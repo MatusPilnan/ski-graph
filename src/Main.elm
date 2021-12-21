@@ -9,7 +9,6 @@ import Html.Attributes as Attr
 import Html.Events as Events
 import Canvas
 import Json.Decode as D
-import Canvas.Settings
 
 
 
@@ -111,7 +110,6 @@ type Msg
   | MouseDown Point
   | MouseUp Point
   | MouseMove Point
-  | CanvasDragged Point
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -165,16 +163,12 @@ update msg model =
       , Cmd.none
       ) else (model, Cmd.none)
 
-    CanvasDragged point -> let _ = Debug.log "drag" point in (model, Cmd.none)
-
-
-
 
 -- SUBSCRIPTIONS
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
   Sub.none
 
 
@@ -192,11 +186,9 @@ view model =
     , textures = [ Canvas.Texture.loadFromImageUrl model.background TextureLoaded ]
     }
     [ Attr.class "h-full w-full overflow-hidden"
-    --, Attr.draggable "true"
     , Events.on "mousedown" <| mouseDecoder MouseDown
     , Events.on "mouseup" <| mouseDecoder MouseUp
     , Events.on "mousemove" <| moveDecoder MouseMove
-    --, Events.on "drag" dragDecoder
     ]
     [ Canvas.group
       [ Canvas.Settings.Advanced.transform
