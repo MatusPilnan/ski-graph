@@ -6,14 +6,16 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start-server": "node ./node_modules/http-server/bin/http-server --proxy http://localhost:8080?",
-    "start": "node ./node_modules/nodemon/bin/nodemon -e \".elm\" -x \"npm run build\"",
-    "build": "elm make src/Main.elm --output public/elm.js && node ./node_modules/tailwindcss/lib/cli -o public/styles.css"
+    "start": "node ./node_modules/nodemon/bin/nodemon -e \".elm\" -x \"npm run build-local\"",
+    "build-local": "elm make src/Main.elm --output public/elm.min.js && node ./node_modules/tailwindcss/lib/cli -o public/styles.min.css",
+    "build": "./build-prod.sh src/Main.elm"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "http-server": "^14.0.0",
     "nodemon": "^2.0.15",
-    "tailwindcss": "^3.0.7"
+    "tailwindcss": "^3.0.7",
+    "uglify-js": "^3.14.5"
   }
 }
