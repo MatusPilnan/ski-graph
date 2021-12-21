@@ -1,6 +1,7 @@
 module Main exposing (..)
 
 import Browser
+import Canvas.Settings.Advanced
 import Canvas.Texture
 import Dict exposing (Dict)
 import Html
@@ -27,8 +28,7 @@ main =
 type alias Vertex =
   { id : String
   , title : Maybe String
-  , x : Int
-  , y : Int
+  , position : Point
   }
 
 type EdgeType
@@ -51,22 +51,35 @@ type alias Model =
   , texture :  Maybe Canvas.Texture.Texture
   , vertices : Dict String Vertex
   , edges : Dict String Edge
-  , width : Int
-  , height : Int
+  , width : Float
+  , height : Float
   , vertexCounter : Int
   , edgeCounter : Int
+  , position : Point
+  , mouseDown : Bool
+  , hasMovedWhileMouseDown : Bool
+  , mouseDownStartPosition : Point
   }
 
 
 type alias ClickEvent =
-  { offsetX : Int
-  , offsetY : Int
+  { offsetX : Float
+  , offsetY : Float
+  , movementX : Float
+  , movementY : Float
+  }
+
+type alias Point = { x : Float, y : Float}
+
+type alias DragEvent =
+  { movementX : Float
+  , movementY : Float
   }
 
 
 type alias Flags =
-  { width : Int
-  , height : Int
+  { width : Float
+  , height : Float
   }
 
 init : Flags -> (Model, Cmd Msg)
@@ -79,6 +92,10 @@ init flags =
     , height = flags.height
     , vertexCounter = 0
     , edgeCounter = 0
+    , position = Point 0 0
+    , mouseDown = False
+    , hasMovedWhileMouseDown = False
+    , mouseDownStartPosition = Point 0 0
     }
   , Cmd.none
   )
@@ -91,7 +108,10 @@ init flags =
 type Msg
   = Noop
   | TextureLoaded (Maybe Canvas.Texture.Texture)
-  | CanvasClicked ClickEvent
+  | MouseDown Point
+  | MouseUp Point
+  | MouseMove Point
+  | CanvasDragged Point
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -102,14 +122,50 @@ update msg model =
     TextureLoaded texture ->
       ({ model | texture = texture}, Cmd.none)
 
-    CanvasClicked clickEvent ->
-      let id = String.fromInt model.vertexCounter in
+    MouseUp point ->
+      let
+        id = String.fromInt model.vertexCounter
+      in
       ( { model
-        | vertices = Dict.insert id ( Vertex id Nothing clickEvent.offsetX clickEvent.offsetY ) model.vertices
-        , vertexCounter = model.vertexCounter + 1
+        | vertices =
+          if model.hasMovedWhileMouseDown
+          then model.vertices
+          else Dict.insert id ( Vertex id Nothing (subPoints point model.position) ) model.vertices
+        , vertexCounter =
+          if model.hasMovedWhileMouseDown
+          then model.vertexCounter
+          else model.vertexCounter + 1
+        , mouseDown = False
         }
       , Cmd.none
       )
+
+    MouseDown point ->
+      ( { model
+        | mouseDown = True
+        , hasMovedWhileMouseDown = False
+        , mouseDownStartPosition = point
+        }
+      , Cmd.none
+      )
+
+    MouseMove movement ->
+      if model.mouseDown then
+      let
+        new = addPoints movement model.position
+        w = Maybe.withDefault model.width <| Maybe.map (\t -> (Canvas.Texture.dimensions t).width ) model.texture
+        h = Maybe.withDefault model.height <| Maybe.map (\t -> (Canvas.Texture.dimensions t).height ) model.texture
+       in
+      ( { model
+        | hasMovedWhileMouseDown = True
+        , position = Point
+          (min 0 <| max (0 - w + model.width) new.x )
+          (min 0 <| max (0 - h + model.height) new.y )
+        }
+      , Cmd.none
+      ) else (model, Cmd.none)
+
+    CanvasDragged point -> let _ = Debug.log "drag" point in (model, Cmd.none)
 
 
 
@@ -131,25 +187,49 @@ view model =
   Html.main_
   [ Attr.class "h-screen w-screen" ]
   [ Canvas.toHtmlWith
-    { width = Maybe.withDefault model.width <| Maybe.map (\t -> ceiling (Canvas.Texture.dimensions t).width ) model.texture
-    , height = Maybe.withDefault model.height <| Maybe.map (\t -> ceiling (Canvas.Texture.dimensions t).height ) model.texture
+    { width = ceiling model.width
+    , height = ceiling model.height
     , textures = [ Canvas.Texture.loadFromImageUrl model.background TextureLoaded ]
     }
-    [ Attr.class "h-full w-full m-4"
-    , Events.on "click" clickDecoder
+    [ Attr.class "h-full w-full overflow-hidden"
+    --, Attr.draggable "true"
+    , Events.on "mousedown" <| mouseDecoder MouseDown
+    , Events.on "mouseup" <| mouseDecoder MouseUp
+    , Events.on "mousemove" <| moveDecoder MouseMove
+    --, Events.on "drag" dragDecoder
     ]
-    <| addBackground model.texture
-      [ Canvas.shapes [] <| List.map (\v -> Canvas.circle (toFloat v.x, toFloat v.y) 10 ) <| Dict.values model.vertices ]
+    [ Canvas.group
+      [ Canvas.Settings.Advanced.transform
+        [ Canvas.Settings.Advanced.translate model.position.x model.position.y
+        ]
+      ]
+      <| addBackground (0, 0) model.texture
+      [ Canvas.shapes [] <| List.map (\v -> Canvas.circle ( v.position.x, v.position.y) 10 ) <| Dict.values model.vertices
+      ]
+    ]
   ]
 
-clickDecoder =
-  D.map2 (\x y -> CanvasClicked <| ClickEvent (ceiling x) (ceiling y))
+mouseDecoder msg =
+  D.map2 (\x y -> msg <| Point x y)
     ( D.field "offsetX" D.float)
     ( D.field "offsetY" D.float)
 
+moveDecoder msg =
+  D.map2 (\x y -> msg <| Point x y)
+    ( D.field "movementX" D.float)
+    ( D.field "movementY" D.float)
 
 
-addBackground texture renderables =
+addBackground position texture renderables =
   case texture of
     Nothing -> renderables
-    Just t -> [ Canvas.texture [] (0,0) t ] ++ renderables
+    Just t -> [ Canvas.texture [] position t ] ++ renderables
+
+
+addPoints : Point -> Point -> Point
+addPoints a b =
+  Point (a.x + b.x) (a.y + b.y)
+
+subPoints : Point -> Point -> Point
+subPoints a b =
+  Point (a.x - b.x) (a.y - b.y)
