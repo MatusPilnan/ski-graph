@@ -8,6 +8,7 @@ import Html
 import Html.Attributes as Attr
 import Html.Events as Events
 import Canvas
+import Icons
 import Json.Decode as D
 
 
@@ -58,6 +59,7 @@ type alias Model =
   , mouseDown : Bool
   , hasMovedWhileMouseDown : Bool
   , mouseDownStartPosition : Point
+  , mapFieldVisible : Bool
   }
 
 
@@ -95,6 +97,7 @@ init flags =
     , mouseDown = False
     , hasMovedWhileMouseDown = False
     , mouseDownStartPosition = Point 0 0
+    , mapFieldVisible = False
     }
   , Cmd.none
   )
@@ -110,6 +113,7 @@ type Msg
   | MouseDown Point
   | MouseUp Point
   | MouseMove Point
+  | SetMapFieldVisible Bool
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -163,6 +167,10 @@ update msg model =
       , Cmd.none
       ) else (model, Cmd.none)
 
+    SetMapFieldVisible bool ->
+      ( { model | mapFieldVisible = bool}, Cmd.none )
+
+
 
 -- SUBSCRIPTIONS
 
@@ -179,13 +187,13 @@ subscriptions _ =
 view : Model -> Html.Html Msg
 view model =
   Html.main_
-  [ Attr.class "h-screen w-screen" ]
+  [ Attr.class "h-screen w-screen overflow-hidden" ]
   [ Canvas.toHtmlWith
     { width = ceiling model.width
     , height = ceiling model.height
     , textures = [ Canvas.Texture.loadFromImageUrl model.background TextureLoaded ]
     }
-    [ Attr.class "h-full w-full overflow-hidden"
+    [ Attr.class "h-full w-full"
     , Events.on "mousedown" <| mouseDecoder MouseDown
     , Events.on "mouseup" <| mouseDecoder MouseUp
     , Events.on "mousemove" <| moveDecoder MouseMove
@@ -198,6 +206,22 @@ view model =
       <| addBackground (0, 0) model.texture
       [ Canvas.shapes [] <| List.map (\v -> Canvas.circle ( v.position.x, v.position.y) 10 ) <| Dict.values model.vertices
       ]
+    ]
+  , Html.div
+    [ Attr.class "fixed bottom-4 right-4 flex items-center" ]
+    [ Html.input
+      [ Attr.classList
+        [("max-w-0", not model.mapFieldVisible)
+        ,("max-w-xs border-2 px-4 py-2", model.mapFieldVisible)
+        ]
+      , Attr.class "w-max rounded-full shadow-lg border-primary transition-all mr-2"
+      ]
+      []
+    , Html.button
+      [ Attr.class "rounded-full shadow-lg bg-blue-400 text-yellow-300 p-4 text-center"
+      , Events.onClick <| SetMapFieldVisible <| not model.mapFieldVisible
+      ]
+      [ Icons.mapIcon ]
     ]
   ]
 
