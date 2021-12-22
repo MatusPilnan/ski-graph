@@ -1,4 +1,4 @@
-module Main exposing (..)
+port module Main exposing (..)
 
 import Browser
 import Canvas.Settings.Advanced
@@ -86,11 +86,12 @@ type alias DragEvent =
 type alias Flags =
   { width : Float
   , height : Float
+  , savedBackground : String
   }
 
 init : Flags -> (Model, Cmd Msg)
 init flags =
-  ( { background = "https://vcdn.bergfex.at/images/resized/5f/b66b2c0f20ebed5f_e600fdabdbc8f004@2x.jpg"
+  ( { background = ""
     , texture = Nothing
     , vertices = Dict.empty
     , edges = Dict.empty
@@ -103,7 +104,7 @@ init flags =
     , hasMovedWhileMouseDown = False
     , mouseDownStartPosition = Point 0 0
     , mapFieldVisible = False
-    , mapFieldInput = ""
+    , mapFieldInput = flags.savedBackground
     , mapFieldState = Loading
     }
   , Cmd.none
@@ -123,6 +124,7 @@ type Msg
   | SetMapFieldVisible Bool
   | TrySettingBackground String
 
+port saveToLocalStorage : (String, String) -> Cmd msg
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -130,19 +132,21 @@ update msg model =
     Noop ->
       (model, Cmd.none)
     TextureLoaded texture ->
-      ( case texture of
-          Just t ->
-            { model
+      case texture of
+        Just t ->
+          ( { model
             | texture = Just t
             , background = model.mapFieldInput
             , mapFieldState = Ok
             }
-          Nothing ->
-            { model
+          , saveToLocalStorage ("background", model.mapFieldInput)
+          )
+        Nothing ->
+          ( { model
             | mapFieldState = Invalid
             }
-      , Cmd.none
-      )
+          , Cmd.none
+          )
 
     MouseUp point ->
       let
