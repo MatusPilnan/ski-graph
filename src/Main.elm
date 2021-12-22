@@ -123,8 +123,10 @@ type Msg
   | MouseMove Point
   | SetMapFieldVisible Bool
   | TrySettingBackground String
+  | DimensionsChanged (Float, Float)
 
 port saveToLocalStorage : (String, String) -> Cmd msg
+port dimensionsChanged : ((Float, Float) -> msg) -> Sub msg
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -204,6 +206,9 @@ update msg model =
     TrySettingBackground string ->
       ( { model | mapFieldInput = string, mapFieldState = Loading}, Cmd.none)
 
+    DimensionsChanged (width, height) ->
+      ( { model | width = width, height = height}, Cmd.none)
+
 
 
 
@@ -212,7 +217,7 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-  Sub.none
+  dimensionsChanged DimensionsChanged
 
 
 
