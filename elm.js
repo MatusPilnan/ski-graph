@@ -4236,8 +4236,8 @@ function _Browser_getViewport()
 		cf: {
 			S: _Browser_window.pageXOffset,
 			T: _Browser_window.pageYOffset,
-			A: _Browser_doc.documentElement.clientWidth,
-			u: _Browser_doc.documentElement.clientHeight
+			u: _Browser_doc.documentElement.clientWidth,
+			r: _Browser_doc.documentElement.clientHeight
 		}
 	};
 }
@@ -4247,8 +4247,8 @@ function _Browser_getScene()
 	var body = _Browser_doc.body;
 	var elem = _Browser_doc.documentElement;
 	return {
-		A: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
-		u: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
+		u: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
+		r: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
 	};
 }
 
@@ -4272,14 +4272,14 @@ function _Browser_getViewportOf(id)
 	{
 		return {
 			b6: {
-				A: node.scrollWidth,
-				u: node.scrollHeight
+				u: node.scrollWidth,
+				r: node.scrollHeight
 			},
 			cf: {
 				S: node.scrollLeft,
 				T: node.scrollTop,
-				A: node.clientWidth,
-				u: node.clientHeight
+				u: node.clientWidth,
+				r: node.clientHeight
 			}
 		};
 	});
@@ -4313,14 +4313,14 @@ function _Browser_getElement(id)
 			cf: {
 				S: x,
 				T: y,
-				A: _Browser_doc.documentElement.clientWidth,
-				u: _Browser_doc.documentElement.clientHeight
+				u: _Browser_doc.documentElement.clientWidth,
+				r: _Browser_doc.documentElement.clientHeight
 			},
 			cv: {
 				S: x + rect.left,
 				T: y + rect.top,
-				A: rect.width,
-				u: rect.height
+				u: rect.width,
+				r: rect.height
 			}
 		};
 	});
@@ -5194,31 +5194,47 @@ var $author$project$Main$init = function (flags) {
 			bD: 0,
 			bE: $elm$core$Dict$empty,
 			an: false,
-			u: flags.u,
-			s: flags.bi,
-			v: 1,
+			r: flags.r,
+			t: flags.bi,
+			w: 1,
 			Y: false,
 			aI: false,
 			bc: A2($author$project$Main$Point, 0, 0),
-			z: A2($author$project$Main$Point, 0, 0),
+			A: A2($author$project$Main$Point, 0, 0),
 			ay: $elm$core$Maybe$Nothing,
 			aB: 0,
 			aC: $elm$core$Dict$empty,
-			A: flags.A
+			u: flags.u
 		},
 		$elm$core$Platform$Cmd$none);
 };
 var $elm$json$Json$Decode$string = _Json_decodeString;
-var $elm$core$Platform$Sub$batch = _Platform_batch;
-var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
+var $author$project$Main$DimensionsChanged = function (a) {
+	return {$: 7, a: a};
+};
+var $elm$json$Json$Decode$index = _Json_decodeIndex;
+var $author$project$Main$dimensionsChanged = _Platform_incomingPort(
+	'dimensionsChanged',
+	A2(
+		$elm$json$Json$Decode$andThen,
+		function (_v0) {
+			return A2(
+				$elm$json$Json$Decode$andThen,
+				function (_v1) {
+					return $elm$json$Json$Decode$succeed(
+						_Utils_Tuple2(_v0, _v1));
+				},
+				A2($elm$json$Json$Decode$index, 1, $elm$json$Json$Decode$float));
+		},
+		A2($elm$json$Json$Decode$index, 0, $elm$json$Json$Decode$float)));
 var $author$project$Main$subscriptions = function (_v0) {
-	return $elm$core$Platform$Sub$none;
+	return $author$project$Main$dimensionsChanged($author$project$Main$DimensionsChanged);
 };
 var $author$project$Main$Invalid = 2;
 var $author$project$Main$Ok = 0;
 var $author$project$Main$Vertex = F3(
 	function (id, title, position) {
-		return {bK: id, z: position, cc: title};
+		return {bK: id, A: position, cc: title};
 	});
 var $author$project$Main$addPoints = F2(
 	function (a, b) {
@@ -5227,10 +5243,10 @@ var $author$project$Main$addPoints = F2(
 var $joakin$elm_canvas$Canvas$Texture$dimensions = function (texture) {
 	if (!texture.$) {
 		var image = texture.a;
-		return {u: image.u, A: image.A};
+		return {r: image.r, u: image.u};
 	} else {
 		var data = texture.a;
-		return {u: data.u, A: data.A};
+		return {r: data.r, u: data.u};
 	}
 };
 var $elm$core$Dict$Black = 1;
@@ -5407,17 +5423,17 @@ var $author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{
-								aR: model.s,
-								v: 0,
+								aR: model.t,
+								w: 0,
 								ay: $elm$core$Maybe$Just(t)
 							}),
 						$author$project$Main$saveToLocalStorage(
-							_Utils_Tuple2('background', model.s)));
+							_Utils_Tuple2('background', model.t)));
 				} else {
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{v: 2}),
+							{w: 2}),
 						$elm$core$Platform$Cmd$none);
 				}
 			case 3:
@@ -5436,7 +5452,7 @@ var $author$project$Main$update = F2(
 									$author$project$Main$Vertex,
 									id,
 									$elm$core$Maybe$Nothing,
-									A2($author$project$Main$subPoints, point, model.z)),
+									A2($author$project$Main$subPoints, point, model.A)),
 								model.aC)
 						}),
 					$elm$core$Platform$Cmd$none);
@@ -5452,16 +5468,6 @@ var $author$project$Main$update = F2(
 				if (model.aI) {
 					var w = A2(
 						$elm$core$Maybe$withDefault,
-						model.A,
-						A2(
-							$elm$core$Maybe$map,
-							function (t) {
-								return $joakin$elm_canvas$Canvas$Texture$dimensions(t).A;
-							},
-							model.ay));
-					var _new = A2($author$project$Main$addPoints, movement, model.z);
-					var h = A2(
-						$elm$core$Maybe$withDefault,
 						model.u,
 						A2(
 							$elm$core$Maybe$map,
@@ -5469,21 +5475,31 @@ var $author$project$Main$update = F2(
 								return $joakin$elm_canvas$Canvas$Texture$dimensions(t).u;
 							},
 							model.ay));
+					var _new = A2($author$project$Main$addPoints, movement, model.A);
+					var h = A2(
+						$elm$core$Maybe$withDefault,
+						model.r,
+						A2(
+							$elm$core$Maybe$map,
+							function (t) {
+								return $joakin$elm_canvas$Canvas$Texture$dimensions(t).r;
+							},
+							model.ay));
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
 							{
 								an: true,
-								z: A2(
+								A: A2(
 									$author$project$Main$Point,
 									A2(
 										$elm$core$Basics$min,
 										0,
-										A2($elm$core$Basics$max, (0 - w) + model.A, _new.S)),
+										A2($elm$core$Basics$max, (0 - w) + model.u, _new.S)),
 									A2(
 										$elm$core$Basics$min,
 										0,
-										A2($elm$core$Basics$max, (0 - h) + model.u, _new.T)))
+										A2($elm$core$Basics$max, (0 - h) + model.r, _new.T)))
 							}),
 						$elm$core$Platform$Cmd$none);
 				} else {
@@ -5495,17 +5511,26 @@ var $author$project$Main$update = F2(
 					_Utils_update(
 						model,
 						{
-							s: ((!bool) && $elm$core$String$isEmpty(model.s)) ? model.aR : model.s,
-							v: ((!bool) && $elm$core$String$isEmpty(model.s)) ? 1 : model.v,
+							t: ((!bool) && $elm$core$String$isEmpty(model.t)) ? model.aR : model.t,
+							w: ((!bool) && $elm$core$String$isEmpty(model.t)) ? 1 : model.w,
 							Y: bool
 						}),
 					$elm$core$Platform$Cmd$none);
-			default:
+			case 6:
 				var string = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{s: string, v: 1}),
+						{t: string, w: 1}),
+					$elm$core$Platform$Cmd$none);
+			default:
+				var _v2 = msg.a;
+				var width = _v2.a;
+				var height = _v2.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{r: height, u: width}),
 					$elm$core$Platform$Cmd$none);
 		}
 	});
@@ -5615,14 +5640,14 @@ var $joakin$elm_canvas$Canvas$addSettingsToRenderable = F2(
 						return _Utils_update(
 							r,
 							{
-								t: A2($elm$core$List$cons, cmd, r.t)
+								v: A2($elm$core$List$cons, cmd, r.v)
 							});
 					case 1:
 						var cmds = setting.a;
 						return _Utils_update(
 							r,
 							{
-								t: A3($elm$core$List$foldl, $elm$core$List$cons, r.t, cmds)
+								v: A3($elm$core$List$foldl, $elm$core$List$cons, r.v, cmds)
 							});
 					case 3:
 						var f = setting.a;
@@ -5648,7 +5673,7 @@ var $joakin$elm_canvas$Canvas$texture = F3(
 			$joakin$elm_canvas$Canvas$addSettingsToRenderable,
 			settings,
 			{
-				t: _List_Nil,
+				v: _List_Nil,
 				H: $joakin$elm_canvas$Canvas$Internal$Canvas$NotSpecified,
 				I: A2($joakin$elm_canvas$Canvas$Internal$Canvas$DrawableTexture, p, t)
 			});
@@ -5753,7 +5778,7 @@ var $joakin$elm_canvas$Canvas$group = F2(
 			$joakin$elm_canvas$Canvas$addSettingsToRenderable,
 			settings,
 			{
-				t: _List_Nil,
+				v: _List_Nil,
 				H: $joakin$elm_canvas$Canvas$Internal$Canvas$NotSpecified,
 				I: $joakin$elm_canvas$Canvas$Internal$Canvas$DrawableGroup(entities)
 			});
@@ -8155,7 +8180,7 @@ var $rtfeldman$elm_css$Css$prop1 = F2(
 var $rtfeldman$elm_css$Css$animationName = function (arg) {
 	return ((arg.E === 'none') || ((arg.E === 'inherit') || ((arg.E === 'unset') || (arg.E === 'initial')))) ? A2($rtfeldman$elm_css$Css$prop1, 'animation-name', arg) : $rtfeldman$elm_css$Css$Preprocess$WithKeyframes(arg.E);
 };
-var $rtfeldman$elm_css$Css$auto = {ch: 0, a: 0, ak: 0, aV: 0, cF: 0, ap: 0, M: 0, C: 0, as: 0, y: 0, a2: 0, ax: 0, q: 0, E: 'auto'};
+var $rtfeldman$elm_css$Css$auto = {ch: 0, a: 0, ak: 0, aV: 0, cF: 0, ap: 0, M: 0, C: 0, as: 0, z: 0, a2: 0, ax: 0, q: 0, E: 'auto'};
 var $rtfeldman$elm_css$Css$backgroundColor = function (c) {
 	return A2($rtfeldman$elm_css$Css$property, 'background-color', c.E);
 };
@@ -8654,7 +8679,7 @@ var $rtfeldman$elm_css$Css$Animations$property = F2(
 	});
 var $rtfeldman$elm_css$Css$PxUnits = 0;
 var $rtfeldman$elm_css$Css$px = A2($rtfeldman$elm_css$Css$Internal$lengthConverter, 0, 'px');
-var $rtfeldman$elm_css$Css$relative = {z: 0, E: 'relative'};
+var $rtfeldman$elm_css$Css$relative = {A: 0, E: 'relative'};
 var $rtfeldman$elm_css$Css$spaceBetween = $rtfeldman$elm_css$Css$prop1('space-between');
 var $rtfeldman$elm_css$Css$width = $rtfeldman$elm_css$Css$prop1('width');
 var $perzanko$elm_loading$Loading$Bars$view = function (config) {
@@ -8918,7 +8943,7 @@ var $perzanko$elm_loading$Loading$BouncingBalls$view = function (config) {
 				_List_Nil)
 			]));
 };
-var $rtfeldman$elm_css$Css$absolute = {z: 0, E: 'absolute'};
+var $rtfeldman$elm_css$Css$absolute = {A: 0, E: 'absolute'};
 var $rtfeldman$elm_css$Css$left = $rtfeldman$elm_css$Css$prop1('left');
 var $rtfeldman$elm_css$Css$UnitlessFloat = 0;
 var $rtfeldman$elm_css$Css$num = function (val) {
@@ -9516,7 +9541,7 @@ var $joakin$elm_canvas$Canvas$shapes = F2(
 			$joakin$elm_canvas$Canvas$addSettingsToRenderable,
 			settings,
 			{
-				t: _List_Nil,
+				v: _List_Nil,
 				H: $joakin$elm_canvas$Canvas$Internal$Canvas$NotSpecified,
 				I: $joakin$elm_canvas$Canvas$Internal$Canvas$DrawableShapes(ss)
 			});
@@ -10127,11 +10152,11 @@ var $joakin$elm_canvas$Canvas$Internal$Texture$drawTexture = F4(
 			function () {
 				if (!t.$) {
 					var image = t.a;
-					return A9($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$drawImage, 0, 0, image.A, image.u, x, y, image.A, image.u, image.aW);
+					return A9($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$drawImage, 0, 0, image.u, image.r, x, y, image.u, image.r, image.aW);
 				} else {
 					var sprite = t.a;
 					var image = t.b;
-					return A9($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$drawImage, sprite.S, sprite.T, sprite.A, sprite.u, x, y, sprite.A, sprite.u, image.aW);
+					return A9($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$drawImage, sprite.S, sprite.T, sprite.u, sprite.r, x, y, sprite.u, sprite.r, image.aW);
 				}
 			}(),
 			cmds);
@@ -10212,7 +10237,7 @@ var $joakin$elm_canvas$Canvas$renderGroup = F3(
 	});
 var $joakin$elm_canvas$Canvas$renderOne = F3(
 	function (parentDrawOp, _v0, cmds) {
-		var commands = _v0.t;
+		var commands = _v0.v;
 		var drawable = _v0.I;
 		var drawOp = _v0.H;
 		return A2(
@@ -10255,7 +10280,7 @@ var $joakin$elm_canvas$Canvas$Internal$Texture$decodeTextureImage = A2(
 				function (tagName, width, height) {
 					return (tagName === 'IMG') ? $elm$core$Maybe$Just(
 						$joakin$elm_canvas$Canvas$Internal$Texture$TImage(
-							{u: height, aW: image, A: width})) : $elm$core$Maybe$Nothing;
+							{r: height, aW: image, u: width})) : $elm$core$Maybe$Nothing;
 				}),
 			A2($elm$json$Json$Decode$field, 'tagName', $elm$json$Json$Decode$string),
 			A2($elm$json$Json$Decode$field, 'width', $elm$json$Json$Decode$float),
@@ -10313,10 +10338,10 @@ var $joakin$elm_canvas$Canvas$toHtmlWith = F3(
 					$joakin$elm_canvas$Canvas$render(entities)),
 				A2(
 					$elm$core$List$cons,
-					$elm$html$Html$Attributes$height(options.u),
+					$elm$html$Html$Attributes$height(options.r),
 					A2(
 						$elm$core$List$cons,
-						$elm$html$Html$Attributes$width(options.A),
+						$elm$html$Html$Attributes$width(options.u),
 						attrs))),
 			A2(
 				$elm$core$List$cons,
@@ -10429,12 +10454,12 @@ var $author$project$Main$view = function (model) {
 				A3(
 				$joakin$elm_canvas$Canvas$toHtmlWith,
 				{
-					u: $elm$core$Basics$ceiling(model.u),
+					r: $elm$core$Basics$ceiling(model.r),
 					c_: _List_fromArray(
 						[
-							A2($joakin$elm_canvas$Canvas$Texture$loadFromImageUrl, model.s, $author$project$Main$TextureLoaded)
+							A2($joakin$elm_canvas$Canvas$Texture$loadFromImageUrl, model.t, $author$project$Main$TextureLoaded)
 						]),
-					A: $elm$core$Basics$ceiling(model.A)
+					u: $elm$core$Basics$ceiling(model.u)
 				},
 				_List_fromArray(
 					[
@@ -10461,7 +10486,7 @@ var $author$project$Main$view = function (model) {
 								$joakin$elm_canvas$Canvas$Settings$Advanced$transform(
 								_List_fromArray(
 									[
-										A2($joakin$elm_canvas$Canvas$Settings$Advanced$translate, model.z.S, model.z.T)
+										A2($joakin$elm_canvas$Canvas$Settings$Advanced$translate, model.A.S, model.A.T)
 									]))
 							]),
 						A3(
@@ -10478,7 +10503,7 @@ var $author$project$Main$view = function (model) {
 										function (v) {
 											return A2(
 												$joakin$elm_canvas$Canvas$circle,
-												_Utils_Tuple2(v.z.S, v.z.T),
+												_Utils_Tuple2(v.A.S, v.A.T),
 												10);
 										},
 										$elm$core$Dict$values(model.aC)))
@@ -10492,7 +10517,7 @@ var $author$project$Main$view = function (model) {
 					]),
 				_Utils_ap(
 					function () {
-						var _v0 = model.v;
+						var _v0 = model.w;
 						switch (_v0) {
 							case 1:
 								return _List_fromArray(
@@ -10532,11 +10557,11 @@ var $author$project$Main$view = function (model) {
 										[
 											_Utils_Tuple2('max-w-0', !model.Y),
 											_Utils_Tuple2('max-w-xs border-2 px-4 py-2', model.Y),
-											_Utils_Tuple2('border-red-600', model.v === 2),
-											_Utils_Tuple2('border-primary', model.v !== 2)
+											_Utils_Tuple2('border-red-600', model.w === 2),
+											_Utils_Tuple2('border-primary', model.w !== 2)
 										])),
 									$elm$html$Html$Attributes$class('w-max rounded-full shadow-lg transition-color focus:border-blue-600 focus-visible:border-blue-600 transition-all mx-2'),
-									$elm$html$Html$Attributes$value(model.s),
+									$elm$html$Html$Attributes$value(model.t),
 									$elm$html$Html$Events$onInput($author$project$Main$TrySettingBackground)
 								]),
 							_List_Nil),
@@ -10566,7 +10591,7 @@ _Platform_export({'Main':{'init':$author$project$Main$main(
 						$elm$json$Json$Decode$andThen,
 						function (height) {
 							return $elm$json$Json$Decode$succeed(
-								{u: height, bi: savedBackground, A: width});
+								{r: height, bi: savedBackground, u: width});
 						},
 						A2($elm$json$Json$Decode$field, 'height', $elm$json$Json$Decode$float));
 				},

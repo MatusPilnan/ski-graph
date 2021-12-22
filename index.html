@@ -20,8 +20,13 @@
         })
 
         app.ports.saveToLocalStorage.subscribe(([key, value]) => {
-          console.log(key, value)
           localStorage.setItem(key, value)
+        })
+
+        window.addEventListener("resize", () => {
+          app.ports.dimensionsChanged.send(
+            [ Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0),
+              Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0)])
         })
     </script>
 </body>
