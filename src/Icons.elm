@@ -19,3 +19,20 @@ mapIcon =
       ]
       []
     ]
+
+
+errorIcon =
+  svg
+    [ SvgAttr.class "h-6 w-6"
+    , SvgAttr.fill "none"
+    , SvgAttr.viewBox "0 0 24 24"
+    , SvgAttr.stroke "currentColor"
+    ]
+    [ path
+      [ SvgAttr.strokeLinecap "round"
+      , SvgAttr.strokeLinejoin "round"
+      , SvgAttr.strokeWidth "2"
+      , SvgAttr.d "M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+      ]
+      []
+    ]

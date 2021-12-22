@@ -10,6 +10,7 @@ import Html.Events as Events
 import Canvas
 import Icons
 import Json.Decode as D
+import Loading exposing (defaultConfig)
 
 
 
@@ -43,6 +44,8 @@ type alias Edge =
   , edgeType : EdgeType
   }
 
+type BackgroundState = Ok | Loading | Invalid
+
 -- MODEL
 
 
@@ -60,6 +63,8 @@ type alias Model =
   , hasMovedWhileMouseDown : Bool
   , mouseDownStartPosition : Point
   , mapFieldVisible : Bool
+  , mapFieldInput : String
+  , mapFieldState : BackgroundState
   }
 
 
@@ -98,6 +103,8 @@ init flags =
     , hasMovedWhileMouseDown = False
     , mouseDownStartPosition = Point 0 0
     , mapFieldVisible = False
+    , mapFieldInput = ""
+    , mapFieldState = Loading
     }
   , Cmd.none
   )
@@ -114,6 +121,7 @@ type Msg
   | MouseUp Point
   | MouseMove Point
   | SetMapFieldVisible Bool
+  | TrySettingBackground String
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -122,7 +130,19 @@ update msg model =
     Noop ->
       (model, Cmd.none)
     TextureLoaded texture ->
-      ({ model | texture = texture}, Cmd.none)
+      ( case texture of
+          Just t ->
+            { model
+            | texture = Just t
+            , background = model.mapFieldInput
+            , mapFieldState = Ok
+            }
+          Nothing ->
+            { model
+            | mapFieldState = Invalid
+            }
+      , Cmd.none
+      )
 
     MouseUp point ->
       let
@@ -147,6 +167,7 @@ update msg model =
         | mouseDown = True
         , hasMovedWhileMouseDown = False
         , mouseDownStartPosition = point
+        , mapFieldVisible = False
         }
       , Cmd.none
       )
@@ -168,7 +189,17 @@ update msg model =
       ) else (model, Cmd.none)
 
     SetMapFieldVisible bool ->
-      ( { model | mapFieldVisible = bool}, Cmd.none )
+      ( { model
+        | mapFieldVisible = bool
+        , mapFieldInput = if not bool && String.isEmpty model.mapFieldInput then model.background else model.mapFieldInput
+        , mapFieldState = if not bool && String.isEmpty model.mapFieldInput then Loading else model.mapFieldState
+        }
+      , Cmd.none
+      )
+
+    TrySettingBackground string ->
+      ( { model | mapFieldInput = string, mapFieldState = Loading}, Cmd.none)
+
 
 
 
@@ -191,7 +222,7 @@ view model =
   [ Canvas.toHtmlWith
     { width = ceiling model.width
     , height = ceiling model.height
-    , textures = [ Canvas.Texture.loadFromImageUrl model.background TextureLoaded ]
+    , textures = [ Canvas.Texture.loadFromImageUrl model.mapFieldInput TextureLoaded ]
     }
     [ Attr.class "h-full w-full"
     , Events.on "mousedown" <| mouseDecoder MouseDown
@@ -208,13 +239,30 @@ view model =
       ]
     ]
   , Html.div
-    [ Attr.class "fixed bottom-4 right-4 flex items-center" ]
+    [ Attr.class "fixed bottom-4 right-4 flex items-center"
+    ] <| (
+    case model.mapFieldState of
+      Loading ->
+        [ Loading.render
+          Loading.Sonar -- LoaderType
+          { defaultConfig | color = "#60a5fa" } -- Config
+          Loading.On -- LoadingState
+        ]
+      Ok -> []
+      Invalid ->
+        [ Html.div [ Attr.class "text-red-600" ] [ Icons.errorIcon ]
+        ]
+     ) ++
     [ Html.input
       [ Attr.classList
-        [("max-w-0", not model.mapFieldVisible)
-        ,("max-w-xs border-2 px-4 py-2", model.mapFieldVisible)
+        [ ("max-w-0", not model.mapFieldVisible)
+        , ("max-w-xs border-2 px-4 py-2", model.mapFieldVisible)
+        , ("border-red-600", model.mapFieldState == Invalid)
+        , ("border-primary", model.mapFieldState /= Invalid)
         ]
-      , Attr.class "w-max rounded-full shadow-lg border-primary transition-all mr-2"
+      , Attr.class "w-max rounded-full shadow-lg transition-color focus:border-blue-600 focus-visible:border-blue-600 transition-all mx-2"
+      , Attr.value model.mapFieldInput
+      , Events.onInput <| TrySettingBackground
       ]
       []
     , Html.button
