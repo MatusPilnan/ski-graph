@@ -59,20 +59,24 @@ type alias Model =
   , vertexCounter : Int
   , edgeCounter : Int
   , position : Point
+  , mousePosition : Point
   , mouseDown : Bool
   , hasMovedWhileMouseDown : Bool
   , mouseDownStartPosition : Point
   , mapFieldVisible : Bool
   , mapFieldInput : String
   , mapFieldState : BackgroundState
+  , zoom : Float
   }
 
 
-type alias ClickEvent =
-  { offsetX : Float
-  , offsetY : Float
-  , movementX : Float
-  , movementY : Float
+type alias MouseEvent =
+  { position : Point
+  , movement : Point
+  }
+
+type alias ScrollEvent =
+  { deltaX : Float
   }
 
 type alias Point = { x : Float, y : Float}
@@ -100,12 +104,14 @@ init flags =
     , vertexCounter = 0
     , edgeCounter = 0
     , position = Point 0 0
+    , mousePosition = Point 0 0
     , mouseDown = False
     , hasMovedWhileMouseDown = False
     , mouseDownStartPosition = Point 0 0
     , mapFieldVisible = False
     , mapFieldInput = flags.savedBackground
     , mapFieldState = Loading
+    , zoom = 1
     }
   , Cmd.none
   )
@@ -118,12 +124,14 @@ init flags =
 type Msg
   = Noop
   | TextureLoaded (Maybe Canvas.Texture.Texture)
-  | MouseDown Point
-  | MouseUp Point
-  | MouseMove Point
+  | MouseDown MouseEvent
+  | MouseUp MouseEvent
+  | MouseMove MouseEvent
+  | MouseLeave
   | SetMapFieldVisible Bool
   | TrySettingBackground String
   | DimensionsChanged (Float, Float)
+  | ZoomChanged Float
 
 port saveToLocalStorage : (String, String) -> Cmd msg
 port dimensionsChanged : ((Float, Float) -> msg) -> Sub msg
@@ -150,7 +158,7 @@ update msg model =
           , Cmd.none
           )
 
-    MouseUp point ->
+    MouseUp mouseEvent ->
       let
         id = String.fromInt model.vertexCounter
       in
@@ -158,7 +166,7 @@ update msg model =
         | vertices =
           if model.hasMovedWhileMouseDown
           then model.vertices
-          else Dict.insert id ( Vertex id Nothing (subPoints point model.position) ) model.vertices
+          else Dict.insert id ( Vertex id Nothing <| canvasPointToBackgroundPoint mouseEvent.position model.position model.zoom ) model.vertices
         , vertexCounter =
           if model.hasMovedWhileMouseDown
           then model.vertexCounter
@@ -168,31 +176,28 @@ update msg model =
       , Cmd.none
       )
 
-    MouseDown point ->
+    MouseDown mouseEvent ->
       ( { model
         | mouseDown = True
         , hasMovedWhileMouseDown = False
-        , mouseDownStartPosition = point
+        , mouseDownStartPosition = mouseEvent.position
         , mapFieldVisible = False
         }
       , Cmd.none
       )
 
-    MouseMove movement ->
+    MouseMove mouseEvent ->
+      let newModel = { model | mousePosition = mouseEvent.position } in
       if model.mouseDown then
       let
-        new = addPoints movement model.position
-        w = Maybe.withDefault model.width <| Maybe.map (\t -> (Canvas.Texture.dimensions t).width ) model.texture
-        h = Maybe.withDefault model.height <| Maybe.map (\t -> (Canvas.Texture.dimensions t).height ) model.texture
-       in
-      ( { model
+        new = addPoints mouseEvent.movement model.position
+      in
+      ( { newModel
         | hasMovedWhileMouseDown = True
-        , position = Point
-          (min 0 <| max (0 - w + model.width) new.x )
-          (min 0 <| max (0 - h + model.height) new.y )
+        , position = constrainBackgroundToCanvas model new
         }
       , Cmd.none
-      ) else (model, Cmd.none)
+      ) else (newModel, Cmd.none)
 
     SetMapFieldVisible bool ->
       ( { model
@@ -207,7 +212,36 @@ update msg model =
       ( { model | mapFieldInput = string, mapFieldState = Loading}, Cmd.none)
 
     DimensionsChanged (width, height) ->
-      ( { model | width = width, height = height}, Cmd.none)
+      let
+        w = Maybe.withDefault width <| Maybe.map (\t -> (Canvas.Texture.dimensions t).width ) model.texture
+        h = Maybe.withDefault height <| Maybe.map (\t -> (Canvas.Texture.dimensions t).height ) model.texture
+        zoomAfter = max (model.zoom) (max ( width / w ) ( height / h ) )
+        newModel = { model | width = width, height = height }
+      in
+      ( { newModel | zoom = zoomAfter
+        , position = constrainBackgroundToCanvas newModel newModel.position
+        }
+      , Cmd.none
+      )
+
+    ZoomChanged delta ->
+      let
+        w = Maybe.withDefault model.width <| Maybe.map (\t -> (Canvas.Texture.dimensions t).width ) model.texture
+        h = Maybe.withDefault model.height <| Maybe.map (\t -> (Canvas.Texture.dimensions t).height ) model.texture
+        zoomBefore = model.zoom
+        zoomAfter = max (model.zoom - ( delta / 1000) ) (max ( model.width / w ) ( model.height / h ) )
+      in
+      ( { model | zoom = zoomAfter
+        , position = constrainBackgroundToCanvas { model | zoom = zoomAfter}
+          <| subPoints model.mousePosition
+          <| mulPoint (canvasPointToBackgroundPoint model.mousePosition model.position zoomBefore) zoomAfter
+        }
+      , Cmd.none
+      )
+
+    MouseLeave ->
+      ( { model | mouseDown = False }, Cmd.none )
+
 
 
 
@@ -236,15 +270,18 @@ view model =
     [ Attr.class "h-full w-full"
     , Events.on "mousedown" <| mouseDecoder MouseDown
     , Events.on "mouseup" <| mouseDecoder MouseUp
-    , Events.on "mousemove" <| moveDecoder MouseMove
+    , Events.on "mouseleave" <| mouseDecoder (\_ -> MouseLeave)
+    , Events.on "mousemove" <| mouseDecoder MouseMove
+    , Events.on "wheel" <| scrollDecoder ZoomChanged
     ]
     [ Canvas.group
       [ Canvas.Settings.Advanced.transform
         [ Canvas.Settings.Advanced.translate model.position.x model.position.y
+        , Canvas.Settings.Advanced.scale model.zoom model.zoom
         ]
       ]
-      <| addBackground (0, 0) model.texture
-      [ Canvas.shapes [] <| List.map (\v -> Canvas.circle ( v.position.x, v.position.y) 10 ) <| Dict.values model.vertices
+      <| addBackground model.width model.height (0, 0) model.texture
+      [ Canvas.shapes [] <| List.map (\v -> Canvas.circle ( v.position.x, v.position.y) (10 / model.zoom) ) <| Dict.values model.vertices
       ]
     ]
   , Html.div
@@ -283,21 +320,38 @@ view model =
   ]
 
 mouseDecoder msg =
-  D.map2 (\x y -> msg <| Point x y)
+  D.map4 (\offsetX offsetY movementX movementY -> msg <| MouseEvent (Point offsetX offsetY) (Point movementX movementY))
     ( D.field "offsetX" D.float)
     ( D.field "offsetY" D.float)
-
-moveDecoder msg =
-  D.map2 (\x y -> msg <| Point x y)
     ( D.field "movementX" D.float)
     ( D.field "movementY" D.float)
 
+scrollDecoder msg =
+   D.map msg <| D.field "deltaY" D.float
 
-addBackground position texture renderables =
+
+addBackground width height position texture renderables =
   case texture of
     Nothing -> renderables
-    Just t -> [ Canvas.texture [] position t ] ++ renderables
+    Just t ->
+      [ Canvas.clear (0, 0) width height, Canvas.texture [] position t ] ++ renderables
 
+
+constrainBackgroundToCanvas : Model -> Point -> Point
+constrainBackgroundToCanvas model new =
+  let
+    w = Maybe.withDefault model.width <| Maybe.map (\t -> (Canvas.Texture.dimensions t).width ) model.texture
+    h = Maybe.withDefault model.height <| Maybe.map (\t -> (Canvas.Texture.dimensions t).height ) model.texture
+  in
+  Point
+    (min 0 <| max (0 - w * model.zoom + model.width) new.x )
+    (min 0 <| max (0 - h * model.zoom + model.height) new.y )
+
+canvasPointToBackgroundPoint canvasPoint backgroundPosition zoomLevel =
+  mulPoint (subPoints canvasPoint backgroundPosition) <| 1 / zoomLevel
+
+backgroundPointToCanvasPoint backgroundPoint backgroundPosition zoomLevel =
+  mulPoint (addPoints backgroundPoint backgroundPosition) zoomLevel
 
 addPoints : Point -> Point -> Point
 addPoints a b =
@@ -306,3 +360,7 @@ addPoints a b =
 subPoints : Point -> Point -> Point
 subPoints a b =
   Point (a.x - b.x) (a.y - b.y)
+
+mulPoint : Point -> Float -> Point
+mulPoint point coef =
+  Point (point.x * coef) (point.y * coef)
