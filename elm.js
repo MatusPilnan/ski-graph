@@ -519,11 +519,11 @@ function _Debug_crash_UNUSED(identifier, fact1, fact2, fact3, fact4)
 
 function _Debug_regionToString(region)
 {
-	if (region.cX.aH === region.cw.aH)
+	if (region.cZ.aJ === region.cy.aJ)
 	{
-		return 'on line ' + region.cX.aH;
+		return 'on line ' + region.cZ.aJ;
 	}
-	return 'on lines ' + region.cX.aH + ' through ' + region.cw.aH;
+	return 'on lines ' + region.cZ.aJ + ' through ' + region.cy.aJ;
 }
 
 
@@ -1857,9 +1857,9 @@ var _Platform_worker = F4(function(impl, flagDecoder, debugMetadata, args)
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.cE,
+		impl.cG,
+		impl.c1,
 		impl.c$,
-		impl.cZ,
 		function() { return function() {} }
 	);
 });
@@ -2704,9 +2704,9 @@ var _VirtualDom_mapEventTuple = F2(function(func, tuple)
 var _VirtualDom_mapEventRecord = F2(function(func, record)
 {
 	return {
-		N: func(record.N),
-		bk: record.bk,
-		bg: record.bg
+		R: func(record.R),
+		bm: record.bm,
+		bi: record.bi
 	}
 });
 
@@ -2974,11 +2974,11 @@ function _VirtualDom_makeCallback(eventNode, initialHandler)
 		// 3 = Custom
 
 		var value = result.a;
-		var message = !tag ? value : tag < 3 ? value.a : value.N;
-		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.bk;
+		var message = !tag ? value : tag < 3 ? value.a : value.R;
+		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.bm;
 		var currentEventNode = (
 			stopPropagation && event.stopPropagation(),
-			(tag == 2 ? value.b : tag == 3 && value.bg) && event.preventDefault(),
+			(tag == 2 ? value.b : tag == 3 && value.bi) && event.preventDefault(),
 			eventNode
 		);
 		var tagger;
@@ -3928,11 +3928,11 @@ var _Browser_element = _Debugger_element || F4(function(impl, flagDecoder, debug
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.cE,
+		impl.cG,
+		impl.c1,
 		impl.c$,
-		impl.cZ,
 		function(sendToApp, initialModel) {
-			var view = impl.c1;
+			var view = impl.c3;
 			/**/
 			var domNode = args['node'];
 			//*/
@@ -3964,12 +3964,12 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.cE,
+		impl.cG,
+		impl.c1,
 		impl.c$,
-		impl.cZ,
 		function(sendToApp, initialModel) {
-			var divertHrefToApp = impl.bj && impl.bj(sendToApp)
-			var view = impl.c1;
+			var divertHrefToApp = impl.bl && impl.bl(sendToApp)
+			var view = impl.c3;
 			var title = _VirtualDom_doc.title;
 			var bodyNode = _VirtualDom_doc.body;
 			var currNode = _VirtualDom_virtualize(bodyNode);
@@ -3977,12 +3977,12 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 			{
 				_VirtualDom_divertHrefToApp = divertHrefToApp;
 				var doc = view(model);
-				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.ck);
+				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.cl);
 				var patches = _VirtualDom_diff(currNode, nextNode);
 				bodyNode = _VirtualDom_applyPatches(bodyNode, currNode, patches, sendToApp);
 				currNode = nextNode;
 				_VirtualDom_divertHrefToApp = 0;
-				(title !== doc.cc) && (_VirtualDom_doc.title = title = doc.cc);
+				(title !== doc.cd) && (_VirtualDom_doc.title = title = doc.cd);
 			});
 		}
 	);
@@ -4038,12 +4038,12 @@ function _Browser_makeAnimator(model, draw)
 
 function _Browser_application(impl)
 {
-	var onUrlChange = impl.cP;
-	var onUrlRequest = impl.cQ;
+	var onUrlChange = impl.cR;
+	var onUrlRequest = impl.cS;
 	var key = function() { key.a(onUrlChange(_Browser_getUrl())); };
 
 	return _Browser_document({
-		bj: function(sendToApp)
+		bl: function(sendToApp)
 		{
 			key.a = sendToApp;
 			_Browser_window.addEventListener('popstate', key);
@@ -4059,9 +4059,9 @@ function _Browser_application(impl)
 					var next = $elm$url$Url$fromString(href).a;
 					sendToApp(onUrlRequest(
 						(next
-							&& curr.b0 === next.b0
-							&& curr.bI === next.bI
-							&& curr.bZ.a === next.bZ.a
+							&& curr.b1 === next.b1
+							&& curr.bK === next.bK
+							&& curr.b_.a === next.b_.a
 						)
 							? $elm$browser$Browser$Internal(next)
 							: $elm$browser$Browser$External(href)
@@ -4069,13 +4069,13 @@ function _Browser_application(impl)
 				}
 			});
 		},
-		cE: function(flags)
+		cG: function(flags)
 		{
-			return A3(impl.cE, flags, _Browser_getUrl(), key);
+			return A3(impl.cG, flags, _Browser_getUrl(), key);
 		},
+		c3: impl.c3,
 		c1: impl.c1,
-		c$: impl.c$,
-		cZ: impl.cZ
+		c$: impl.c$
 	});
 }
 
@@ -4141,17 +4141,17 @@ var _Browser_decodeEvent = F2(function(decoder, event)
 function _Browser_visibilityInfo()
 {
 	return (typeof _VirtualDom_doc.hidden !== 'undefined')
-		? { cB: 'hidden', cl: 'visibilitychange' }
+		? { cD: 'hidden', cm: 'visibilitychange' }
 		:
 	(typeof _VirtualDom_doc.mozHidden !== 'undefined')
-		? { cB: 'mozHidden', cl: 'mozvisibilitychange' }
+		? { cD: 'mozHidden', cm: 'mozvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.msHidden !== 'undefined')
-		? { cB: 'msHidden', cl: 'msvisibilitychange' }
+		? { cD: 'msHidden', cm: 'msvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.webkitHidden !== 'undefined')
-		? { cB: 'webkitHidden', cl: 'webkitvisibilitychange' }
-		: { cB: 'hidden', cl: 'visibilitychange' };
+		? { cD: 'webkitHidden', cm: 'webkitvisibilitychange' }
+		: { cD: 'hidden', cm: 'visibilitychange' };
 }
 
 
@@ -4232,12 +4232,12 @@ var _Browser_call = F2(function(functionName, id)
 function _Browser_getViewport()
 {
 	return {
-		b6: _Browser_getScene(),
-		cf: {
-			S: _Browser_window.pageXOffset,
-			T: _Browser_window.pageYOffset,
-			u: _Browser_doc.documentElement.clientWidth,
-			r: _Browser_doc.documentElement.clientHeight
+		b7: _Browser_getScene(),
+		cg: {
+			H: _Browser_window.pageXOffset,
+			I: _Browser_window.pageYOffset,
+			m: _Browser_doc.documentElement.clientWidth,
+			l: _Browser_doc.documentElement.clientHeight
 		}
 	};
 }
@@ -4247,8 +4247,8 @@ function _Browser_getScene()
 	var body = _Browser_doc.body;
 	var elem = _Browser_doc.documentElement;
 	return {
-		u: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
-		r: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
+		m: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
+		l: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
 	};
 }
 
@@ -4271,15 +4271,15 @@ function _Browser_getViewportOf(id)
 	return _Browser_withNode(id, function(node)
 	{
 		return {
-			b6: {
-				u: node.scrollWidth,
-				r: node.scrollHeight
+			b7: {
+				m: node.scrollWidth,
+				l: node.scrollHeight
 			},
-			cf: {
-				S: node.scrollLeft,
-				T: node.scrollTop,
-				u: node.clientWidth,
-				r: node.clientHeight
+			cg: {
+				H: node.scrollLeft,
+				I: node.scrollTop,
+				m: node.clientWidth,
+				l: node.clientHeight
 			}
 		};
 	});
@@ -4309,18 +4309,18 @@ function _Browser_getElement(id)
 		var x = _Browser_window.pageXOffset;
 		var y = _Browser_window.pageYOffset;
 		return {
-			b6: _Browser_getScene(),
-			cf: {
-				S: x,
-				T: y,
-				u: _Browser_doc.documentElement.clientWidth,
-				r: _Browser_doc.documentElement.clientHeight
+			b7: _Browser_getScene(),
+			cg: {
+				H: x,
+				I: y,
+				m: _Browser_doc.documentElement.clientWidth,
+				l: _Browser_doc.documentElement.clientHeight
 			},
-			cv: {
-				S: x + rect.left,
-				T: y + rect.top,
-				u: rect.width,
-				r: rect.height
+			cx: {
+				H: x + rect.left,
+				I: y + rect.top,
+				m: rect.width,
+				l: rect.height
 			}
 		};
 	});
@@ -4801,22 +4801,22 @@ var $elm$core$Array$builderToArray = F2(
 		if (!builder.g) {
 			return A4(
 				$elm$core$Array$Array_elm_builtin,
-				$elm$core$Elm$JsArray$length(builder.i),
+				$elm$core$Elm$JsArray$length(builder.j),
 				$elm$core$Array$shiftStep,
 				$elm$core$Elm$JsArray$empty,
-				builder.i);
+				builder.j);
 		} else {
 			var treeLen = builder.g * $elm$core$Array$branchFactor;
 			var depth = $elm$core$Basics$floor(
 				A2($elm$core$Basics$logBase, $elm$core$Array$branchFactor, treeLen - 1));
-			var correctNodeList = reverseNodeList ? $elm$core$List$reverse(builder.j) : builder.j;
+			var correctNodeList = reverseNodeList ? $elm$core$List$reverse(builder.k) : builder.k;
 			var tree = A2($elm$core$Array$treeFromBuilder, correctNodeList, builder.g);
 			return A4(
 				$elm$core$Array$Array_elm_builtin,
-				$elm$core$Elm$JsArray$length(builder.i) + treeLen,
+				$elm$core$Elm$JsArray$length(builder.j) + treeLen,
 				A2($elm$core$Basics$max, 5, depth * $elm$core$Array$shiftStep),
 				tree,
-				builder.i);
+				builder.j);
 		}
 	});
 var $elm$core$Basics$idiv = _Basics_idiv;
@@ -4829,7 +4829,7 @@ var $elm$core$Array$initializeHelp = F5(
 				return A2(
 					$elm$core$Array$builderToArray,
 					false,
-					{j: nodeList, g: (len / $elm$core$Array$branchFactor) | 0, i: tail});
+					{k: nodeList, g: (len / $elm$core$Array$branchFactor) | 0, j: tail});
 			} else {
 				var leaf = $elm$core$Array$Leaf(
 					A3($elm$core$Elm$JsArray$initialize, $elm$core$Array$branchFactor, fromIndex, fn));
@@ -4897,7 +4897,7 @@ var $elm$url$Url$Http = 0;
 var $elm$url$Url$Https = 1;
 var $elm$url$Url$Url = F6(
 	function (protocol, host, port_, path, query, fragment) {
-		return {bH: fragment, bI: host, bW: path, bZ: port_, b0: protocol, b1: query};
+		return {bJ: fragment, bK: host, bX: path, b_: port_, b1: protocol, b2: query};
 	});
 var $elm$core$String$contains = _String_contains;
 var $elm$core$String$length = _String_length;
@@ -5181,7 +5181,7 @@ var $elm$json$Json$Decode$float = _Json_decodeFloat;
 var $author$project$Main$Loading = 1;
 var $author$project$Main$Point = F2(
 	function (x, y) {
-		return {S: x, T: y};
+		return {H: x, I: y};
 	});
 var $elm$core$Dict$RBEmpty_elm_builtin = {$: -2};
 var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
@@ -5190,27 +5190,29 @@ var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$init = function (flags) {
 	return _Utils_Tuple2(
 		{
-			aR: '',
-			bD: 0,
-			bE: $elm$core$Dict$empty,
-			an: false,
-			r: flags.r,
-			t: flags.bi,
-			w: 1,
-			Y: false,
-			aI: false,
-			bc: A2($author$project$Main$Point, 0, 0),
-			A: A2($author$project$Main$Point, 0, 0),
-			ay: $elm$core$Maybe$Nothing,
-			aB: 0,
-			aC: $elm$core$Dict$empty,
-			u: flags.u
+			aT: '',
+			bF: 0,
+			bG: $elm$core$Dict$empty,
+			ap: false,
+			l: flags.l,
+			w: flags.bk,
+			y: 1,
+			_: false,
+			au: false,
+			be: A2($author$project$Main$Point, 0, 0),
+			aK: A2($author$project$Main$Point, 0, 0),
+			i: A2($author$project$Main$Point, 0, 0),
+			C: $elm$core$Maybe$Nothing,
+			aD: 0,
+			aE: $elm$core$Dict$empty,
+			m: flags.m,
+			o: 1
 		},
 		$elm$core$Platform$Cmd$none);
 };
 var $elm$json$Json$Decode$string = _Json_decodeString;
 var $author$project$Main$DimensionsChanged = function (a) {
-	return {$: 7, a: a};
+	return {$: 8, a: a};
 };
 var $elm$json$Json$Decode$index = _Json_decodeIndex;
 var $author$project$Main$dimensionsChanged = _Platform_incomingPort(
@@ -5234,21 +5236,90 @@ var $author$project$Main$Invalid = 2;
 var $author$project$Main$Ok = 0;
 var $author$project$Main$Vertex = F3(
 	function (id, title, position) {
-		return {bK: id, A: position, cc: title};
+		return {bM: id, i: position, cd: title};
 	});
 var $author$project$Main$addPoints = F2(
 	function (a, b) {
-		return A2($author$project$Main$Point, a.S + b.S, a.T + b.T);
+		return A2($author$project$Main$Point, a.H + b.H, a.I + b.I);
+	});
+var $author$project$Main$mulPoint = F2(
+	function (point, coef) {
+		return A2($author$project$Main$Point, point.H * coef, point.I * coef);
+	});
+var $author$project$Main$subPoints = F2(
+	function (a, b) {
+		return A2($author$project$Main$Point, a.H - b.H, a.I - b.I);
+	});
+var $author$project$Main$canvasPointToBackgroundPoint = F3(
+	function (canvasPoint, backgroundPosition, zoomLevel) {
+		return A2(
+			$author$project$Main$mulPoint,
+			A2($author$project$Main$subPoints, canvasPoint, backgroundPosition),
+			1 / zoomLevel);
 	});
 var $joakin$elm_canvas$Canvas$Texture$dimensions = function (texture) {
 	if (!texture.$) {
 		var image = texture.a;
-		return {r: image.r, u: image.u};
+		return {l: image.l, m: image.m};
 	} else {
 		var data = texture.a;
-		return {r: data.r, u: data.u};
+		return {l: data.l, m: data.m};
 	}
 };
+var $elm$core$Maybe$map = F2(
+	function (f, maybe) {
+		if (!maybe.$) {
+			var value = maybe.a;
+			return $elm$core$Maybe$Just(
+				f(value));
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $elm$core$Basics$min = F2(
+	function (x, y) {
+		return (_Utils_cmp(x, y) < 0) ? x : y;
+	});
+var $elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (!maybe.$) {
+			var value = maybe.a;
+			return value;
+		} else {
+			return _default;
+		}
+	});
+var $author$project$Main$constrainBackgroundToCanvas = F2(
+	function (model, _new) {
+		var w = A2(
+			$elm$core$Maybe$withDefault,
+			model.m,
+			A2(
+				$elm$core$Maybe$map,
+				function (t) {
+					return $joakin$elm_canvas$Canvas$Texture$dimensions(t).m;
+				},
+				model.C));
+		var h = A2(
+			$elm$core$Maybe$withDefault,
+			model.l,
+			A2(
+				$elm$core$Maybe$map,
+				function (t) {
+					return $joakin$elm_canvas$Canvas$Texture$dimensions(t).l;
+				},
+				model.C));
+		return A2(
+			$author$project$Main$Point,
+			A2(
+				$elm$core$Basics$min,
+				0,
+				A2($elm$core$Basics$max, (0 - (w * model.o)) + model.m, _new.H)),
+			A2(
+				$elm$core$Basics$min,
+				0,
+				A2($elm$core$Basics$max, (0 - (h * model.o)) + model.l, _new.I)));
+	});
 var $elm$core$Dict$Black = 1;
 var $elm$core$Dict$RBNode_elm_builtin = F5(
 	function (a, b, c, d, e) {
@@ -5358,20 +5429,6 @@ var $elm$core$Dict$insert = F3(
 			return x;
 		}
 	});
-var $elm$core$Maybe$map = F2(
-	function (f, maybe) {
-		if (!maybe.$) {
-			var value = maybe.a;
-			return $elm$core$Maybe$Just(
-				f(value));
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
-var $elm$core$Basics$min = F2(
-	function (x, y) {
-		return (_Utils_cmp(x, y) < 0) ? x : y;
-	});
 var $elm$core$Basics$not = _Basics_not;
 var $elm$json$Json$Encode$list = F2(
 	function (func, entries) {
@@ -5397,19 +5454,6 @@ var $author$project$Main$saveToLocalStorage = _Platform_outgoingPort(
 					$elm$json$Json$Encode$string(b)
 				]));
 	});
-var $author$project$Main$subPoints = F2(
-	function (a, b) {
-		return A2($author$project$Main$Point, a.S - b.S, a.T - b.T);
-	});
-var $elm$core$Maybe$withDefault = F2(
-	function (_default, maybe) {
-		if (!maybe.$) {
-			var value = maybe.a;
-			return value;
-		} else {
-			return _default;
-		}
-	});
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
@@ -5423,120 +5467,175 @@ var $author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{
-								aR: model.t,
-								w: 0,
-								ay: $elm$core$Maybe$Just(t)
+								aT: model.w,
+								y: 0,
+								C: $elm$core$Maybe$Just(t)
 							}),
 						$author$project$Main$saveToLocalStorage(
-							_Utils_Tuple2('background', model.t)));
+							_Utils_Tuple2('background', model.w)));
 				} else {
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{w: 2}),
+							{y: 2}),
 						$elm$core$Platform$Cmd$none);
 				}
 			case 3:
-				var point = msg.a;
-				var id = $elm$core$String$fromInt(model.aB);
+				var mouseEvent = msg.a;
+				var id = $elm$core$String$fromInt(model.aD);
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
-							aI: false,
-							aB: model.an ? model.aB : (model.aB + 1),
-							aC: model.an ? model.aC : A3(
+							au: false,
+							aD: model.ap ? model.aD : (model.aD + 1),
+							aE: model.ap ? model.aE : A3(
 								$elm$core$Dict$insert,
 								id,
 								A3(
 									$author$project$Main$Vertex,
 									id,
 									$elm$core$Maybe$Nothing,
-									A2($author$project$Main$subPoints, point, model.A)),
-								model.aC)
+									A3($author$project$Main$canvasPointToBackgroundPoint, mouseEvent.i, model.i, model.o)),
+								model.aE)
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 2:
-				var point = msg.a;
+				var mouseEvent = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{an: false, Y: false, aI: true, bc: point}),
+						{ap: false, _: false, au: true, be: mouseEvent.i}),
 					$elm$core$Platform$Cmd$none);
 			case 4:
-				var movement = msg.a;
-				if (model.aI) {
-					var w = A2(
-						$elm$core$Maybe$withDefault,
-						model.u,
-						A2(
-							$elm$core$Maybe$map,
-							function (t) {
-								return $joakin$elm_canvas$Canvas$Texture$dimensions(t).u;
-							},
-							model.ay));
-					var _new = A2($author$project$Main$addPoints, movement, model.A);
-					var h = A2(
-						$elm$core$Maybe$withDefault,
-						model.r,
-						A2(
-							$elm$core$Maybe$map,
-							function (t) {
-								return $joakin$elm_canvas$Canvas$Texture$dimensions(t).r;
-							},
-							model.ay));
+				var mouseEvent = msg.a;
+				var newModel = _Utils_update(
+					model,
+					{aK: mouseEvent.i});
+				if (model.au) {
+					var _new = A2($author$project$Main$addPoints, mouseEvent.bU, model.i);
 					return _Utils_Tuple2(
 						_Utils_update(
-							model,
+							newModel,
 							{
-								an: true,
-								A: A2(
-									$author$project$Main$Point,
-									A2(
-										$elm$core$Basics$min,
-										0,
-										A2($elm$core$Basics$max, (0 - w) + model.u, _new.S)),
-									A2(
-										$elm$core$Basics$min,
-										0,
-										A2($elm$core$Basics$max, (0 - h) + model.r, _new.T)))
+								ap: true,
+								i: A2($author$project$Main$constrainBackgroundToCanvas, model, _new)
 							}),
 						$elm$core$Platform$Cmd$none);
 				} else {
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					return _Utils_Tuple2(newModel, $elm$core$Platform$Cmd$none);
 				}
-			case 5:
+			case 6:
 				var bool = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
-							t: ((!bool) && $elm$core$String$isEmpty(model.t)) ? model.aR : model.t,
-							w: ((!bool) && $elm$core$String$isEmpty(model.t)) ? 1 : model.w,
-							Y: bool
+							w: ((!bool) && $elm$core$String$isEmpty(model.w)) ? model.aT : model.w,
+							y: ((!bool) && $elm$core$String$isEmpty(model.w)) ? 1 : model.y,
+							_: bool
 						}),
 					$elm$core$Platform$Cmd$none);
-			case 6:
+			case 7:
 				var string = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{t: string, w: 1}),
+						{w: string, y: 1}),
 					$elm$core$Platform$Cmd$none);
-			default:
+			case 8:
 				var _v2 = msg.a;
 				var width = _v2.a;
 				var height = _v2.b;
+				var w = A2(
+					$elm$core$Maybe$withDefault,
+					width,
+					A2(
+						$elm$core$Maybe$map,
+						function (t) {
+							return $joakin$elm_canvas$Canvas$Texture$dimensions(t).m;
+						},
+						model.C));
+				var newModel = _Utils_update(
+					model,
+					{l: height, m: width});
+				var h = A2(
+					$elm$core$Maybe$withDefault,
+					height,
+					A2(
+						$elm$core$Maybe$map,
+						function (t) {
+							return $joakin$elm_canvas$Canvas$Texture$dimensions(t).l;
+						},
+						model.C));
+				var zoomAfter = A2(
+					$elm$core$Basics$max,
+					model.o,
+					A2($elm$core$Basics$max, width / w, height / h));
+				return _Utils_Tuple2(
+					_Utils_update(
+						newModel,
+						{
+							i: A2($author$project$Main$constrainBackgroundToCanvas, newModel, newModel.i),
+							o: zoomAfter
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 9:
+				var delta = msg.a;
+				var zoomBefore = model.o;
+				var w = A2(
+					$elm$core$Maybe$withDefault,
+					model.m,
+					A2(
+						$elm$core$Maybe$map,
+						function (t) {
+							return $joakin$elm_canvas$Canvas$Texture$dimensions(t).m;
+						},
+						model.C));
+				var h = A2(
+					$elm$core$Maybe$withDefault,
+					model.l,
+					A2(
+						$elm$core$Maybe$map,
+						function (t) {
+							return $joakin$elm_canvas$Canvas$Texture$dimensions(t).l;
+						},
+						model.C));
+				var zoomAfter = A2(
+					$elm$core$Basics$max,
+					model.o - (delta / 1000),
+					A2($elm$core$Basics$max, model.m / w, model.l / h));
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{r: height, u: width}),
+						{
+							i: A2(
+								$author$project$Main$constrainBackgroundToCanvas,
+								_Utils_update(
+									model,
+									{o: zoomAfter}),
+								A2(
+									$author$project$Main$subPoints,
+									model.aK,
+									A2(
+										$author$project$Main$mulPoint,
+										A3($author$project$Main$canvasPointToBackgroundPoint, model.aK, model.i, zoomBefore),
+										zoomAfter))),
+							o: zoomAfter
+						}),
+					$elm$core$Platform$Cmd$none);
+			default:
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{au: false}),
 					$elm$core$Platform$Cmd$none);
 		}
 	});
 var $author$project$Main$MouseDown = function (a) {
 	return {$: 2, a: a};
 };
+var $author$project$Main$MouseLeave = {$: 5};
 var $author$project$Main$MouseMove = function (a) {
 	return {$: 4, a: a};
 };
@@ -5545,21 +5644,36 @@ var $author$project$Main$MouseUp = function (a) {
 };
 var $perzanko$elm_loading$Loading$On = 0;
 var $author$project$Main$SetMapFieldVisible = function (a) {
-	return {$: 5, a: a};
+	return {$: 6, a: a};
 };
 var $perzanko$elm_loading$Loading$Sonar = 5;
 var $author$project$Main$TextureLoaded = function (a) {
 	return {$: 1, a: a};
 };
 var $author$project$Main$TrySettingBackground = function (a) {
-	return {$: 6, a: a};
+	return {$: 7, a: a};
 };
+var $author$project$Main$ZoomChanged = function (a) {
+	return {$: 9, a: a};
+};
+var $joakin$elm_canvas$Canvas$Internal$Canvas$DrawableClear = F3(
+	function (a, b, c) {
+		return {$: 3, a: a, b: b, c: c};
+	});
+var $joakin$elm_canvas$Canvas$Internal$Canvas$NotSpecified = {$: 0};
+var $joakin$elm_canvas$Canvas$Internal$Canvas$Renderable = $elm$core$Basics$identity;
+var $joakin$elm_canvas$Canvas$clear = F3(
+	function (point, w, h) {
+		return {
+			x: _List_Nil,
+			L: $joakin$elm_canvas$Canvas$Internal$Canvas$NotSpecified,
+			M: A3($joakin$elm_canvas$Canvas$Internal$Canvas$DrawableClear, point, w, h)
+		};
+	});
 var $joakin$elm_canvas$Canvas$Internal$Canvas$DrawableTexture = F2(
 	function (a, b) {
 		return {$: 2, a: a, b: b};
 	});
-var $joakin$elm_canvas$Canvas$Internal$Canvas$NotSpecified = {$: 0};
-var $joakin$elm_canvas$Canvas$Internal$Canvas$Renderable = $elm$core$Basics$identity;
 var $joakin$elm_canvas$Canvas$Internal$Canvas$Fill = function (a) {
 	return {$: 1, a: a};
 };
@@ -5640,28 +5754,28 @@ var $joakin$elm_canvas$Canvas$addSettingsToRenderable = F2(
 						return _Utils_update(
 							r,
 							{
-								v: A2($elm$core$List$cons, cmd, r.v)
+								x: A2($elm$core$List$cons, cmd, r.x)
 							});
 					case 1:
 						var cmds = setting.a;
 						return _Utils_update(
 							r,
 							{
-								v: A3($elm$core$List$foldl, $elm$core$List$cons, r.v, cmds)
+								x: A3($elm$core$List$foldl, $elm$core$List$cons, r.x, cmds)
 							});
 					case 3:
 						var f = setting.a;
 						return _Utils_update(
 							r,
 							{
-								I: f(r.I)
+								M: f(r.M)
 							});
 					default:
 						var op = setting.a;
 						return _Utils_update(
 							r,
 							{
-								H: A2($joakin$elm_canvas$Canvas$mergeDrawOp, r.H, op)
+								L: A2($joakin$elm_canvas$Canvas$mergeDrawOp, r.L, op)
 							});
 				}
 			});
@@ -5673,13 +5787,13 @@ var $joakin$elm_canvas$Canvas$texture = F3(
 			$joakin$elm_canvas$Canvas$addSettingsToRenderable,
 			settings,
 			{
-				v: _List_Nil,
-				H: $joakin$elm_canvas$Canvas$Internal$Canvas$NotSpecified,
-				I: A2($joakin$elm_canvas$Canvas$Internal$Canvas$DrawableTexture, p, t)
+				x: _List_Nil,
+				L: $joakin$elm_canvas$Canvas$Internal$Canvas$NotSpecified,
+				M: A2($joakin$elm_canvas$Canvas$Internal$Canvas$DrawableTexture, p, t)
 			});
 	});
-var $author$project$Main$addBackground = F3(
-	function (position, texture, renderables) {
+var $author$project$Main$addBackground = F5(
+	function (width, height, position, texture, renderables) {
 		if (texture.$ === 1) {
 			return renderables;
 		} else {
@@ -5687,6 +5801,11 @@ var $author$project$Main$addBackground = F3(
 			return _Utils_ap(
 				_List_fromArray(
 					[
+						A3(
+						$joakin$elm_canvas$Canvas$clear,
+						_Utils_Tuple2(0, 0),
+						width,
+						height),
 						A3($joakin$elm_canvas$Canvas$texture, _List_Nil, position, t)
 					]),
 				renderables);
@@ -5734,7 +5853,7 @@ var $elm$html$Html$Attributes$classList = function (classes) {
 				$elm$core$Tuple$first,
 				A2($elm$core$List$filter, $elm$core$Tuple$second, classes))));
 };
-var $perzanko$elm_loading$Loading$defaultConfig = {bA: '', cn: '#74b4c9', cW: 30, b8: 1};
+var $perzanko$elm_loading$Loading$defaultConfig = {bC: '', co: '#74b4c9', cY: 30, b9: 1};
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
 var $elm$svg$Svg$Attributes$d = _VirtualDom_attribute('d');
@@ -5778,9 +5897,9 @@ var $joakin$elm_canvas$Canvas$group = F2(
 			$joakin$elm_canvas$Canvas$addSettingsToRenderable,
 			settings,
 			{
-				v: _List_Nil,
-				H: $joakin$elm_canvas$Canvas$Internal$Canvas$NotSpecified,
-				I: $joakin$elm_canvas$Canvas$Internal$Canvas$DrawableGroup(entities)
+				x: _List_Nil,
+				L: $joakin$elm_canvas$Canvas$Internal$Canvas$NotSpecified,
+				M: $joakin$elm_canvas$Canvas$Internal$Canvas$DrawableGroup(entities)
 			});
 	});
 var $elm$html$Html$input = _VirtualDom_node('input');
@@ -5815,25 +5934,24 @@ var $author$project$Icons$mapIcon = A2(
 				]),
 			_List_Nil)
 		]));
+var $author$project$Main$MouseEvent = F2(
+	function (position, movement) {
+		return {bU: movement, i: position};
+	});
+var $elm$json$Json$Decode$map4 = _Json_map4;
 var $author$project$Main$mouseDecoder = function (msg) {
-	return A3(
-		$elm$json$Json$Decode$map2,
-		F2(
-			function (x, y) {
+	return A5(
+		$elm$json$Json$Decode$map4,
+		F4(
+			function (offsetX, offsetY, movementX, movementY) {
 				return msg(
-					A2($author$project$Main$Point, x, y));
+					A2(
+						$author$project$Main$MouseEvent,
+						A2($author$project$Main$Point, offsetX, offsetY),
+						A2($author$project$Main$Point, movementX, movementY)));
 			}),
 		A2($elm$json$Json$Decode$field, 'offsetX', $elm$json$Json$Decode$float),
-		A2($elm$json$Json$Decode$field, 'offsetY', $elm$json$Json$Decode$float));
-};
-var $author$project$Main$moveDecoder = function (msg) {
-	return A3(
-		$elm$json$Json$Decode$map2,
-		F2(
-			function (x, y) {
-				return msg(
-					A2($author$project$Main$Point, x, y));
-			}),
+		A2($elm$json$Json$Decode$field, 'offsetY', $elm$json$Json$Decode$float),
 		A2($elm$json$Json$Decode$field, 'movementX', $elm$json$Json$Decode$float),
 		A2($elm$json$Json$Decode$field, 'movementY', $elm$json$Json$Decode$float));
 };
@@ -6256,8 +6374,8 @@ var $rtfeldman$elm_css$Css$Structure$compactHelp = F2(
 					A2($elm$core$List$cons, declaration, declarations));
 			case 6:
 				var record = declaration.a;
-				return $elm$core$String$isEmpty(record.cp) ? _Utils_Tuple2(keyframesByName, declarations) : _Utils_Tuple2(
-					A3($elm$core$Dict$insert, record.cM, record.cp, keyframesByName),
+				return $elm$core$String$isEmpty(record.cq) ? _Utils_Tuple2(keyframesByName, declarations) : _Utils_Tuple2(
+					A3($elm$core$Dict$insert, record.cQ, record.cq, keyframesByName),
 					declarations);
 			case 7:
 				var properties = declaration.a;
@@ -6303,16 +6421,16 @@ var $rtfeldman$elm_css$Css$Structure$withKeyframeDeclarations = F2(
 					var name = _v0.a;
 					var decl = _v0.b;
 					return $rtfeldman$elm_css$Css$Structure$Keyframes(
-						{cp: decl, cM: name});
+						{cq: decl, cQ: name});
 				},
 				$elm$core$Dict$toList(keyframesByName)),
 			compactedDeclarations);
 	});
 var $rtfeldman$elm_css$Css$Structure$compactStylesheet = function (_v0) {
-	var charset = _v0.bz;
-	var imports = _v0.bL;
-	var namespaces = _v0.bU;
-	var declarations = _v0.cq;
+	var charset = _v0.bB;
+	var imports = _v0.bN;
+	var namespaces = _v0.bV;
+	var declarations = _v0.cr;
 	var _v1 = A3(
 		$elm$core$List$foldr,
 		$rtfeldman$elm_css$Css$Structure$compactHelp,
@@ -6321,7 +6439,7 @@ var $rtfeldman$elm_css$Css$Structure$compactStylesheet = function (_v0) {
 	var keyframesByName = _v1.a;
 	var compactedDeclarations = _v1.b;
 	var finalDeclarations = A2($rtfeldman$elm_css$Css$Structure$withKeyframeDeclarations, keyframesByName, compactedDeclarations);
-	return {bz: charset, cq: finalDeclarations, bL: imports, bU: namespaces};
+	return {bB: charset, cr: finalDeclarations, bN: imports, bV: namespaces};
 };
 var $rtfeldman$elm_css$Css$Structure$Output$charsetToString = function (charset) {
 	return A2(
@@ -6335,13 +6453,13 @@ var $rtfeldman$elm_css$Css$Structure$Output$charsetToString = function (charset)
 			charset));
 };
 var $rtfeldman$elm_css$Css$Structure$Output$mediaExpressionToString = function (expression) {
-	return '(' + (expression.bG + (A2(
+	return '(' + (expression.bI + (A2(
 		$elm$core$Maybe$withDefault,
 		'',
 		A2(
 			$elm$core$Maybe$map,
 			$elm$core$Basics$append(': '),
-			expression.E)) + ')'));
+			expression.G)) + ')'));
 };
 var $rtfeldman$elm_css$Css$Structure$Output$mediaTypeToString = function (mediaType) {
 	switch (mediaType) {
@@ -6583,8 +6701,8 @@ var $rtfeldman$elm_css$Css$Structure$Output$prettyPrintDeclaration = function (d
 		case 5:
 			return 'TODO';
 		case 6:
-			var name = decl.a.cM;
-			var declaration = decl.a.cp;
+			var name = decl.a.cQ;
+			var declaration = decl.a.cq;
 			return '@keyframes ' + (name + (' {\n' + (declaration + '\n}')));
 		case 7:
 			return 'TODO';
@@ -6595,10 +6713,10 @@ var $rtfeldman$elm_css$Css$Structure$Output$prettyPrintDeclaration = function (d
 	}
 };
 var $rtfeldman$elm_css$Css$Structure$Output$prettyPrint = function (_v0) {
-	var charset = _v0.bz;
-	var imports = _v0.bL;
-	var namespaces = _v0.bU;
-	var declarations = _v0.cq;
+	var charset = _v0.bB;
+	var imports = _v0.bN;
+	var namespaces = _v0.bV;
+	var declarations = _v0.cr;
 	return A2(
 		$elm$core$String$join,
 		'\n\n',
@@ -7017,7 +7135,7 @@ var $rtfeldman$elm_css$Css$Structure$concatMapLastStyleBlock = F2(
 var $elm$core$String$cons = _String_cons;
 var $rtfeldman$elm_css$ElmCssVendor$Murmur3$HashData = F4(
 	function (shift, seed, hash, charsProcessed) {
-		return {ah: charsProcessed, ao: hash, aa: seed, at: shift};
+		return {aj: charsProcessed, aq: hash, ac: seed, aw: shift};
 	});
 var $rtfeldman$elm_css$ElmCssVendor$Murmur3$c1 = 3432918353;
 var $rtfeldman$elm_css$ElmCssVendor$Murmur3$c2 = 461845907;
@@ -7035,14 +7153,14 @@ var $rtfeldman$elm_css$ElmCssVendor$Murmur3$rotlBy = F2(
 	});
 var $elm$core$Bitwise$xor = _Bitwise_xor;
 var $rtfeldman$elm_css$ElmCssVendor$Murmur3$finalize = function (data) {
-	var acc = (!(!data.ao)) ? (data.aa ^ A2(
+	var acc = (!(!data.aq)) ? (data.ac ^ A2(
 		$rtfeldman$elm_css$ElmCssVendor$Murmur3$multiplyBy,
 		$rtfeldman$elm_css$ElmCssVendor$Murmur3$c2,
 		A2(
 			$rtfeldman$elm_css$ElmCssVendor$Murmur3$rotlBy,
 			15,
-			A2($rtfeldman$elm_css$ElmCssVendor$Murmur3$multiplyBy, $rtfeldman$elm_css$ElmCssVendor$Murmur3$c1, data.ao)))) : data.aa;
-	var h0 = acc ^ data.ah;
+			A2($rtfeldman$elm_css$ElmCssVendor$Murmur3$multiplyBy, $rtfeldman$elm_css$ElmCssVendor$Murmur3$c1, data.aq)))) : data.ac;
+	var h0 = acc ^ data.aj;
 	var h1 = A2($rtfeldman$elm_css$ElmCssVendor$Murmur3$multiplyBy, 2246822507, h0 ^ (h0 >>> 16));
 	var h2 = A2($rtfeldman$elm_css$ElmCssVendor$Murmur3$multiplyBy, 3266489909, h1 ^ (h1 >>> 13));
 	return (h2 ^ (h2 >>> 16)) >>> 0;
@@ -7066,17 +7184,17 @@ var $rtfeldman$elm_css$ElmCssVendor$Murmur3$mix = F2(
 	});
 var $rtfeldman$elm_css$ElmCssVendor$Murmur3$hashFold = F2(
 	function (c, data) {
-		var res = data.ao | ((255 & $elm$core$Char$toCode(c)) << data.at);
-		var _v0 = data.at;
+		var res = data.aq | ((255 & $elm$core$Char$toCode(c)) << data.aw);
+		var _v0 = data.aw;
 		if (_v0 === 24) {
 			return {
-				ah: data.ah + 1,
-				ao: 0,
-				aa: A2($rtfeldman$elm_css$ElmCssVendor$Murmur3$mix, data.aa, res),
-				at: 0
+				aj: data.aj + 1,
+				aq: 0,
+				ac: A2($rtfeldman$elm_css$ElmCssVendor$Murmur3$mix, data.ac, res),
+				aw: 0
 			};
 		} else {
-			return {ah: data.ah + 1, ao: res, aa: data.aa, at: data.at + 8};
+			return {aj: data.aj + 1, aq: res, ac: data.ac, aw: data.aw + 8};
 		}
 	});
 var $rtfeldman$elm_css$ElmCssVendor$Murmur3$hashString = F2(
@@ -7691,7 +7809,7 @@ var $rtfeldman$elm_css$Css$Preprocess$Resolve$applyStyles = F2(
 						_List_fromArray(
 							[
 								$rtfeldman$elm_css$Css$Structure$Keyframes(
-								{cp: str, cM: name})
+								{cq: str, cQ: name})
 							]));
 				case 4:
 					var _v12 = styles.a;
@@ -7826,13 +7944,13 @@ var $rtfeldman$elm_css$Css$Preprocess$Resolve$toDeclarations = function (snippet
 	}
 };
 var $rtfeldman$elm_css$Css$Preprocess$Resolve$toStructure = function (_v0) {
-	var charset = _v0.bz;
-	var imports = _v0.bL;
-	var namespaces = _v0.bU;
-	var snippets = _v0.b7;
+	var charset = _v0.bB;
+	var imports = _v0.bN;
+	var namespaces = _v0.bV;
+	var snippets = _v0.b8;
 	var declarations = $rtfeldman$elm_css$Css$Preprocess$Resolve$extract(
 		A2($elm$core$List$concatMap, $rtfeldman$elm_css$Css$Preprocess$unwrapSnippet, snippets));
-	return {bz: charset, cq: declarations, bL: imports, bU: namespaces};
+	return {bB: charset, cr: declarations, bN: imports, bV: namespaces};
 };
 var $rtfeldman$elm_css$Css$Preprocess$Resolve$compileHelp = function (sheet) {
 	return $rtfeldman$elm_css$Css$Structure$Output$prettyPrint(
@@ -7878,7 +7996,7 @@ var $rtfeldman$elm_css$VirtualDom$Styled$snippetFromPair = function (_v0) {
 				])));
 };
 var $rtfeldman$elm_css$Css$Preprocess$stylesheet = function (snippets) {
-	return {bz: $elm$core$Maybe$Nothing, bL: _List_Nil, bU: _List_Nil, b7: snippets};
+	return {bB: $elm$core$Maybe$Nothing, bN: _List_Nil, bV: _List_Nil, b8: snippets};
 };
 var $rtfeldman$elm_css$VirtualDom$Styled$toDeclaration = function (dict) {
 	return $rtfeldman$elm_css$Css$Preprocess$Resolve$compile(
@@ -8137,23 +8255,23 @@ var $elm$core$String$fromFloat = _String_fromNumber;
 var $rtfeldman$elm_css$Css$Internal$lengthConverter = F3(
 	function (units, unitLabel, numericValue) {
 		return {
-			bn: 0,
-			bx: 0,
-			ak: 0,
-			l: 0,
-			aG: 0,
-			ap: 0,
-			M: 0,
-			aq: 0,
+			bp: 0,
+			bz: 0,
+			am: 0,
+			p: 0,
+			aI: 0,
 			ar: 0,
-			W: 0,
-			X: 0,
-			C: 0,
-			O: numericValue,
-			aw: 0,
-			az: unitLabel,
-			aO: units,
-			E: _Utils_ap(
+			Q: 0,
+			as: 0,
+			at: 0,
+			Y: 0,
+			Z: 0,
+			E: 0,
+			S: numericValue,
+			az: 0,
+			aB: unitLabel,
+			aQ: units,
+			G: _Utils_ap(
 				$elm$core$String$fromFloat(numericValue),
 				unitLabel)
 		};
@@ -8175,14 +8293,14 @@ var $rtfeldman$elm_css$Css$property = F2(
 	});
 var $rtfeldman$elm_css$Css$prop1 = F2(
 	function (key, arg) {
-		return A2($rtfeldman$elm_css$Css$property, key, arg.E);
+		return A2($rtfeldman$elm_css$Css$property, key, arg.G);
 	});
 var $rtfeldman$elm_css$Css$animationName = function (arg) {
-	return ((arg.E === 'none') || ((arg.E === 'inherit') || ((arg.E === 'unset') || (arg.E === 'initial')))) ? A2($rtfeldman$elm_css$Css$prop1, 'animation-name', arg) : $rtfeldman$elm_css$Css$Preprocess$WithKeyframes(arg.E);
+	return ((arg.G === 'none') || ((arg.G === 'inherit') || ((arg.G === 'unset') || (arg.G === 'initial')))) ? A2($rtfeldman$elm_css$Css$prop1, 'animation-name', arg) : $rtfeldman$elm_css$Css$Preprocess$WithKeyframes(arg.G);
 };
-var $rtfeldman$elm_css$Css$auto = {ch: 0, a: 0, ak: 0, aV: 0, cF: 0, ap: 0, M: 0, C: 0, as: 0, z: 0, a2: 0, ax: 0, q: 0, E: 'auto'};
+var $rtfeldman$elm_css$Css$auto = {ci: 0, a: 0, am: 0, aX: 0, cH: 0, ar: 0, Q: 0, E: 0, av: 0, B: 0, a4: 0, aA: 0, u: 0, G: 'auto'};
 var $rtfeldman$elm_css$Css$backgroundColor = function (c) {
-	return A2($rtfeldman$elm_css$Css$property, 'background-color', c.E);
+	return A2($rtfeldman$elm_css$Css$property, 'background-color', c.G);
 };
 var $rtfeldman$elm_css$Css$borderRadius = $rtfeldman$elm_css$Css$prop1('border-radius');
 var $rtfeldman$elm_css$VirtualDom$Styled$Attribute = F3(
@@ -8253,12 +8371,12 @@ var $rtfeldman$elm_css$Css$withPrecedingHash = function (str) {
 };
 var $rtfeldman$elm_css$Css$erroneousHex = function (str) {
 	return {
-		ae: 1,
-		a5: 0,
-		cn: 0,
-		a8: 0,
-		bh: 0,
-		E: $rtfeldman$elm_css$Css$withPrecedingHash(str)
+		ag: 1,
+		a7: 0,
+		co: 0,
+		ba: 0,
+		bj: 0,
+		G: $rtfeldman$elm_css$Css$withPrecedingHash(str)
 	};
 };
 var $elm$core$String$foldr = _String_foldr;
@@ -8517,12 +8635,12 @@ var $rtfeldman$elm_css$Css$validHex = F5(
 			var blue = _v6.a.a;
 			var alpha = _v6.b.a;
 			return {
-				ae: alpha / 255,
-				a5: blue,
-				cn: 0,
-				a8: green,
-				bh: red,
-				E: $rtfeldman$elm_css$Css$withPrecedingHash(str)
+				ag: alpha / 255,
+				a7: blue,
+				co: 0,
+				ba: green,
+				bj: red,
+				G: $rtfeldman$elm_css$Css$withPrecedingHash(str)
 			};
 		} else {
 			return $rtfeldman$elm_css$Css$erroneousHex(str);
@@ -8653,10 +8771,10 @@ var $rtfeldman$elm_css$Css$Internal$compileKeyframes = function (tuples) {
 		A2($elm$core$List$map, $rtfeldman$elm_css$Css$Internal$printKeyframeSelector, tuples));
 };
 var $rtfeldman$elm_css$Css$Animations$keyframes = function (tuples) {
-	return $elm$core$List$isEmpty(tuples) ? {a9: 0, bd: 0, E: 'none'} : {
-		a9: 0,
-		bd: 0,
-		E: $rtfeldman$elm_css$Css$Internal$compileKeyframes(tuples)
+	return $elm$core$List$isEmpty(tuples) ? {bb: 0, bf: 0, G: 'none'} : {
+		bb: 0,
+		bf: 0,
+		G: $rtfeldman$elm_css$Css$Internal$compileKeyframes(tuples)
 	};
 };
 var $rtfeldman$elm_css$Css$prop2 = F3(
@@ -8668,7 +8786,7 @@ var $rtfeldman$elm_css$Css$prop2 = F3(
 				$elm$core$String$join,
 				' ',
 				_List_fromArray(
-					[argA.E, argB.E])));
+					[argA.G, argB.G])));
 	});
 var $rtfeldman$elm_css$Css$margin2 = $rtfeldman$elm_css$Css$prop2('margin');
 var $rtfeldman$elm_css$Css$position = $rtfeldman$elm_css$Css$prop1('position');
@@ -8679,19 +8797,19 @@ var $rtfeldman$elm_css$Css$Animations$property = F2(
 	});
 var $rtfeldman$elm_css$Css$PxUnits = 0;
 var $rtfeldman$elm_css$Css$px = A2($rtfeldman$elm_css$Css$Internal$lengthConverter, 0, 'px');
-var $rtfeldman$elm_css$Css$relative = {A: 0, E: 'relative'};
+var $rtfeldman$elm_css$Css$relative = {i: 0, G: 'relative'};
 var $rtfeldman$elm_css$Css$spaceBetween = $rtfeldman$elm_css$Css$prop1('space-between');
 var $rtfeldman$elm_css$Css$width = $rtfeldman$elm_css$Css$prop1('width');
 var $perzanko$elm_loading$Loading$Bars$view = function (config) {
 	var withSpeed = function (x) {
-		return $elm$core$String$fromFloat(x / config.b8);
+		return $elm$core$String$fromFloat(x / config.b9);
 	};
 	var outerStyle = _List_fromArray(
 		[
 			$rtfeldman$elm_css$Css$width(
-			$rtfeldman$elm_css$Css$px(config.cW)),
+			$rtfeldman$elm_css$Css$px(config.cY)),
 			$rtfeldman$elm_css$Css$height(
-			$rtfeldman$elm_css$Css$px(config.cW)),
+			$rtfeldman$elm_css$Css$px(config.cY)),
 			$rtfeldman$elm_css$Css$position($rtfeldman$elm_css$Css$relative),
 			A2(
 			$rtfeldman$elm_css$Css$margin2,
@@ -8704,13 +8822,13 @@ var $perzanko$elm_loading$Loading$Bars$view = function (config) {
 	var childStyle = _List_fromArray(
 		[
 			$rtfeldman$elm_css$Css$width(
-			$rtfeldman$elm_css$Css$px(config.cW / 3.5)),
+			$rtfeldman$elm_css$Css$px(config.cY / 3.5)),
 			$rtfeldman$elm_css$Css$height(
-			$rtfeldman$elm_css$Css$px(config.cW / 3.5)),
+			$rtfeldman$elm_css$Css$px(config.cY / 3.5)),
 			$rtfeldman$elm_css$Css$borderRadius(
 			$rtfeldman$elm_css$Css$px(5)),
 			$rtfeldman$elm_css$Css$backgroundColor(
-			$rtfeldman$elm_css$Css$hex(config.cn)),
+			$rtfeldman$elm_css$Css$hex(config.co)),
 			A2(
 			$rtfeldman$elm_css$Css$property,
 			'animation-duration',
@@ -8728,7 +8846,7 @@ var $perzanko$elm_loading$Loading$Bars$view = function (config) {
 								A2(
 								$rtfeldman$elm_css$Css$Animations$property,
 								'height',
-								$elm$core$String$fromFloat(config.cW / 3.5) + 'px'),
+								$elm$core$String$fromFloat(config.cY / 3.5) + 'px'),
 								A2($rtfeldman$elm_css$Css$Animations$property, 'transform', 'translate3d(0,0,0)')
 							])),
 						_Utils_Tuple2(
@@ -8738,7 +8856,7 @@ var $perzanko$elm_loading$Loading$Bars$view = function (config) {
 								A2(
 								$rtfeldman$elm_css$Css$Animations$property,
 								'height',
-								$elm$core$String$fromFloat(config.cW) + 'px'),
+								$elm$core$String$fromFloat(config.cY) + 'px'),
 								A2($rtfeldman$elm_css$Css$Animations$property, 'transform', 'translate3d(0,0,0)')
 							])),
 						_Utils_Tuple2(
@@ -8748,7 +8866,7 @@ var $perzanko$elm_loading$Loading$Bars$view = function (config) {
 								A2(
 								$rtfeldman$elm_css$Css$Animations$property,
 								'height',
-								$elm$core$String$fromFloat(config.cW / 3.5) + 'px'),
+								$elm$core$String$fromFloat(config.cY / 3.5) + 'px'),
 								A2($rtfeldman$elm_css$Css$Animations$property, 'transform', 'translate3d(0,0,0)')
 							]))
 					])))
@@ -8758,7 +8876,7 @@ var $perzanko$elm_loading$Loading$Bars$view = function (config) {
 		_List_fromArray(
 			[
 				$rtfeldman$elm_css$Html$Styled$Attributes$css(outerStyle),
-				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.bA)
+				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.bC)
 			]),
 		_List_fromArray(
 			[
@@ -8812,21 +8930,21 @@ var $perzanko$elm_loading$Loading$Bars$view = function (config) {
 				_List_Nil)
 			]));
 };
-var $rtfeldman$elm_css$Css$block = {f: 0, E: 'block'};
+var $rtfeldman$elm_css$Css$block = {f: 0, G: 'block'};
 var $rtfeldman$elm_css$Css$center = $rtfeldman$elm_css$Css$prop1('center');
 var $rtfeldman$elm_css$Css$display = $rtfeldman$elm_css$Css$prop1('display');
 var $rtfeldman$elm_css$Css$PercentageUnits = 0;
 var $rtfeldman$elm_css$Css$pct = A2($rtfeldman$elm_css$Css$Internal$lengthConverter, 0, '%');
 var $perzanko$elm_loading$Loading$BouncingBalls$view = function (config) {
 	var withSpeed = function (x) {
-		return $elm$core$String$fromFloat(x / config.b8);
+		return $elm$core$String$fromFloat(x / config.b9);
 	};
 	var outerStyle = _List_fromArray(
 		[
 			$rtfeldman$elm_css$Css$width(
-			$rtfeldman$elm_css$Css$px(config.cW)),
+			$rtfeldman$elm_css$Css$px(config.cY)),
 			$rtfeldman$elm_css$Css$height(
-			$rtfeldman$elm_css$Css$px(config.cW)),
+			$rtfeldman$elm_css$Css$px(config.cY)),
 			$rtfeldman$elm_css$Css$position($rtfeldman$elm_css$Css$relative),
 			A2(
 			$rtfeldman$elm_css$Css$margin2,
@@ -8840,13 +8958,13 @@ var $perzanko$elm_loading$Loading$BouncingBalls$view = function (config) {
 		[
 			$rtfeldman$elm_css$Css$display($rtfeldman$elm_css$Css$block),
 			$rtfeldman$elm_css$Css$width(
-			$rtfeldman$elm_css$Css$px(config.cW / 3.5)),
+			$rtfeldman$elm_css$Css$px(config.cY / 3.5)),
 			$rtfeldman$elm_css$Css$height(
-			$rtfeldman$elm_css$Css$px(config.cW / 3.5)),
+			$rtfeldman$elm_css$Css$px(config.cY / 3.5)),
 			$rtfeldman$elm_css$Css$borderRadius(
 			$rtfeldman$elm_css$Css$pct(100)),
 			$rtfeldman$elm_css$Css$backgroundColor(
-			$rtfeldman$elm_css$Css$hex(config.cn)),
+			$rtfeldman$elm_css$Css$hex(config.co)),
 			A2(
 			$rtfeldman$elm_css$Css$property,
 			'animation-duration',
@@ -8874,7 +8992,7 @@ var $perzanko$elm_loading$Loading$BouncingBalls$view = function (config) {
 								A2(
 								$rtfeldman$elm_css$Css$Animations$property,
 								'transform',
-								'translate3d(0,0,0) translateZ(0) translate(0,' + ($elm$core$String$fromFloat(config.cW / 3.5) + 'px)'))
+								'translate3d(0,0,0) translateZ(0) translate(0,' + ($elm$core$String$fromFloat(config.cY / 3.5) + 'px)'))
 							])),
 						_Utils_Tuple2(
 						100,
@@ -8889,7 +9007,7 @@ var $perzanko$elm_loading$Loading$BouncingBalls$view = function (config) {
 		_List_fromArray(
 			[
 				$rtfeldman$elm_css$Html$Styled$Attributes$css(outerStyle),
-				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.bA)
+				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.bC)
 			]),
 		_List_fromArray(
 			[
@@ -8943,33 +9061,33 @@ var $perzanko$elm_loading$Loading$BouncingBalls$view = function (config) {
 				_List_Nil)
 			]));
 };
-var $rtfeldman$elm_css$Css$absolute = {A: 0, E: 'absolute'};
+var $rtfeldman$elm_css$Css$absolute = {i: 0, G: 'absolute'};
 var $rtfeldman$elm_css$Css$left = $rtfeldman$elm_css$Css$prop1('left');
 var $rtfeldman$elm_css$Css$UnitlessFloat = 0;
 var $rtfeldman$elm_css$Css$num = function (val) {
 	return {
-		X: 0,
-		C: 0,
-		aJ: 0,
-		aY: 0,
-		O: val,
-		az: '',
-		aO: 0,
-		E: $elm$core$String$fromFloat(val)
+		Z: 0,
+		E: 0,
+		aL: 0,
+		a_: 0,
+		S: val,
+		aB: '',
+		aQ: 0,
+		G: $elm$core$String$fromFloat(val)
 	};
 };
 var $rtfeldman$elm_css$Css$opacity = $rtfeldman$elm_css$Css$prop1('opacity');
 var $rtfeldman$elm_css$Css$top = $rtfeldman$elm_css$Css$prop1('top');
 var $perzanko$elm_loading$Loading$Circle$view = function (config) {
 	var withSpeed = function (x) {
-		return $elm$core$String$fromFloat(x / config.b8);
+		return $elm$core$String$fromFloat(x / config.b9);
 	};
 	var outerStyle = _List_fromArray(
 		[
 			$rtfeldman$elm_css$Css$width(
-			$rtfeldman$elm_css$Css$px(config.cW)),
+			$rtfeldman$elm_css$Css$px(config.cY)),
 			$rtfeldman$elm_css$Css$height(
-			$rtfeldman$elm_css$Css$px(config.cW * 0.95)),
+			$rtfeldman$elm_css$Css$px(config.cY * 0.95)),
 			$rtfeldman$elm_css$Css$position($rtfeldman$elm_css$Css$relative),
 			A2(
 			$rtfeldman$elm_css$Css$margin2,
@@ -8979,9 +9097,9 @@ var $perzanko$elm_loading$Loading$Circle$view = function (config) {
 	var childStyle = _List_fromArray(
 		[
 			$rtfeldman$elm_css$Css$width(
-			$rtfeldman$elm_css$Css$px(config.cW - (2 * (config.cW * 0.17)))),
+			$rtfeldman$elm_css$Css$px(config.cY - (2 * (config.cY * 0.17)))),
 			$rtfeldman$elm_css$Css$height(
-			$rtfeldman$elm_css$Css$px(config.cW - (2 * (config.cW * 0.17)))),
+			$rtfeldman$elm_css$Css$px(config.cY - (2 * (config.cY * 0.17)))),
 			$rtfeldman$elm_css$Css$borderRadius(
 			$rtfeldman$elm_css$Css$pct(50)),
 			$rtfeldman$elm_css$Css$position($rtfeldman$elm_css$Css$absolute),
@@ -9018,7 +9136,7 @@ var $perzanko$elm_loading$Loading$Circle$view = function (config) {
 		_List_fromArray(
 			[
 				$rtfeldman$elm_css$Html$Styled$Attributes$css(outerStyle),
-				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.bA)
+				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.bC)
 			]),
 		_List_fromArray(
 			[
@@ -9036,7 +9154,7 @@ var $perzanko$elm_loading$Loading$Circle$view = function (config) {
 										A2(
 										$rtfeldman$elm_css$Css$property,
 										'border',
-										$elm$core$String$fromFloat(config.cW * 0.17) + ('px ' + (config.cn + ' solid'))),
+										$elm$core$String$fromFloat(config.cY * 0.17) + ('px ' + (config.co + ' solid'))),
 										$rtfeldman$elm_css$Css$opacity(
 										$rtfeldman$elm_css$Css$num(0.25))
 									])
@@ -9057,11 +9175,11 @@ var $perzanko$elm_loading$Loading$Circle$view = function (config) {
 										A2(
 										$rtfeldman$elm_css$Css$property,
 										'border',
-										$elm$core$String$fromFloat(config.cW * 0.17) + 'px transparent solid'),
+										$elm$core$String$fromFloat(config.cY * 0.17) + 'px transparent solid'),
 										A2(
 										$rtfeldman$elm_css$Css$property,
 										'border-top',
-										$elm$core$String$fromFloat(config.cW * 0.17) + ('px ' + (config.cn + ' solid'))),
+										$elm$core$String$fromFloat(config.cY * 0.17) + ('px ' + (config.co + ' solid'))),
 										$rtfeldman$elm_css$Css$opacity(
 										$rtfeldman$elm_css$Css$num(0.8))
 									])
@@ -9074,9 +9192,9 @@ var $perzanko$elm_loading$Loading$DoubleBounce$view = function (config) {
 	var outerStyle = _List_fromArray(
 		[
 			$rtfeldman$elm_css$Css$width(
-			$rtfeldman$elm_css$Css$px(config.cW)),
+			$rtfeldman$elm_css$Css$px(config.cY)),
 			$rtfeldman$elm_css$Css$height(
-			$rtfeldman$elm_css$Css$px(config.cW)),
+			$rtfeldman$elm_css$Css$px(config.cY)),
 			$rtfeldman$elm_css$Css$position($rtfeldman$elm_css$Css$relative),
 			A2(
 			$rtfeldman$elm_css$Css$margin2,
@@ -9092,7 +9210,7 @@ var $perzanko$elm_loading$Loading$DoubleBounce$view = function (config) {
 			$rtfeldman$elm_css$Css$borderRadius(
 			$rtfeldman$elm_css$Css$pct(50)),
 			$rtfeldman$elm_css$Css$backgroundColor(
-			$rtfeldman$elm_css$Css$hex(config.cn)),
+			$rtfeldman$elm_css$Css$hex(config.co)),
 			$rtfeldman$elm_css$Css$opacity(
 			$rtfeldman$elm_css$Css$num(0.6)),
 			$rtfeldman$elm_css$Css$position($rtfeldman$elm_css$Css$absolute),
@@ -9126,7 +9244,7 @@ var $perzanko$elm_loading$Loading$DoubleBounce$view = function (config) {
 			A2(
 			$rtfeldman$elm_css$Css$property,
 			'animation-duration',
-			$elm$core$String$fromFloat(2 / config.b8) + 's'),
+			$elm$core$String$fromFloat(2 / config.b9) + 's'),
 			A2($rtfeldman$elm_css$Css$property, 'animation-timing-function', 'ease-in-out'),
 			A2($rtfeldman$elm_css$Css$property, 'animation-iteration-count', 'infinite')
 		]);
@@ -9135,7 +9253,7 @@ var $perzanko$elm_loading$Loading$DoubleBounce$view = function (config) {
 		_List_fromArray(
 			[
 				$rtfeldman$elm_css$Html$Styled$Attributes$css(outerStyle),
-				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.bA)
+				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.bC)
 			]),
 		_List_fromArray(
 			[
@@ -9160,7 +9278,7 @@ var $perzanko$elm_loading$Loading$DoubleBounce$view = function (config) {
 										A2(
 										$rtfeldman$elm_css$Css$property,
 										'animation-delay',
-										'-' + ($elm$core$String$fromFloat(1 / config.b8) + 's'))
+										'-' + ($elm$core$String$fromFloat(1 / config.b9) + 's'))
 									])
 								])))
 					]),
@@ -9186,21 +9304,21 @@ var $rtfeldman$elm_css$Css$prop3 = F4(
 				$elm$core$String$join,
 				' ',
 				_List_fromArray(
-					[argA.E, argB.E, argC.E])));
+					[argA.G, argB.G, argC.G])));
 	});
 var $rtfeldman$elm_css$Css$border3 = $rtfeldman$elm_css$Css$prop3('border');
 var $rtfeldman$elm_css$Css$Animations$opacity = function (_v0) {
-	var value = _v0.E;
+	var value = _v0.G;
 	return 'opacity:' + value;
 };
-var $rtfeldman$elm_css$Css$solid = {n: 0, ab: 0, E: 'solid'};
+var $rtfeldman$elm_css$Css$solid = {r: 0, ad: 0, G: 'solid'};
 var $perzanko$elm_loading$Loading$Sonar$view = function (config) {
 	var outerStyle = _List_fromArray(
 		[
 			$rtfeldman$elm_css$Css$width(
-			$rtfeldman$elm_css$Css$px(config.cW)),
+			$rtfeldman$elm_css$Css$px(config.cY)),
 			$rtfeldman$elm_css$Css$height(
-			$rtfeldman$elm_css$Css$px(config.cW)),
+			$rtfeldman$elm_css$Css$px(config.cY)),
 			$rtfeldman$elm_css$Css$position($rtfeldman$elm_css$Css$relative),
 			A2(
 			$rtfeldman$elm_css$Css$margin2,
@@ -9214,23 +9332,23 @@ var $perzanko$elm_loading$Loading$Sonar$view = function (config) {
 					$rtfeldman$elm_css$Css$borderRadius(
 					$rtfeldman$elm_css$Css$pct(50)),
 					$rtfeldman$elm_css$Css$width(
-					$rtfeldman$elm_css$Css$px(config.cW / 3)),
+					$rtfeldman$elm_css$Css$px(config.cY / 3)),
 					$rtfeldman$elm_css$Css$height(
-					$rtfeldman$elm_css$Css$px(config.cW / 3)),
+					$rtfeldman$elm_css$Css$px(config.cY / 3)),
 					A2(
 					$rtfeldman$elm_css$Css$property,
 					'top',
-					'calc(50% - ' + ($elm$core$String$fromFloat(config.cW / 6) + 'px)')),
+					'calc(50% - ' + ($elm$core$String$fromFloat(config.cY / 6) + 'px)')),
 					A2(
 					$rtfeldman$elm_css$Css$property,
 					'left',
-					'calc(50% - ' + ($elm$core$String$fromFloat(config.cW / 6) + 'px)')),
+					'calc(50% - ' + ($elm$core$String$fromFloat(config.cY / 6) + 'px)')),
 					$rtfeldman$elm_css$Css$backgroundColor(
-					$rtfeldman$elm_css$Css$hex(config.cn)),
+					$rtfeldman$elm_css$Css$hex(config.co)),
 					A2(
 					$rtfeldman$elm_css$Css$property,
 					'animation-duration',
-					$elm$core$String$fromFloat(3 / config.b8) + 's'),
+					$elm$core$String$fromFloat(3 / config.b9) + 's'),
 					A2($rtfeldman$elm_css$Css$property, 'animation-timing-funtion', 'linear'),
 					A2($rtfeldman$elm_css$Css$property, 'animation-iteration-count', 'infinite'),
 					$rtfeldman$elm_css$Css$animationName(
@@ -9293,28 +9411,28 @@ var $perzanko$elm_loading$Loading$Sonar$view = function (config) {
 					$rtfeldman$elm_css$Css$borderRadius(
 					$rtfeldman$elm_css$Css$pct(50)),
 					$rtfeldman$elm_css$Css$width(
-					$rtfeldman$elm_css$Css$px(config.cW / 3)),
+					$rtfeldman$elm_css$Css$px(config.cY / 3)),
 					$rtfeldman$elm_css$Css$height(
-					$rtfeldman$elm_css$Css$px(config.cW / 3)),
+					$rtfeldman$elm_css$Css$px(config.cY / 3)),
 					A2(
 					$rtfeldman$elm_css$Css$property,
 					'top',
-					'calc(50% - ' + ($elm$core$String$fromFloat(config.cW / 6) + 'px)')),
+					'calc(50% - ' + ($elm$core$String$fromFloat(config.cY / 6) + 'px)')),
 					A2(
 					$rtfeldman$elm_css$Css$property,
 					'left',
-					'calc(50% - ' + ($elm$core$String$fromFloat(config.cW / 6) + 'px)')),
+					'calc(50% - ' + ($elm$core$String$fromFloat(config.cY / 6) + 'px)')),
 					A3(
 					$rtfeldman$elm_css$Css$border3,
 					$rtfeldman$elm_css$Css$px(1),
 					$rtfeldman$elm_css$Css$solid,
-					$rtfeldman$elm_css$Css$hex(config.cn)),
+					$rtfeldman$elm_css$Css$hex(config.co)),
 					$rtfeldman$elm_css$Css$opacity(
 					$rtfeldman$elm_css$Css$num(0)),
 					A2(
 					$rtfeldman$elm_css$Css$property,
 					'animation-duration',
-					$elm$core$String$fromFloat(3 / config.b8) + 's'),
+					$elm$core$String$fromFloat(3 / config.b9) + 's'),
 					A2($rtfeldman$elm_css$Css$property, 'animation-timing-funtion', 'linear'),
 					A2($rtfeldman$elm_css$Css$property, 'animation-iteration-count', 'infinite'),
 					$rtfeldman$elm_css$Css$animationName(
@@ -9365,7 +9483,7 @@ var $perzanko$elm_loading$Loading$Sonar$view = function (config) {
 		_List_fromArray(
 			[
 				$rtfeldman$elm_css$Html$Styled$Attributes$css(outerStyle),
-				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.bA)
+				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.bC)
 			]),
 		_List_Nil);
 };
@@ -9373,9 +9491,9 @@ var $perzanko$elm_loading$Loading$Spinner$view = function (config) {
 	var outerStyle = _List_fromArray(
 		[
 			$rtfeldman$elm_css$Css$width(
-			$rtfeldman$elm_css$Css$px(config.cW)),
+			$rtfeldman$elm_css$Css$px(config.cY)),
 			$rtfeldman$elm_css$Css$height(
-			$rtfeldman$elm_css$Css$px(config.cW)),
+			$rtfeldman$elm_css$Css$px(config.cY)),
 			$rtfeldman$elm_css$Css$position($rtfeldman$elm_css$Css$relative),
 			A2(
 			$rtfeldman$elm_css$Css$margin2,
@@ -9391,14 +9509,14 @@ var $perzanko$elm_loading$Loading$Spinner$view = function (config) {
 			$rtfeldman$elm_css$Css$pct(100))
 		]);
 	var calcAnimationDelay = function (x) {
-		return (x === 1) ? '0s' : ($elm$core$String$fromFloat(-((1.1 - (x / 10)) / config.b8)) + 's');
+		return (x === 1) ? '0s' : ($elm$core$String$fromFloat(-((1.1 - (x / 10)) / config.b9)) + 's');
 	};
 	return A2(
 		$rtfeldman$elm_css$Html$Styled$div,
 		_List_fromArray(
 			[
 				$rtfeldman$elm_css$Html$Styled$Attributes$css(outerStyle),
-				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.bA)
+				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.bC)
 			]),
 		_List_fromArray(
 			[
@@ -9449,13 +9567,13 @@ var $perzanko$elm_loading$Loading$Spinner$view = function (config) {
 													$rtfeldman$elm_css$Css$height(
 													$rtfeldman$elm_css$Css$pct(15)),
 													$rtfeldman$elm_css$Css$backgroundColor(
-													$rtfeldman$elm_css$Css$hex(config.cn)),
+													$rtfeldman$elm_css$Css$hex(config.co)),
 													$rtfeldman$elm_css$Css$borderRadius(
 													$rtfeldman$elm_css$Css$pct(100)),
 													A2(
 													$rtfeldman$elm_css$Css$property,
 													'animation-duration',
-													$elm$core$String$fromFloat(1.2 / config.b8) + 's'),
+													$elm$core$String$fromFloat(1.2 / config.b9) + 's'),
 													A2($rtfeldman$elm_css$Css$property, 'animation-iteration-count', 'infinite'),
 													A2($rtfeldman$elm_css$Css$property, 'animation-fill-mode', 'both'),
 													$rtfeldman$elm_css$Css$animationName(
@@ -9532,6 +9650,17 @@ var $perzanko$elm_loading$Loading$render = F3(
 			return $elm$html$Html$text(' ');
 		}
 	});
+var $joakin$elm_canvas$Canvas$Settings$Advanced$Scale = F2(
+	function (a, b) {
+		return {$: 1, a: a, b: b};
+	});
+var $joakin$elm_canvas$Canvas$Settings$Advanced$scale = $joakin$elm_canvas$Canvas$Settings$Advanced$Scale;
+var $author$project$Main$scrollDecoder = function (msg) {
+	return A2(
+		$elm$json$Json$Decode$map,
+		msg,
+		A2($elm$json$Json$Decode$field, 'deltaY', $elm$json$Json$Decode$float));
+};
 var $joakin$elm_canvas$Canvas$Internal$Canvas$DrawableShapes = function (a) {
 	return {$: 1, a: a};
 };
@@ -9541,9 +9670,9 @@ var $joakin$elm_canvas$Canvas$shapes = F2(
 			$joakin$elm_canvas$Canvas$addSettingsToRenderable,
 			settings,
 			{
-				v: _List_Nil,
-				H: $joakin$elm_canvas$Canvas$Internal$Canvas$NotSpecified,
-				I: $joakin$elm_canvas$Canvas$Internal$Canvas$DrawableShapes(ss)
+				x: _List_Nil,
+				L: $joakin$elm_canvas$Canvas$Internal$Canvas$NotSpecified,
+				M: $joakin$elm_canvas$Canvas$Internal$Canvas$DrawableShapes(ss)
 			});
 	});
 var $elm$html$Html$canvas = _VirtualDom_node('canvas');
@@ -10017,7 +10146,7 @@ var $joakin$elm_canvas$Canvas$renderTextFill = F5(
 	function (txt, x, y, maybeColor, cmds) {
 		return A2(
 			$elm$core$List$cons,
-			A4($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$fillText, txt.bl, x, y, txt.ba),
+			A4($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$fillText, txt.bn, x, y, txt.bc),
 			function () {
 				if (!maybeColor.$) {
 					var color = maybeColor.a;
@@ -10060,7 +10189,7 @@ var $joakin$elm_canvas$Canvas$renderTextStroke = F5(
 	function (txt, x, y, maybeColor, cmds) {
 		return A2(
 			$elm$core$List$cons,
-			A4($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$strokeText, txt.bl, x, y, txt.ba),
+			A4($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$strokeText, txt.bn, x, y, txt.bc),
 			function () {
 				if (!maybeColor.$) {
 					var color = maybeColor.a;
@@ -10075,7 +10204,7 @@ var $joakin$elm_canvas$Canvas$renderTextStroke = F5(
 	});
 var $joakin$elm_canvas$Canvas$renderTextDrawOp = F3(
 	function (drawOp, txt, cmds) {
-		var _v0 = txt.bY;
+		var _v0 = txt.bZ;
 		var x = _v0.a;
 		var y = _v0.b;
 		switch (drawOp.$) {
@@ -10152,11 +10281,11 @@ var $joakin$elm_canvas$Canvas$Internal$Texture$drawTexture = F4(
 			function () {
 				if (!t.$) {
 					var image = t.a;
-					return A9($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$drawImage, 0, 0, image.u, image.r, x, y, image.u, image.r, image.aW);
+					return A9($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$drawImage, 0, 0, image.m, image.l, x, y, image.m, image.l, image.aY);
 				} else {
 					var sprite = t.a;
 					var image = t.b;
-					return A9($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$drawImage, sprite.S, sprite.T, sprite.u, sprite.r, x, y, sprite.u, sprite.r, image.aW);
+					return A9($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$drawImage, sprite.H, sprite.I, sprite.m, sprite.l, x, y, sprite.m, sprite.l, image.aY);
 				}
 			}(),
 			cmds);
@@ -10237,9 +10366,9 @@ var $joakin$elm_canvas$Canvas$renderGroup = F3(
 	});
 var $joakin$elm_canvas$Canvas$renderOne = F3(
 	function (parentDrawOp, _v0, cmds) {
-		var commands = _v0.v;
-		var drawable = _v0.I;
-		var drawOp = _v0.H;
+		var commands = _v0.x;
+		var drawable = _v0.M;
+		var drawOp = _v0.L;
 		return A2(
 			$elm$core$List$cons,
 			$joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$restore,
@@ -10280,7 +10409,7 @@ var $joakin$elm_canvas$Canvas$Internal$Texture$decodeTextureImage = A2(
 				function (tagName, width, height) {
 					return (tagName === 'IMG') ? $elm$core$Maybe$Just(
 						$joakin$elm_canvas$Canvas$Internal$Texture$TImage(
-							{r: height, aW: image, u: width})) : $elm$core$Maybe$Nothing;
+							{l: height, aY: image, m: width})) : $elm$core$Maybe$Nothing;
 				}),
 			A2($elm$json$Json$Decode$field, 'tagName', $elm$json$Json$Decode$string),
 			A2($elm$json$Json$Decode$field, 'width', $elm$json$Json$Decode$float),
@@ -10338,15 +10467,15 @@ var $joakin$elm_canvas$Canvas$toHtmlWith = F3(
 					$joakin$elm_canvas$Canvas$render(entities)),
 				A2(
 					$elm$core$List$cons,
-					$elm$html$Html$Attributes$height(options.r),
+					$elm$html$Html$Attributes$height(options.l),
 					A2(
 						$elm$core$List$cons,
-						$elm$html$Html$Attributes$width(options.u),
+						$elm$html$Html$Attributes$width(options.m),
 						attrs))),
 			A2(
 				$elm$core$List$cons,
 				_Utils_Tuple2('__canvas', $joakin$elm_canvas$Canvas$cnvs),
-				A2($elm$core$List$map, $joakin$elm_canvas$Canvas$renderTextureSource, options.c_)));
+				A2($elm$core$List$map, $joakin$elm_canvas$Canvas$renderTextureSource, options.c0)));
 	});
 var $joakin$elm_canvas$Canvas$Internal$Canvas$SettingCommands = function (a) {
 	return {$: 1, a: a};
@@ -10415,12 +10544,12 @@ var $joakin$elm_canvas$Canvas$Settings$Advanced$transform = function (transforms
 						var y = t.b;
 						return A2($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$translate, x, y);
 					default:
-						var m11 = t.a.cH;
-						var m12 = t.a.cI;
-						var m21 = t.a.cJ;
-						var m22 = t.a.cK;
-						var dx = t.a.cs;
-						var dy = t.a.ct;
+						var m11 = t.a.cJ;
+						var m12 = t.a.cK;
+						var m21 = t.a.cL;
+						var m22 = t.a.cM;
+						var dx = t.a.cu;
+						var dy = t.a.cv;
 						return A6($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$transform, m11, m12, m21, m22, dx, dy);
 				}
 			},
@@ -10454,12 +10583,12 @@ var $author$project$Main$view = function (model) {
 				A3(
 				$joakin$elm_canvas$Canvas$toHtmlWith,
 				{
-					r: $elm$core$Basics$ceiling(model.r),
-					c_: _List_fromArray(
+					l: $elm$core$Basics$ceiling(model.l),
+					c0: _List_fromArray(
 						[
-							A2($joakin$elm_canvas$Canvas$Texture$loadFromImageUrl, model.t, $author$project$Main$TextureLoaded)
+							A2($joakin$elm_canvas$Canvas$Texture$loadFromImageUrl, model.w, $author$project$Main$TextureLoaded)
 						]),
-					u: $elm$core$Basics$ceiling(model.u)
+					m: $elm$core$Basics$ceiling(model.m)
 				},
 				_List_fromArray(
 					[
@@ -10474,8 +10603,19 @@ var $author$project$Main$view = function (model) {
 						$author$project$Main$mouseDecoder($author$project$Main$MouseUp)),
 						A2(
 						$elm$html$Html$Events$on,
+						'mouseleave',
+						$author$project$Main$mouseDecoder(
+							function (_v0) {
+								return $author$project$Main$MouseLeave;
+							})),
+						A2(
+						$elm$html$Html$Events$on,
 						'mousemove',
-						$author$project$Main$moveDecoder($author$project$Main$MouseMove))
+						$author$project$Main$mouseDecoder($author$project$Main$MouseMove)),
+						A2(
+						$elm$html$Html$Events$on,
+						'wheel',
+						$author$project$Main$scrollDecoder($author$project$Main$ZoomChanged))
 					]),
 				_List_fromArray(
 					[
@@ -10486,13 +10626,16 @@ var $author$project$Main$view = function (model) {
 								$joakin$elm_canvas$Canvas$Settings$Advanced$transform(
 								_List_fromArray(
 									[
-										A2($joakin$elm_canvas$Canvas$Settings$Advanced$translate, model.A.S, model.A.T)
+										A2($joakin$elm_canvas$Canvas$Settings$Advanced$translate, model.i.H, model.i.I),
+										A2($joakin$elm_canvas$Canvas$Settings$Advanced$scale, model.o, model.o)
 									]))
 							]),
-						A3(
+						A5(
 							$author$project$Main$addBackground,
+							model.m,
+							model.l,
 							_Utils_Tuple2(0, 0),
-							model.ay,
+							model.C,
 							_List_fromArray(
 								[
 									A2(
@@ -10503,10 +10646,10 @@ var $author$project$Main$view = function (model) {
 										function (v) {
 											return A2(
 												$joakin$elm_canvas$Canvas$circle,
-												_Utils_Tuple2(v.A.S, v.A.T),
-												10);
+												_Utils_Tuple2(v.i.H, v.i.I),
+												10 / model.o);
 										},
-										$elm$core$Dict$values(model.aC)))
+										$elm$core$Dict$values(model.aE)))
 								])))
 					])),
 				A2(
@@ -10517,8 +10660,8 @@ var $author$project$Main$view = function (model) {
 					]),
 				_Utils_ap(
 					function () {
-						var _v0 = model.w;
-						switch (_v0) {
+						var _v1 = model.y;
+						switch (_v1) {
 							case 1:
 								return _List_fromArray(
 									[
@@ -10527,7 +10670,7 @@ var $author$project$Main$view = function (model) {
 										5,
 										_Utils_update(
 											$perzanko$elm_loading$Loading$defaultConfig,
-											{cn: '#60a5fa'}),
+											{co: '#60a5fa'}),
 										0)
 									]);
 							case 0:
@@ -10555,13 +10698,13 @@ var $author$project$Main$view = function (model) {
 									$elm$html$Html$Attributes$classList(
 									_List_fromArray(
 										[
-											_Utils_Tuple2('max-w-0', !model.Y),
-											_Utils_Tuple2('max-w-xs border-2 px-4 py-2', model.Y),
-											_Utils_Tuple2('border-red-600', model.w === 2),
-											_Utils_Tuple2('border-primary', model.w !== 2)
+											_Utils_Tuple2('max-w-0', !model._),
+											_Utils_Tuple2('max-w-xs border-2 px-4 py-2', model._),
+											_Utils_Tuple2('border-red-600', model.y === 2),
+											_Utils_Tuple2('border-primary', model.y !== 2)
 										])),
 									$elm$html$Html$Attributes$class('w-max rounded-full shadow-lg transition-color focus:border-blue-600 focus-visible:border-blue-600 transition-all mx-2'),
-									$elm$html$Html$Attributes$value(model.t),
+									$elm$html$Html$Attributes$value(model.w),
 									$elm$html$Html$Events$onInput($author$project$Main$TrySettingBackground)
 								]),
 							_List_Nil),
@@ -10571,7 +10714,7 @@ var $author$project$Main$view = function (model) {
 								[
 									$elm$html$Html$Attributes$class('rounded-full shadow-lg bg-blue-400 text-yellow-300 p-4 text-center'),
 									$elm$html$Html$Events$onClick(
-									$author$project$Main$SetMapFieldVisible(!model.Y))
+									$author$project$Main$SetMapFieldVisible(!model._))
 								]),
 							_List_fromArray(
 								[$author$project$Icons$mapIcon]))
@@ -10579,7 +10722,7 @@ var $author$project$Main$view = function (model) {
 			]));
 };
 var $author$project$Main$main = $elm$browser$Browser$element(
-	{cE: $author$project$Main$init, cZ: $author$project$Main$subscriptions, c$: $author$project$Main$update, c1: $author$project$Main$view});
+	{cG: $author$project$Main$init, c$: $author$project$Main$subscriptions, c1: $author$project$Main$update, c3: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
 	A2(
 		$elm$json$Json$Decode$andThen,
@@ -10591,7 +10734,7 @@ _Platform_export({'Main':{'init':$author$project$Main$main(
 						$elm$json$Json$Decode$andThen,
 						function (height) {
 							return $elm$json$Json$Decode$succeed(
-								{r: height, bi: savedBackground, u: width});
+								{l: height, bk: savedBackground, m: width});
 						},
 						A2($elm$json$Json$Decode$field, 'height', $elm$json$Json$Decode$float));
 				},
