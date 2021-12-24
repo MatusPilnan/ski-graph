@@ -1,8 +1,11 @@
 port module Main exposing (..)
 
+import Animator
 import Browser
+import Canvas.Settings
 import Canvas.Settings.Advanced
 import Canvas.Texture
+import Color
 import Dict exposing (Dict)
 import Html
 import Html.Attributes as Attr
@@ -11,6 +14,7 @@ import Canvas
 import Icons
 import Json.Decode as D
 import Loading exposing (defaultConfig)
+import Time
 
 
 
@@ -46,11 +50,17 @@ type alias Edge =
 
 type BackgroundState = Ok | Loading | Invalid
 
+type alias Animations =
+  { expandedPoint : Animator.Timeline (Maybe Vertex)
+  }
+
+
 -- MODEL
 
 
 type alias Model =
   { background : String
+  , animations : Animations
   , texture :  Maybe Canvas.Texture.Texture
   , vertices : Dict String Vertex
   , edges : Dict String Edge
@@ -80,6 +90,7 @@ type alias ScrollEvent =
   }
 
 type alias Point = { x : Float, y : Float}
+type alias CanvasPoint = { x : Float, y : Float}
 
 type alias DragEvent =
   { movementX : Float
@@ -96,6 +107,9 @@ type alias Flags =
 init : Flags -> (Model, Cmd Msg)
 init flags =
   ( { background = ""
+    , animations =
+      { expandedPoint = Animator.init Nothing
+      }
     , texture = Nothing
     , vertices = Dict.empty
     , edges = Dict.empty
@@ -132,6 +146,7 @@ type Msg
   | TrySettingBackground String
   | DimensionsChanged (Float, Float)
   | ZoomChanged Float
+  | AnimationFrame Time.Posix
 
 port saveToLocalStorage : (String, String) -> Cmd msg
 port dimensionsChanged : ((Float, Float) -> msg) -> Sub msg
@@ -141,6 +156,10 @@ update msg model =
   case msg of
     Noop ->
       (model, Cmd.none)
+    AnimationFrame newTime ->
+      ( { model | animations = Animator.update newTime animator model.animations}
+      , Cmd.none
+      )
     TextureLoaded texture ->
       case texture of
         Just t ->
@@ -187,7 +206,13 @@ update msg model =
       )
 
     MouseMove mouseEvent ->
-      let newModel = { model | mousePosition = mouseEvent.position } in
+      let
+        newHovered = List.head <| List.filter (\v -> mouseOverPoint model.position model.zoom mouseEvent.position v.position ) <| Dict.values model.vertices
+        newModel =
+          { model | mousePosition = mouseEvent.position
+          , animations = animateHoveredPoint model.animations newHovered
+          }
+      in
       if model.mouseDown then
       let
         new = addPoints mouseEvent.movement model.position
@@ -250,8 +275,24 @@ update msg model =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions _ =
-  dimensionsChanged DimensionsChanged
+subscriptions model =
+  Sub.batch
+    [ dimensionsChanged DimensionsChanged
+    , Animator.toSubscription AnimationFrame model.animations animator
+    ]
+
+
+-- ANIMATOR
+animator : Animator.Animator Animations
+animator =
+  Animator.animator
+    |> Animator.watching
+      .expandedPoint
+      (\newPoint model -> { model | expandedPoint = newPoint })
+
+animateHoveredPoint : Animations -> Maybe Vertex -> Animations
+animateHoveredPoint animations newHover =
+  { animations | expandedPoint = animations.expandedPoint |> Animator.go Animator.quickly newHover }
 
 
 
@@ -281,10 +322,104 @@ view model =
         ]
       ]
       <| addBackground model.width model.height (0, 0) model.texture
-      [ Canvas.shapes [] <| List.map (\v -> Canvas.circle ( v.position.x, v.position.y) (10 / model.zoom) ) <| Dict.values model.vertices
+      [ Canvas.group [] <| List.map (vertexView model) <| Dict.values model.vertices
       ]
     ]
-  , Html.div
+  , mapField model
+  ]
+
+mouseDecoder msg =
+  D.map4 (\offsetX offsetY movementX movementY -> msg <| MouseEvent (Point offsetX offsetY) (Point movementX movementY))
+    ( D.field "offsetX" D.float)
+    ( D.field "offsetY" D.float)
+    ( D.field "movementX" D.float)
+    ( D.field "movementY" D.float)
+
+scrollDecoder msg =
+   D.map msg <| D.field "deltaY" D.float
+
+vertexView : Model -> Vertex -> Canvas.Renderable
+vertexView model vertex =
+  Canvas.group
+  []
+  [ Canvas.shapes
+    []
+    [ Canvas.circle
+      ( vertex.position.x, vertex.position.y)
+      (
+        ( if (Animator.current model.animations.expandedPoint == Just vertex)
+            || (Animator.arrived model.animations.expandedPoint == Just vertex)
+            || (Animator.previous model.animations.expandedPoint == Just vertex)
+          then Animator.move model.animations.expandedPoint vertexMovementAnimation
+          else pointSize
+        ) / model.zoom
+      )
+    ]
+  , Canvas.shapes
+    [ Canvas.Settings.fill Color.white ]
+    [ Canvas.circle
+      ( vertex.position.x, vertex.position.y)
+      (
+       ( if (Animator.current model.animations.expandedPoint == Just vertex)
+           || (Animator.arrived model.animations.expandedPoint == Just vertex)
+           || (Animator.previous model.animations.expandedPoint == Just vertex)
+         then Animator.linear model.animations.expandedPoint vertexFillAnimation
+         else 0
+       ) / model.zoom
+      )
+    ]
+  ]
+
+vertexMovementAnimation : Maybe Vertex -> Animator.Movement
+vertexMovementAnimation state =
+  Animator.at <|
+  case state of
+    Nothing -> pointSize
+    Just _ -> 1.5 * pointSize
+
+vertexFillAnimation : Maybe Vertex -> Animator.Movement
+vertexFillAnimation state =
+  Animator.at <|
+  case state of
+    Nothing -> 0
+    Just _ -> pointSize
+
+
+addBackground width height position texture renderables =
+  case texture of
+    Nothing -> renderables
+    Just t ->
+      [ Canvas.clear (0, 0) width height, Canvas.texture [] position t ] ++ renderables
+
+
+constrainBackgroundToCanvas : Model -> Point -> Point
+constrainBackgroundToCanvas model new =
+  let
+    w = Maybe.withDefault model.width <| Maybe.map (\t -> (Canvas.Texture.dimensions t).width ) model.texture
+    h = Maybe.withDefault model.height <| Maybe.map (\t -> (Canvas.Texture.dimensions t).height ) model.texture
+  in
+  Point
+    (min 0 <| max (0 - w * model.zoom + model.width) new.x )
+    (min 0 <| max (0 - h * model.zoom + model.height) new.y )
+
+canvasPointToBackgroundPoint canvasPoint backgroundPosition zoomLevel =
+  mulPoint (subPoints canvasPoint backgroundPosition) <| 1 / zoomLevel
+
+backgroundPointToCanvasPoint backgroundPoint backgroundPosition zoomLevel =
+  addPoints backgroundPosition <| mulPoint backgroundPoint zoomLevel
+
+pointSize = 10
+
+mouseOverPoint backgroundPosition zoomLevel mousePosition point =
+  let a = backgroundPointToCanvasPoint point backgroundPosition zoomLevel in
+    pointSize >= (pointToLength <| subPoints a mousePosition)
+
+pointToLength point =
+   sqrt <| point.x^2 + point.y^2
+
+
+mapField model =
+  Html.div
     [ Attr.class "fixed bottom-4 right-4 flex items-center"
     ] <| (
     case model.mapFieldState of
@@ -317,41 +452,6 @@ view model =
       ]
       [ Icons.mapIcon ]
     ]
-  ]
-
-mouseDecoder msg =
-  D.map4 (\offsetX offsetY movementX movementY -> msg <| MouseEvent (Point offsetX offsetY) (Point movementX movementY))
-    ( D.field "offsetX" D.float)
-    ( D.field "offsetY" D.float)
-    ( D.field "movementX" D.float)
-    ( D.field "movementY" D.float)
-
-scrollDecoder msg =
-   D.map msg <| D.field "deltaY" D.float
-
-
-addBackground width height position texture renderables =
-  case texture of
-    Nothing -> renderables
-    Just t ->
-      [ Canvas.clear (0, 0) width height, Canvas.texture [] position t ] ++ renderables
-
-
-constrainBackgroundToCanvas : Model -> Point -> Point
-constrainBackgroundToCanvas model new =
-  let
-    w = Maybe.withDefault model.width <| Maybe.map (\t -> (Canvas.Texture.dimensions t).width ) model.texture
-    h = Maybe.withDefault model.height <| Maybe.map (\t -> (Canvas.Texture.dimensions t).height ) model.texture
-  in
-  Point
-    (min 0 <| max (0 - w * model.zoom + model.width) new.x )
-    (min 0 <| max (0 - h * model.zoom + model.height) new.y )
-
-canvasPointToBackgroundPoint canvasPoint backgroundPosition zoomLevel =
-  mulPoint (subPoints canvasPoint backgroundPosition) <| 1 / zoomLevel
-
-backgroundPointToCanvasPoint backgroundPoint backgroundPosition zoomLevel =
-  mulPoint (addPoints backgroundPoint backgroundPosition) zoomLevel
 
 addPoints : Point -> Point -> Point
 addPoints a b =
