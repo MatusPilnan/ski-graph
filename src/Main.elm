@@ -36,8 +36,15 @@ type alias Vertex =
   , position : Point
   }
 
+type SkiRunType
+  = Easy
+  | Medium
+  | Difficult
+  | SkiRoute
+
+
 type EdgeType
-  = Run
+  = SkiRun SkiRunType
   | Lift
 
 type alias Edge =
@@ -79,10 +86,17 @@ type alias Model =
   , zoom : Float
   }
 
+type MouseButton
+  = Primary
+  | Secondary
+  | Wheel
+  | Other
+
 
 type alias MouseEvent =
   { position : Point
   , movement : Point
+  , button : MouseButton
   }
 
 type alias ScrollEvent =
@@ -178,51 +192,19 @@ update msg model =
           )
 
     MouseUp mouseEvent ->
-      let
-        id = String.fromInt model.vertexCounter
-      in
-      ( { model
-        | vertices =
-          if model.hasMovedWhileMouseDown
-          then model.vertices
-          else Dict.insert id ( Vertex id Nothing <| canvasPointToBackgroundPoint mouseEvent.position model.position model.zoom ) model.vertices
-        , vertexCounter =
-          if model.hasMovedWhileMouseDown
-          then model.vertexCounter
-          else model.vertexCounter + 1
-        , mouseDown = False
-        }
-      , Cmd.none
-      )
+      (model, Cmd.none)
+      |> checkVertexCreation mouseEvent
 
     MouseDown mouseEvent ->
-      ( { model
-        | mouseDown = True
-        , hasMovedWhileMouseDown = False
-        , mouseDownStartPosition = mouseEvent.position
-        , mapFieldVisible = False
-        }
-      , Cmd.none
-      )
+      ( model, Cmd.none )
+      |> checkToStartDrag mouseEvent
 
     MouseMove mouseEvent ->
-      let
-        newHovered = List.head <| List.filter (\v -> mouseOverPoint model.position model.zoom mouseEvent.position v.position ) <| Dict.values model.vertices
-        newModel =
-          { model | mousePosition = mouseEvent.position
-          , animations = animateHoveredPoint model.animations newHovered
-          }
-      in
-      if model.mouseDown then
-      let
-        new = addPoints mouseEvent.movement model.position
-      in
-      ( { newModel
-        | hasMovedWhileMouseDown = True
-        , position = constrainBackgroundToCanvas model new
-        }
-      , Cmd.none
-      ) else (newModel, Cmd.none)
+      (model, Cmd.none)
+      |> setModelMousePosition mouseEvent
+      |> checkMouseEventForPointHover mouseEvent
+      |> checkModelDragging mouseEvent
+
 
     SetMapFieldVisible bool ->
       ( { model
@@ -268,6 +250,63 @@ update msg model =
       ( { model | mouseDown = False }, Cmd.none )
 
 
+checkMouseEventForPointHover : MouseEvent -> (Model, Cmd Msg) -> (Model, Cmd Msg)
+checkMouseEventForPointHover event (model, cmd) =
+  let
+    newHovered = List.head <| List.filter (\v -> mouseOverPoint model.position model.zoom event.position v.position ) <| Dict.values model.vertices
+  in
+  ({ model | animations = animateHoveredPoint model.animations newHovered }, cmd )
+
+
+
+setModelMousePosition : MouseEvent -> (Model, Cmd Msg) -> (Model, Cmd Msg)
+setModelMousePosition event (model, cmd) =
+  ({ model | mousePosition = event.position }, cmd )
+
+
+checkModelDragging : MouseEvent -> (Model, Cmd Msg) -> (Model, Cmd Msg)
+checkModelDragging event (model, cmd) =
+  if model.mouseDown then
+    let
+      new = addPoints event.movement model.position
+    in
+    ( { model
+      | hasMovedWhileMouseDown = True
+      , position = constrainBackgroundToCanvas model new
+      }
+    , cmd
+    ) else (model,cmd)
+
+checkVertexCreation : MouseEvent -> (Model, Cmd Msg) -> (Model, Cmd Msg)
+checkVertexCreation event (model, cmd) =
+  let
+    id = String.fromInt model.vertexCounter
+  in
+  ( { model
+    | vertices =
+      if model.hasMovedWhileMouseDown
+      then model.vertices
+      else Dict.insert id ( Vertex id Nothing <| canvasPointToBackgroundPoint event.position model.position model.zoom ) model.vertices
+    , vertexCounter =
+      if model.hasMovedWhileMouseDown
+      then model.vertexCounter
+      else model.vertexCounter + 1
+    , mouseDown = False
+    }
+  , cmd
+  )
+
+checkToStartDrag : MouseEvent -> (Model, Cmd Msg) -> (Model, Cmd Msg)
+checkToStartDrag event (model, cmd) =
+  ( if event.button == Primary then
+    { model
+    | mouseDown = True
+    , hasMovedWhileMouseDown = False
+    , mouseDownStartPosition = event.position
+    , mapFieldVisible = False
+    } else model
+  , cmd
+  )
 
 
 
@@ -329,11 +368,20 @@ view model =
   ]
 
 mouseDecoder msg =
-  D.map4 (\offsetX offsetY movementX movementY -> msg <| MouseEvent (Point offsetX offsetY) (Point movementX movementY))
+  D.map5
+    ( \offsetX offsetY movementX movementY button ->
+      msg <| MouseEvent (Point offsetX offsetY) (Point movementX movementY)
+      <| case button of
+          0 -> Primary
+          1 -> Secondary
+          2 -> Wheel
+          _ -> Other
+    )
     ( D.field "offsetX" D.float)
     ( D.field "offsetY" D.float)
     ( D.field "movementX" D.float)
     ( D.field "movementY" D.float)
+    ( D.field "button" D.int)
 
 scrollDecoder msg =
    D.map msg <| D.field "deltaY" D.float
