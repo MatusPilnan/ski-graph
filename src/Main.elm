@@ -4,6 +4,7 @@ import Animator
 import Browser
 import Canvas.Settings
 import Canvas.Settings.Advanced
+import Canvas.Settings.Line
 import Canvas.Texture
 import Color
 import Dict exposing (Dict)
@@ -46,13 +47,15 @@ type SkiRunType
 type EdgeType
   = SkiRun SkiRunType
   | Lift
+  | Unfinished
 
 type alias Edge =
   { id : String
   , title : Maybe String
   , start : Vertex
-  , end : Vertex
+  , end : Maybe Vertex
   , edgeType : EdgeType
+  , points : List Point
   }
 
 type BackgroundState = Ok | Loading | Invalid
@@ -84,6 +87,7 @@ type alias Model =
   , mapFieldInput : String
   , mapFieldState : BackgroundState
   , zoom : Float
+  , drawingEdge : Maybe Edge
   }
 
 type MouseButton
@@ -140,6 +144,7 @@ init flags =
     , mapFieldInput = flags.savedBackground
     , mapFieldState = Loading
     , zoom = 1
+    , drawingEdge = Nothing
     }
   , Cmd.none
   )
@@ -194,10 +199,13 @@ update msg model =
     MouseUp mouseEvent ->
       (model, Cmd.none)
       |> checkVertexCreation mouseEvent
+      |> checkEndDrawing mouseEvent
+      |> checkConnectDrawing mouseEvent
 
     MouseDown mouseEvent ->
       ( model, Cmd.none )
       |> checkToStartDrag mouseEvent
+      |> checkToStartDrawing mouseEvent
 
     MouseMove mouseEvent ->
       (model, Cmd.none)
@@ -252,10 +260,7 @@ update msg model =
 
 checkMouseEventForPointHover : MouseEvent -> (Model, Cmd Msg) -> (Model, Cmd Msg)
 checkMouseEventForPointHover event (model, cmd) =
-  let
-    newHovered = List.head <| List.filter (\v -> mouseOverPoint model.position model.zoom event.position v.position ) <| Dict.values model.vertices
-  in
-  ({ model | animations = animateHoveredPoint model.animations newHovered }, cmd )
+  ({ model | animations = animateHoveredPoint model.animations <| getHoveringVertex model event }, cmd )
 
 
 
@@ -266,7 +271,7 @@ setModelMousePosition event (model, cmd) =
 
 checkModelDragging : MouseEvent -> (Model, Cmd Msg) -> (Model, Cmd Msg)
 checkModelDragging event (model, cmd) =
-  if model.mouseDown then
+  if model.mouseDown && (not <| maybeHasValue model.drawingEdge) then
     let
       new = addPoints event.movement model.position
     in
@@ -281,14 +286,15 @@ checkVertexCreation : MouseEvent -> (Model, Cmd Msg) -> (Model, Cmd Msg)
 checkVertexCreation event (model, cmd) =
   let
     id = String.fromInt model.vertexCounter
+    condition = model.hasMovedWhileMouseDown || maybeHasValue model.drawingEdge || event.button /= Primary
   in
   ( { model
     | vertices =
-      if model.hasMovedWhileMouseDown
+      if condition
       then model.vertices
       else Dict.insert id ( Vertex id Nothing <| canvasPointToBackgroundPoint event.position model.position model.zoom ) model.vertices
     , vertexCounter =
-      if model.hasMovedWhileMouseDown
+      if condition
       then model.vertexCounter
       else model.vertexCounter + 1
     , mouseDown = False
@@ -308,7 +314,48 @@ checkToStartDrag event (model, cmd) =
   , cmd
   )
 
+checkEndDrawing : MouseEvent -> (Model, Cmd Msg) -> (Model, Cmd Msg)
+checkEndDrawing event (model, cmd) =
+  ( if event.button == Secondary then
+    { model
+    | drawingEdge = Nothing
+    } else model
+  , cmd
+  )
 
+checkConnectDrawing : MouseEvent -> (Model, Cmd Msg) -> (Model, Cmd Msg)
+checkConnectDrawing event (model, cmd) =
+  let maybeVertex = getHoveringVertex model event in
+  ( case (event.button, maybeVertex, model.drawingEdge) of
+    (Primary, Just vertex, Just edge) ->
+      if vertex /= edge.start then
+      { model | drawingEdge = Nothing
+      , edgeCounter = model.edgeCounter + 1
+      , edges = Dict.insert edge.id { edge | end = Just vertex, edgeType = Lift } model.edges
+      } else model
+    (Primary, Nothing, Just edge) ->
+      { model | drawingEdge = Just { edge | points = edge.points ++ [ event.position ] }
+      }
+    (_, _, _) -> model
+  , cmd
+  )
+
+
+checkToStartDrawing : MouseEvent -> (Model, Cmd Msg) -> (Model, Cmd Msg)
+checkToStartDrawing event (model, cmd) =
+  case (event.button, getHoveringVertex model event, model.drawingEdge) of
+    ( Primary, Just vertex, Nothing ) ->
+      let edgeId = String.fromInt <| model.edgeCounter + 1 in
+      ( { model | drawingEdge = Just <| Edge edgeId ( Just <| "Edge " ++ edgeId) vertex Nothing Unfinished []
+        }
+      , cmd
+      )
+    (_, _, _) -> (model, cmd)
+
+
+getHoveringVertex : Model -> MouseEvent -> Maybe Vertex
+getHoveringVertex model event =
+  List.head <| List.filter (\v -> mouseOverPoint model.position model.zoom event.position v.position ) <| Dict.values model.vertices
 
 -- SUBSCRIPTIONS
 
@@ -361,11 +408,21 @@ view model =
         ]
       ]
       <| addBackground model.width model.height (0, 0) model.texture
-      [ Canvas.group [] <| List.map (vertexView model) <| Dict.values model.vertices
+      [ Canvas.group []
+        <| (List.map (edgeView model) <| Dict.values model.edges)
+        ++ (List.map (vertexView model) <| Dict.values model.vertices)
+        ++
+        case model.drawingEdge of
+          Nothing -> []
+          Just edge ->
+            [ edgeView model edge ]
       ]
     ]
   , mapField model
   ]
+
+pointToCanvasLibPoint point =
+  (point.x, point.y)
 
 mouseDecoder msg =
   D.map5
@@ -373,8 +430,8 @@ mouseDecoder msg =
       msg <| MouseEvent (Point offsetX offsetY) (Point movementX movementY)
       <| case button of
           0 -> Primary
-          1 -> Secondary
-          2 -> Wheel
+          1 -> Wheel
+          2 -> Secondary
           _ -> Other
     )
     ( D.field "offsetX" D.float)
@@ -395,24 +452,24 @@ vertexView model vertex =
     [ Canvas.circle
       ( vertex.position.x, vertex.position.y)
       (
-        ( if (Animator.current model.animations.expandedPoint == Just vertex)
-            || (Animator.arrived model.animations.expandedPoint == Just vertex)
-            || (Animator.previous model.animations.expandedPoint == Just vertex)
+        ( if vertexExpansionCondition model vertex
           then Animator.move model.animations.expandedPoint vertexMovementAnimation
+          else if vertexEdgeDrawingCondition model vertex
+          then 1.5 * pointSize
           else pointSize
         ) / model.zoom
       )
     ]
   , Canvas.shapes
-    [ Canvas.Settings.fill Color.white ]
+    [ Canvas.Settings.fill <| if vertexEdgeDrawingCondition model vertex then Color.green else Color.white ]
     [ Canvas.circle
       ( vertex.position.x, vertex.position.y)
       (
-       ( if (Animator.current model.animations.expandedPoint == Just vertex)
-           || (Animator.arrived model.animations.expandedPoint == Just vertex)
-           || (Animator.previous model.animations.expandedPoint == Just vertex)
+       ( if vertexExpansionCondition model vertex
          then Animator.linear model.animations.expandedPoint vertexFillAnimation
-         else 0
+         else if vertexEdgeDrawingCondition model vertex
+        then pointSize
+        else 0
        ) / model.zoom
       )
     ]
@@ -431,6 +488,49 @@ vertexFillAnimation state =
   case state of
     Nothing -> 0
     Just _ -> pointSize
+
+vertexExpansionCondition : Model -> Vertex -> Bool
+vertexExpansionCondition model vertex =
+  (Animator.current model.animations.expandedPoint == Just vertex)
+  || (Animator.arrived model.animations.expandedPoint == Just vertex)
+  || (Animator.previous model.animations.expandedPoint == Just vertex)
+
+
+vertexEdgeDrawingCondition : Model -> Vertex -> Bool
+vertexEdgeDrawingCondition model vertex =
+  ( Maybe.map .start model.drawingEdge == Just vertex)
+
+
+edgeView : Model -> Edge -> Canvas.Renderable
+edgeView model edge =
+  Canvas.shapes
+  (edgeStyle edge.edgeType model.zoom)
+  [ Canvas.path (pointToCanvasLibPoint edge.start.position)
+    <| List.map
+      (Canvas.lineTo << pointToCanvasLibPoint)
+      <| edge.points
+      ++ [ case edge.end of
+             Nothing -> canvasPointToBackgroundPoint model.mousePosition model.position model.zoom
+             Just vertex -> vertex.position
+         ]
+  ]
+
+
+edgeStyle : EdgeType -> Float -> List Canvas.Settings.Setting
+edgeStyle edgeType zoom =
+  [ Canvas.Settings.Line.lineWidth <| lineWidth / zoom
+  , Canvas.Settings.Line.lineCap Canvas.Settings.Line.RoundCap
+  , Canvas.Settings.Line.lineJoin Canvas.Settings.Line.RoundJoin
+  ] ++
+  case edgeType of
+    SkiRun skiRunType ->
+      case skiRunType of
+        Easy -> [ Canvas.Settings.stroke Color.blue ]
+        Medium -> [ Canvas.Settings.stroke Color.red ]
+        Difficult -> [ Canvas.Settings.stroke Color.black ]
+        SkiRoute -> [ Canvas.Settings.stroke Color.red, Canvas.Settings.Line.lineDash [5, 5] ]
+    Lift -> [ Canvas.Settings.stroke Color.black ]
+    Unfinished -> [ Canvas.Settings.stroke Color.green ]
 
 
 addBackground width height position texture renderables =
@@ -457,6 +557,7 @@ backgroundPointToCanvasPoint backgroundPoint backgroundPosition zoomLevel =
   addPoints backgroundPosition <| mulPoint backgroundPoint zoomLevel
 
 pointSize = 10
+lineWidth = 5
 
 mouseOverPoint backgroundPosition zoomLevel mousePosition point =
   let a = backgroundPointToCanvasPoint point backgroundPosition zoomLevel in
@@ -512,3 +613,10 @@ subPoints a b =
 mulPoint : Point -> Float -> Point
 mulPoint point coef =
   Point (point.x * coef) (point.y * coef)
+
+
+maybeHasValue : Maybe a -> Bool
+maybeHasValue m =
+  case m of
+    Nothing -> False
+    Just _ -> True
