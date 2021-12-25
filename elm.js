@@ -519,11 +519,11 @@ function _Debug_crash_UNUSED(identifier, fact1, fact2, fact3, fact4)
 
 function _Debug_regionToString(region)
 {
-	if (region.dW.a6 === region.dp.a6)
+	if (region.bH.bb === region.bQ.bb)
 	{
-		return 'on line ' + region.dW.a6;
+		return 'on line ' + region.bH.bb;
 	}
-	return 'on lines ' + region.dW.a6 + ' through ' + region.dp.a6;
+	return 'on lines ' + region.bH.bb + ' through ' + region.bQ.bb;
 }
 
 
@@ -1857,9 +1857,9 @@ var _Platform_worker = F4(function(impl, flagDecoder, debugMetadata, args)
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.dx,
-		impl.d2,
-		impl.dZ,
+		impl.dB,
+		impl.d5,
+		impl.d0,
 		function() { return function() {} }
 	);
 });
@@ -2704,9 +2704,9 @@ var _VirtualDom_mapEventTuple = F2(function(func, tuple)
 var _VirtualDom_mapEventRecord = F2(function(func, record)
 {
 	return {
-		ab: func(record.ab),
-		bY: record.bY,
-		bU: record.bU
+		ac: func(record.ac),
+		b5: record.b5,
+		b1: record.b1
 	}
 });
 
@@ -2974,11 +2974,11 @@ function _VirtualDom_makeCallback(eventNode, initialHandler)
 		// 3 = Custom
 
 		var value = result.a;
-		var message = !tag ? value : tag < 3 ? value.a : value.ab;
-		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.bY;
+		var message = !tag ? value : tag < 3 ? value.a : value.ac;
+		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.b5;
 		var currentEventNode = (
 			stopPropagation && event.stopPropagation(),
-			(tag == 2 ? value.b : tag == 3 && value.bU) && event.preventDefault(),
+			(tag == 2 ? value.b : tag == 3 && value.b1) && event.preventDefault(),
 			eventNode
 		);
 		var tagger;
@@ -3928,11 +3928,11 @@ var _Browser_element = _Debugger_element || F4(function(impl, flagDecoder, debug
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.dx,
-		impl.d2,
-		impl.dZ,
+		impl.dB,
+		impl.d5,
+		impl.d0,
 		function(sendToApp, initialModel) {
-			var view = impl.d4;
+			var view = impl.d7;
 			/**/
 			var domNode = args['node'];
 			//*/
@@ -3964,12 +3964,12 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.dx,
-		impl.d2,
-		impl.dZ,
+		impl.dB,
+		impl.d5,
+		impl.d0,
 		function(sendToApp, initialModel) {
-			var divertHrefToApp = impl.bX && impl.bX(sendToApp)
-			var view = impl.d4;
+			var divertHrefToApp = impl.b4 && impl.b4(sendToApp)
+			var view = impl.d7;
 			var title = _VirtualDom_doc.title;
 			var bodyNode = _VirtualDom_doc.body;
 			var currNode = _VirtualDom_virtualize(bodyNode);
@@ -3977,12 +3977,12 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 			{
 				_VirtualDom_divertHrefToApp = divertHrefToApp;
 				var doc = view(model);
-				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.da);
+				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.dg);
 				var patches = _VirtualDom_diff(currNode, nextNode);
 				bodyNode = _VirtualDom_applyPatches(bodyNode, currNode, patches, sendToApp);
 				currNode = nextNode;
 				_VirtualDom_divertHrefToApp = 0;
-				(title !== doc.cZ) && (_VirtualDom_doc.title = title = doc.cZ);
+				(title !== doc.c3) && (_VirtualDom_doc.title = title = doc.c3);
 			});
 		}
 	);
@@ -4038,12 +4038,12 @@ function _Browser_makeAnimator(model, draw)
 
 function _Browser_application(impl)
 {
-	var onUrlChange = impl.dM;
-	var onUrlRequest = impl.dN;
+	var onUrlChange = impl.dQ;
+	var onUrlRequest = impl.dR;
 	var key = function() { key.a(onUrlChange(_Browser_getUrl())); };
 
 	return _Browser_document({
-		bX: function(sendToApp)
+		b4: function(sendToApp)
 		{
 			key.a = sendToApp;
 			_Browser_window.addEventListener('popstate', key);
@@ -4059,9 +4059,9 @@ function _Browser_application(impl)
 					var next = $elm$url$Url$fromString(href).a;
 					sendToApp(onUrlRequest(
 						(next
-							&& curr.cK === next.cK
-							&& curr.co === next.co
-							&& curr.cH.a === next.cH.a
+							&& curr.cQ === next.cQ
+							&& curr.cv === next.cv
+							&& curr.cN.a === next.cN.a
 						)
 							? $elm$browser$Browser$Internal(next)
 							: $elm$browser$Browser$External(href)
@@ -4069,13 +4069,13 @@ function _Browser_application(impl)
 				}
 			});
 		},
-		dx: function(flags)
+		dB: function(flags)
 		{
-			return A3(impl.dx, flags, _Browser_getUrl(), key);
+			return A3(impl.dB, flags, _Browser_getUrl(), key);
 		},
-		d4: impl.d4,
-		d2: impl.d2,
-		dZ: impl.dZ
+		d7: impl.d7,
+		d5: impl.d5,
+		d0: impl.d0
 	});
 }
 
@@ -4141,17 +4141,17 @@ var _Browser_decodeEvent = F2(function(decoder, event)
 function _Browser_visibilityInfo()
 {
 	return (typeof _VirtualDom_doc.hidden !== 'undefined')
-		? { du: 'hidden', db: 'visibilitychange' }
+		? { dy: 'hidden', dh: 'visibilitychange' }
 		:
 	(typeof _VirtualDom_doc.mozHidden !== 'undefined')
-		? { du: 'mozHidden', db: 'mozvisibilitychange' }
+		? { dy: 'mozHidden', dh: 'mozvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.msHidden !== 'undefined')
-		? { du: 'msHidden', db: 'msvisibilitychange' }
+		? { dy: 'msHidden', dh: 'msvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.webkitHidden !== 'undefined')
-		? { du: 'webkitHidden', db: 'webkitvisibilitychange' }
-		: { du: 'hidden', db: 'visibilitychange' };
+		? { dy: 'webkitHidden', dh: 'webkitvisibilitychange' }
+		: { dy: 'hidden', dh: 'visibilitychange' };
 }
 
 
@@ -4232,12 +4232,12 @@ var _Browser_call = F2(function(functionName, id)
 function _Browser_getViewport()
 {
 	return {
-		cQ: _Browser_getScene(),
-		c1: {
-			C: _Browser_window.pageXOffset,
-			D: _Browser_window.pageYOffset,
-			q: _Browser_doc.documentElement.clientWidth,
-			o: _Browser_doc.documentElement.clientHeight
+		cW: _Browser_getScene(),
+		c7: {
+			v: _Browser_window.pageXOffset,
+			w: _Browser_window.pageYOffset,
+			r: _Browser_doc.documentElement.clientWidth,
+			p: _Browser_doc.documentElement.clientHeight
 		}
 	};
 }
@@ -4247,8 +4247,8 @@ function _Browser_getScene()
 	var body = _Browser_doc.body;
 	var elem = _Browser_doc.documentElement;
 	return {
-		q: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
-		o: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
+		r: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
+		p: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
 	};
 }
 
@@ -4271,15 +4271,15 @@ function _Browser_getViewportOf(id)
 	return _Browser_withNode(id, function(node)
 	{
 		return {
-			cQ: {
-				q: node.scrollWidth,
-				o: node.scrollHeight
+			cW: {
+				r: node.scrollWidth,
+				p: node.scrollHeight
 			},
-			c1: {
-				C: node.scrollLeft,
-				D: node.scrollTop,
-				q: node.clientWidth,
-				o: node.clientHeight
+			c7: {
+				v: node.scrollLeft,
+				w: node.scrollTop,
+				r: node.clientWidth,
+				p: node.clientHeight
 			}
 		};
 	});
@@ -4309,18 +4309,18 @@ function _Browser_getElement(id)
 		var x = _Browser_window.pageXOffset;
 		var y = _Browser_window.pageYOffset;
 		return {
-			cQ: _Browser_getScene(),
-			c1: {
-				C: x,
-				D: y,
-				q: _Browser_doc.documentElement.clientWidth,
-				o: _Browser_doc.documentElement.clientHeight
+			cW: _Browser_getScene(),
+			c7: {
+				v: x,
+				w: y,
+				r: _Browser_doc.documentElement.clientWidth,
+				p: _Browser_doc.documentElement.clientHeight
 			},
-			$7: {
-				C: x + rect.left,
-				D: y + rect.top,
-				q: rect.width,
-				o: rect.height
+			dt: {
+				v: x + rect.left,
+				w: y + rect.top,
+				r: rect.width,
+				p: rect.height
 			}
 		};
 	});
@@ -4809,7 +4809,7 @@ var $elm$core$Array$builderToArray = F2(
 			var treeLen = builder.i * $elm$core$Array$branchFactor;
 			var depth = $elm$core$Basics$floor(
 				A2($elm$core$Basics$logBase, $elm$core$Array$branchFactor, treeLen - 1));
-			var correctNodeList = reverseNodeList ? $elm$core$List$reverse(builder.l) : builder.l;
+			var correctNodeList = reverseNodeList ? $elm$core$List$reverse(builder.m) : builder.m;
 			var tree = A2($elm$core$Array$treeFromBuilder, correctNodeList, builder.i);
 			return A4(
 				$elm$core$Array$Array_elm_builtin,
@@ -4829,7 +4829,7 @@ var $elm$core$Array$initializeHelp = F5(
 				return A2(
 					$elm$core$Array$builderToArray,
 					false,
-					{l: nodeList, i: (len / $elm$core$Array$branchFactor) | 0, k: tail});
+					{m: nodeList, i: (len / $elm$core$Array$branchFactor) | 0, k: tail});
 			} else {
 				var leaf = $elm$core$Array$Leaf(
 					A3($elm$core$Elm$JsArray$initialize, $elm$core$Array$branchFactor, fromIndex, fn));
@@ -4897,7 +4897,7 @@ var $elm$url$Url$Http = 0;
 var $elm$url$Url$Https = 1;
 var $elm$url$Url$Url = F6(
 	function (protocol, host, port_, path, query, fragment) {
-		return {cn: fragment, co: host, cE: path, cH: port_, cK: protocol, cL: query};
+		return {cu: fragment, cv: host, cK: path, cN: port_, cQ: protocol, cR: query};
 	});
 var $elm$core$String$contains = _String_contains;
 var $elm$core$String$length = _String_length;
@@ -5181,7 +5181,7 @@ var $elm$json$Json$Decode$float = _Json_decodeFloat;
 var $author$project$Main$Loading = 1;
 var $author$project$Main$Point = F2(
 	function (x, y) {
-		return {C: x, D: y};
+		return {v: x, w: y};
 	});
 var $elm$core$Dict$RBEmpty_elm_builtin = {$: -2};
 var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
@@ -5199,13 +5199,13 @@ var $elm$time$Time$Posix = $elm$core$Basics$identity;
 var $elm$time$Time$millisToPosix = $elm$core$Basics$identity;
 var $mdgriffith$elm_animator$Animator$init = function (first) {
 	return {
-		cl: _List_Nil,
-		ct: first,
-		a4: _List_Nil,
-		cC: $mdgriffith$elm_animator$Internal$Time$absolute(
+		cs: _List_Nil,
+		cz: first,
+		a9: _List_Nil,
+		cI: $mdgriffith$elm_animator$Internal$Time$absolute(
 			$elm$time$Time$millisToPosix(0)),
-		ba: $elm$core$Maybe$Nothing,
-		bA: true
+		be: $elm$core$Maybe$Nothing,
+		bF: true
 	};
 };
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
@@ -5213,26 +5213,27 @@ var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$init = function (flags) {
 	return _Utils_Tuple2(
 		{
-			s: {
-				u: $mdgriffith$elm_animator$Animator$init($elm$core$Maybe$Nothing)
+			x: {
+				E: $mdgriffith$elm_animator$Animator$init($elm$core$Maybe$Nothing)
 			},
-			bl: '',
-			ci: 0,
-			cj: $elm$core$Dict$empty,
-			aI: false,
-			o: flags.o,
-			F: flags.bW,
-			I: 1,
-			ak: false,
-			aN: false,
-			bP: A2($author$project$Main$Point, 0, 0),
-			a8: A2($author$project$Main$Point, 0, 0),
-			f: A2($author$project$Main$Point, 0, 0),
-			M: $elm$core$Maybe$Nothing,
-			aZ: 0,
-			aq: $elm$core$Dict$empty,
-			q: flags.q,
-			r: 1
+			bp: '',
+			z: $elm$core$Maybe$Nothing,
+			a5: 0,
+			a6: $elm$core$Dict$empty,
+			a8: false,
+			p: flags.p,
+			G: flags.b3,
+			J: 1,
+			al: false,
+			aO: false,
+			bY: A2($author$project$Main$Point, 0, 0),
+			aP: A2($author$project$Main$Point, 0, 0),
+			d: A2($author$project$Main$Point, 0, 0),
+			N: $elm$core$Maybe$Nothing,
+			a$: 0,
+			ar: $elm$core$Dict$empty,
+			r: flags.r,
+			l: 1
 		},
 		$elm$core$Platform$Cmd$none);
 };
@@ -5467,7 +5468,7 @@ var $mdgriffith$elm_animator$Internal$Timeline$addToCurrentLine = F3(
 	});
 var $mdgriffith$elm_animator$Internal$Timeline$enqueue = F3(
 	function (timeline, now, scheduled) {
-		var _v0 = timeline.cl;
+		var _v0 = timeline.cs;
 		var lines = _v0;
 		return A3($mdgriffith$elm_animator$Internal$Timeline$addToCurrentLine, now, scheduled, lines);
 	});
@@ -5758,9 +5759,9 @@ var $mdgriffith$elm_animator$Internal$Timeline$interruptLines = F5(
 	});
 var $mdgriffith$elm_animator$Internal$Timeline$interrupt = F3(
 	function (details, startAt, scheduled) {
-		var _v0 = details.cl;
+		var _v0 = details.cs;
 		var lines = _v0;
-		var _v1 = A5($mdgriffith$elm_animator$Internal$Timeline$interruptLines, details.cC, startAt, scheduled, _List_Nil, lines);
+		var _v1 = A5($mdgriffith$elm_animator$Internal$Timeline$interruptLines, details.cI, startAt, scheduled, _List_Nil, lines);
 		if (_v1.$ === 1) {
 			return A3($mdgriffith$elm_animator$Internal$Timeline$enqueue, details, startAt, scheduled);
 		} else {
@@ -5784,12 +5785,12 @@ var $mdgriffith$elm_animator$Internal$Timeline$applyInterruptionHelper = F2(
 				var newEvents = A3(
 					$mdgriffith$elm_animator$Internal$Timeline$interrupt,
 					timeline,
-					A2($mdgriffith$elm_animator$Internal$Time$advanceBy, delay, timeline.cC),
+					A2($mdgriffith$elm_animator$Internal$Time$advanceBy, delay, timeline.cI),
 					inter);
 				var $temp$interrupts = remaining,
 					$temp$timeline = _Utils_update(
 					timeline,
-					{cl: newEvents});
+					{cs: newEvents});
 				interrupts = $temp$interrupts;
 				timeline = $temp$timeline;
 				continue applyInterruptionHelper;
@@ -5797,20 +5798,20 @@ var $mdgriffith$elm_animator$Internal$Timeline$applyInterruptionHelper = F2(
 		}
 	});
 var $mdgriffith$elm_animator$Internal$Timeline$applyInterruptions = function (timeline) {
-	var _v0 = timeline.a4;
+	var _v0 = timeline.a9;
 	if (!_v0.b) {
 		return timeline;
 	} else {
 		return A2(
 			$mdgriffith$elm_animator$Internal$Timeline$applyInterruptionHelper,
-			$elm$core$List$reverse(timeline.a4),
+			$elm$core$List$reverse(timeline.a9),
 			_Utils_update(
 				timeline,
-				{a4: _List_Nil}));
+				{a9: _List_Nil}));
 	}
 };
 var $mdgriffith$elm_animator$Internal$Timeline$applyQueued = function (timeline) {
-	var _v0 = timeline.ba;
+	var _v0 = timeline.be;
 	if (_v0.$ === 1) {
 		return timeline;
 	} else {
@@ -5818,8 +5819,8 @@ var $mdgriffith$elm_animator$Internal$Timeline$applyQueued = function (timeline)
 		return _Utils_update(
 			timeline,
 			{
-				cl: A3($mdgriffith$elm_animator$Internal$Timeline$enqueue, timeline, timeline.cC, queued),
-				ba: $elm$core$Maybe$Nothing
+				cs: A3($mdgriffith$elm_animator$Internal$Timeline$enqueue, timeline, timeline.cI, queued),
+				be: $elm$core$Maybe$Nothing
 			});
 	}
 };
@@ -6018,20 +6019,20 @@ var $mdgriffith$elm_animator$Internal$Timeline$linesAreActive = F2(
 var $mdgriffith$elm_animator$Internal$Timeline$clean = F2(
 	function (runGC, details) {
 		var running = function () {
-			var _v1 = details.cl;
+			var _v1 = details.cs;
 			var lines = _v1;
-			return A2($mdgriffith$elm_animator$Internal$Timeline$linesAreActive, details.cC, lines);
+			return A2($mdgriffith$elm_animator$Internal$Timeline$linesAreActive, details.cI, lines);
 		}();
 		var events = function () {
-			var _v0 = details.cl;
+			var _v0 = details.cs;
 			var evs = _v0;
 			return evs;
 		}();
 		return _Utils_update(
 			details,
 			{
-				cl: runGC ? A3($mdgriffith$elm_animator$Internal$Timeline$garbageCollectOldEvents, details.cC, _List_Nil, events) : details.cl,
-				bA: running
+				cs: runGC ? A3($mdgriffith$elm_animator$Internal$Timeline$garbageCollectOldEvents, details.cI, _List_Nil, events) : details.cs,
+				bF: running
 			});
 	});
 var $ianmackenzie$elm_units$Quantity$max = F2(
@@ -6046,8 +6047,8 @@ var $mdgriffith$elm_animator$Internal$Timeline$updateWith = F3(
 		var now = A2(
 			$ianmackenzie$elm_units$Quantity$max,
 			$mdgriffith$elm_animator$Internal$Time$absolute(possiblyNow),
-			timeline.cC);
-		return _Utils_eq(timeline.cl, _List_Nil) ? A2(
+			timeline.cI);
+		return _Utils_eq(timeline.cs, _List_Nil) ? A2(
 			$mdgriffith$elm_animator$Internal$Timeline$clean,
 			withGC,
 			$mdgriffith$elm_animator$Internal$Timeline$applyInterruptions(
@@ -6055,14 +6056,14 @@ var $mdgriffith$elm_animator$Internal$Timeline$updateWith = F3(
 					_Utils_update(
 						timeline,
 						{
-							cl: function () {
-								var firstOccurring = A3($mdgriffith$elm_animator$Internal$Timeline$Occurring, timeline.ct, now, now);
+							cs: function () {
+								var firstOccurring = A3($mdgriffith$elm_animator$Internal$Timeline$Occurring, timeline.cz, now, now);
 								return _List_fromArray(
 									[
 										A3($mdgriffith$elm_animator$Internal$Timeline$Line, now, firstOccurring, _List_Nil)
 									]);
 							}(),
-							cC: now
+							cI: now
 						})))) : A2(
 			$mdgriffith$elm_animator$Internal$Timeline$clean,
 			withGC,
@@ -6070,7 +6071,7 @@ var $mdgriffith$elm_animator$Internal$Timeline$updateWith = F3(
 				$mdgriffith$elm_animator$Internal$Timeline$applyQueued(
 					_Utils_update(
 						timeline,
-						{cC: now}))));
+						{cI: now}))));
 	});
 var $mdgriffith$elm_animator$Internal$Timeline$update = $mdgriffith$elm_animator$Internal$Timeline$updateWith(true);
 var $mdgriffith$elm_animator$Animator$watching = F3(
@@ -6095,13 +6096,13 @@ var $mdgriffith$elm_animator$Animator$watching = F3(
 var $author$project$Main$animator = A3(
 	$mdgriffith$elm_animator$Animator$watching,
 	function ($) {
-		return $.u;
+		return $.E;
 	},
 	F2(
 		function (newPoint, model) {
 			return _Utils_update(
 				model,
-				{u: newPoint});
+				{E: newPoint});
 		}),
 	$mdgriffith$elm_animator$Animator$animator);
 var $elm$core$Platform$Sub$batch = _Platform_batch;
@@ -6126,7 +6127,7 @@ var $elm$browser$Browser$AnimationManager$Time = function (a) {
 };
 var $elm$browser$Browser$AnimationManager$State = F3(
 	function (subs, request, oldTime) {
-		return {bR: oldTime, cO: request, cV: subs};
+		return {b_: oldTime, cU: request, c$: subs};
 	});
 var $elm$browser$Browser$AnimationManager$init = $elm$core$Task$succeed(
 	A3($elm$browser$Browser$AnimationManager$State, _List_Nil, $elm$core$Maybe$Nothing, 0));
@@ -6137,8 +6138,8 @@ var $elm$core$Platform$sendToSelf = _Platform_sendToSelf;
 var $elm$core$Process$spawn = _Scheduler_spawn;
 var $elm$browser$Browser$AnimationManager$onEffects = F3(
 	function (router, subs, _v0) {
-		var request = _v0.cO;
-		var oldTime = _v0.bR;
+		var request = _v0.cU;
+		var oldTime = _v0.b_;
 		var _v1 = _Utils_Tuple2(request, subs);
 		if (_v1.a.$ === 1) {
 			if (!_v1.b.b) {
@@ -6184,8 +6185,8 @@ var $elm$browser$Browser$AnimationManager$onEffects = F3(
 	});
 var $elm$browser$Browser$AnimationManager$onSelfMsg = F3(
 	function (router, newTime, _v0) {
-		var subs = _v0.cV;
-		var oldTime = _v0.bR;
+		var subs = _v0.c$;
+		var oldTime = _v0.b_;
 		var send = function (sub) {
 			if (!sub.$) {
 				var tagger = sub.a;
@@ -6261,18 +6262,335 @@ var $author$project$Main$subscriptions = function (model) {
 		_List_fromArray(
 			[
 				$author$project$Main$dimensionsChanged($author$project$Main$DimensionsChanged),
-				A3($mdgriffith$elm_animator$Animator$toSubscription, $author$project$Main$AnimationFrame, model.s, $author$project$Main$animator)
+				A3($mdgriffith$elm_animator$Animator$toSubscription, $author$project$Main$AnimationFrame, model.x, $author$project$Main$animator)
 			]));
 };
 var $author$project$Main$Invalid = 2;
 var $author$project$Main$Ok = 0;
-var $author$project$Main$Vertex = F3(
-	function (id, title, position) {
-		return {cq: id, f: position, cZ: title};
+var $author$project$Main$mulPoint = F2(
+	function (point, coef) {
+		return A2($author$project$Main$Point, point.v * coef, point.w * coef);
+	});
+var $author$project$Main$subPoints = F2(
+	function (a, b) {
+		return A2($author$project$Main$Point, a.v - b.v, a.w - b.w);
+	});
+var $author$project$Main$canvasPointToBackgroundPoint = F3(
+	function (canvasPoint, backgroundPosition, zoomLevel) {
+		return A2(
+			$author$project$Main$mulPoint,
+			A2($author$project$Main$subPoints, canvasPoint, backgroundPosition),
+			1 / zoomLevel);
+	});
+var $author$project$Main$Lift = {$: 1};
+var $elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
 	});
 var $author$project$Main$addPoints = F2(
 	function (a, b) {
-		return A2($author$project$Main$Point, a.C + b.C, a.D + b.D);
+		return A2($author$project$Main$Point, a.v + b.v, a.w + b.w);
+	});
+var $author$project$Main$backgroundPointToCanvasPoint = F3(
+	function (backgroundPoint, backgroundPosition, zoomLevel) {
+		return A2(
+			$author$project$Main$addPoints,
+			backgroundPosition,
+			A2($author$project$Main$mulPoint, backgroundPoint, zoomLevel));
+	});
+var $author$project$Main$pointSize = 10;
+var $elm$core$Basics$pow = _Basics_pow;
+var $elm$core$Basics$sqrt = _Basics_sqrt;
+var $author$project$Main$pointToLength = function (point) {
+	return $elm$core$Basics$sqrt(
+		A2($elm$core$Basics$pow, point.v, 2) + A2($elm$core$Basics$pow, point.w, 2));
+};
+var $author$project$Main$mouseOverPoint = F4(
+	function (backgroundPosition, zoomLevel, mousePosition, point) {
+		var a = A3($author$project$Main$backgroundPointToCanvasPoint, point, backgroundPosition, zoomLevel);
+		return _Utils_cmp(
+			$author$project$Main$pointSize,
+			$author$project$Main$pointToLength(
+				A2($author$project$Main$subPoints, a, mousePosition))) > -1;
+	});
+var $elm$core$Dict$values = function (dict) {
+	return A3(
+		$elm$core$Dict$foldr,
+		F3(
+			function (key, value, valueList) {
+				return A2($elm$core$List$cons, value, valueList);
+			}),
+		_List_Nil,
+		dict);
+};
+var $author$project$Main$getHoveringVertex = F2(
+	function (model, event) {
+		return $elm$core$List$head(
+			A2(
+				$elm$core$List$filter,
+				function (v) {
+					return A4($author$project$Main$mouseOverPoint, model.d, model.l, event.d, v.d);
+				},
+				$elm$core$Dict$values(model.ar)));
+	});
+var $elm$core$Dict$Black = 1;
+var $elm$core$Dict$RBNode_elm_builtin = F5(
+	function (a, b, c, d, e) {
+		return {$: -1, a: a, b: b, c: c, d: d, e: e};
+	});
+var $elm$core$Dict$Red = 0;
+var $elm$core$Dict$balance = F5(
+	function (color, key, value, left, right) {
+		if ((right.$ === -1) && (!right.a)) {
+			var _v1 = right.a;
+			var rK = right.b;
+			var rV = right.c;
+			var rLeft = right.d;
+			var rRight = right.e;
+			if ((left.$ === -1) && (!left.a)) {
+				var _v3 = left.a;
+				var lK = left.b;
+				var lV = left.c;
+				var lLeft = left.d;
+				var lRight = left.e;
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					0,
+					key,
+					value,
+					A5($elm$core$Dict$RBNode_elm_builtin, 1, lK, lV, lLeft, lRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, 1, rK, rV, rLeft, rRight));
+			} else {
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					color,
+					rK,
+					rV,
+					A5($elm$core$Dict$RBNode_elm_builtin, 0, key, value, left, rLeft),
+					rRight);
+			}
+		} else {
+			if ((((left.$ === -1) && (!left.a)) && (left.d.$ === -1)) && (!left.d.a)) {
+				var _v5 = left.a;
+				var lK = left.b;
+				var lV = left.c;
+				var _v6 = left.d;
+				var _v7 = _v6.a;
+				var llK = _v6.b;
+				var llV = _v6.c;
+				var llLeft = _v6.d;
+				var llRight = _v6.e;
+				var lRight = left.e;
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					0,
+					lK,
+					lV,
+					A5($elm$core$Dict$RBNode_elm_builtin, 1, llK, llV, llLeft, llRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, 1, key, value, lRight, right));
+			} else {
+				return A5($elm$core$Dict$RBNode_elm_builtin, color, key, value, left, right);
+			}
+		}
+	});
+var $elm$core$Basics$compare = _Utils_compare;
+var $elm$core$Dict$insertHelp = F3(
+	function (key, value, dict) {
+		if (dict.$ === -2) {
+			return A5($elm$core$Dict$RBNode_elm_builtin, 0, key, value, $elm$core$Dict$RBEmpty_elm_builtin, $elm$core$Dict$RBEmpty_elm_builtin);
+		} else {
+			var nColor = dict.a;
+			var nKey = dict.b;
+			var nValue = dict.c;
+			var nLeft = dict.d;
+			var nRight = dict.e;
+			var _v1 = A2($elm$core$Basics$compare, key, nKey);
+			switch (_v1) {
+				case 0:
+					return A5(
+						$elm$core$Dict$balance,
+						nColor,
+						nKey,
+						nValue,
+						A3($elm$core$Dict$insertHelp, key, value, nLeft),
+						nRight);
+				case 1:
+					return A5($elm$core$Dict$RBNode_elm_builtin, nColor, nKey, value, nLeft, nRight);
+				default:
+					return A5(
+						$elm$core$Dict$balance,
+						nColor,
+						nKey,
+						nValue,
+						nLeft,
+						A3($elm$core$Dict$insertHelp, key, value, nRight));
+			}
+		}
+	});
+var $elm$core$Dict$insert = F3(
+	function (key, value, dict) {
+		var _v0 = A3($elm$core$Dict$insertHelp, key, value, dict);
+		if ((_v0.$ === -1) && (!_v0.a)) {
+			var _v1 = _v0.a;
+			var k = _v0.b;
+			var v = _v0.c;
+			var l = _v0.d;
+			var r = _v0.e;
+			return A5($elm$core$Dict$RBNode_elm_builtin, 1, k, v, l, r);
+		} else {
+			var x = _v0;
+			return x;
+		}
+	});
+var $elm$core$Basics$neq = _Utils_notEqual;
+var $author$project$Main$checkConnectDrawing = F2(
+	function (event, _v0) {
+		var model = _v0.a;
+		var cmd = _v0.b;
+		var maybeVertex = A2($author$project$Main$getHoveringVertex, model, event);
+		return _Utils_Tuple2(
+			function () {
+				var _v1 = _Utils_Tuple3(event.az, maybeVertex, model.z);
+				_v1$2:
+				while (true) {
+					if (!_v1.a) {
+						if (!_v1.b.$) {
+							if (!_v1.c.$) {
+								var _v2 = _v1.a;
+								var vertex = _v1.b.a;
+								var edge = _v1.c.a;
+								return (!_Utils_eq(vertex, edge.bH)) ? _Utils_update(
+									model,
+									{
+										z: $elm$core$Maybe$Nothing,
+										a5: model.a5 + 1,
+										a6: A3(
+											$elm$core$Dict$insert,
+											edge.bU,
+											_Utils_update(
+												edge,
+												{
+													bP: $author$project$Main$Lift,
+													bQ: $elm$core$Maybe$Just(vertex)
+												}),
+											model.a6)
+									}) : model;
+							} else {
+								break _v1$2;
+							}
+						} else {
+							if (!_v1.c.$) {
+								var _v3 = _v1.a;
+								var _v4 = _v1.b;
+								var edge = _v1.c.a;
+								return _Utils_update(
+									model,
+									{
+										z: $elm$core$Maybe$Just(
+											_Utils_update(
+												edge,
+												{
+													bC: _Utils_ap(
+														edge.bC,
+														_List_fromArray(
+															[event.d]))
+												}))
+									});
+							} else {
+								break _v1$2;
+							}
+						}
+					} else {
+						break _v1$2;
+					}
+				}
+				return model;
+			}(),
+			cmd);
+	});
+var $author$project$Main$Secondary = 1;
+var $author$project$Main$checkEndDrawing = F2(
+	function (event, _v0) {
+		var model = _v0.a;
+		var cmd = _v0.b;
+		return _Utils_Tuple2(
+			(event.az === 1) ? _Utils_update(
+				model,
+				{z: $elm$core$Maybe$Nothing}) : model,
+			cmd);
+	});
+var $joakin$elm_canvas$Canvas$Texture$dimensions = function (texture) {
+	if (!texture.$) {
+		var image = texture.a;
+		return {p: image.p, r: image.r};
+	} else {
+		var data = texture.a;
+		return {p: data.p, r: data.r};
+	}
+};
+var $author$project$Main$constrainBackgroundToCanvas = F2(
+	function (model, _new) {
+		var w = A2(
+			$elm$core$Maybe$withDefault,
+			model.r,
+			A2(
+				$elm$core$Maybe$map,
+				function (t) {
+					return $joakin$elm_canvas$Canvas$Texture$dimensions(t).r;
+				},
+				model.N));
+		var h = A2(
+			$elm$core$Maybe$withDefault,
+			model.p,
+			A2(
+				$elm$core$Maybe$map,
+				function (t) {
+					return $joakin$elm_canvas$Canvas$Texture$dimensions(t).p;
+				},
+				model.N));
+		return A2(
+			$author$project$Main$Point,
+			A2(
+				$elm$core$Basics$min,
+				0,
+				A2($elm$core$Basics$max, (0 - (w * model.l)) + model.r, _new.v)),
+			A2(
+				$elm$core$Basics$min,
+				0,
+				A2($elm$core$Basics$max, (0 - (h * model.l)) + model.p, _new.w)));
+	});
+var $author$project$Main$maybeHasValue = function (m) {
+	if (m.$ === 1) {
+		return false;
+	} else {
+		return true;
+	}
+};
+var $elm$core$Basics$not = _Basics_not;
+var $author$project$Main$checkModelDragging = F2(
+	function (event, _v0) {
+		var model = _v0.a;
+		var cmd = _v0.b;
+		if (model.aO && (!$author$project$Main$maybeHasValue(model.z))) {
+			var _new = A2($author$project$Main$addPoints, event.cG, model.d);
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{
+						a8: true,
+						d: A2($author$project$Main$constrainBackgroundToCanvas, model, _new)
+					}),
+				cmd);
+		} else {
+			return _Utils_Tuple2(model, cmd);
+		}
 	});
 var $mdgriffith$elm_animator$Animator$TransitionTo = F2(
 	function (a, b) {
@@ -6419,13 +6737,13 @@ var $mdgriffith$elm_animator$Animator$interrupt = F2(
 		return _Utils_update(
 			tl,
 			{
-				a4: function () {
+				a9: function () {
 					var _v1 = A2(
 						$mdgriffith$elm_animator$Animator$initializeSchedule,
 						$mdgriffith$elm_animator$Animator$millis(0),
 						steps);
 					if (_v1.$ === 1) {
-						return tl.a4;
+						return tl.a9;
 					} else {
 						var _v2 = _v1.a;
 						var schedule = _v2.a;
@@ -6433,10 +6751,10 @@ var $mdgriffith$elm_animator$Animator$interrupt = F2(
 						return A2(
 							$elm$core$List$cons,
 							A3($elm$core$List$foldl, $mdgriffith$elm_animator$Animator$stepsToEvents, schedule, otherSteps),
-							tl.a4);
+							tl.a9);
 					}
 				}(),
-				bA: true
+				bF: true
 			});
 	});
 var $mdgriffith$elm_animator$Animator$go = F3(
@@ -6455,207 +6773,100 @@ var $author$project$Main$animateHoveredPoint = F2(
 		return _Utils_update(
 			animations,
 			{
-				u: A3($mdgriffith$elm_animator$Animator$go, $mdgriffith$elm_animator$Animator$quickly, newHover, animations.u)
+				E: A3($mdgriffith$elm_animator$Animator$go, $mdgriffith$elm_animator$Animator$quickly, newHover, animations.E)
 			});
 	});
-var $author$project$Main$mulPoint = F2(
-	function (point, coef) {
-		return A2($author$project$Main$Point, point.C * coef, point.D * coef);
-	});
-var $author$project$Main$subPoints = F2(
-	function (a, b) {
-		return A2($author$project$Main$Point, a.C - b.C, a.D - b.D);
-	});
-var $author$project$Main$canvasPointToBackgroundPoint = F3(
-	function (canvasPoint, backgroundPosition, zoomLevel) {
-		return A2(
-			$author$project$Main$mulPoint,
-			A2($author$project$Main$subPoints, canvasPoint, backgroundPosition),
-			1 / zoomLevel);
-	});
-var $joakin$elm_canvas$Canvas$Texture$dimensions = function (texture) {
-	if (!texture.$) {
-		var image = texture.a;
-		return {o: image.o, q: image.q};
-	} else {
-		var data = texture.a;
-		return {o: data.o, q: data.q};
-	}
-};
-var $author$project$Main$constrainBackgroundToCanvas = F2(
-	function (model, _new) {
-		var w = A2(
-			$elm$core$Maybe$withDefault,
-			model.q,
-			A2(
-				$elm$core$Maybe$map,
-				function (t) {
-					return $joakin$elm_canvas$Canvas$Texture$dimensions(t).q;
-				},
-				model.M));
-		var h = A2(
-			$elm$core$Maybe$withDefault,
-			model.o,
-			A2(
-				$elm$core$Maybe$map,
-				function (t) {
-					return $joakin$elm_canvas$Canvas$Texture$dimensions(t).o;
-				},
-				model.M));
-		return A2(
-			$author$project$Main$Point,
-			A2(
-				$elm$core$Basics$min,
-				0,
-				A2($elm$core$Basics$max, (0 - (w * model.r)) + model.q, _new.C)),
-			A2(
-				$elm$core$Basics$min,
-				0,
-				A2($elm$core$Basics$max, (0 - (h * model.r)) + model.o, _new.D)));
-	});
-var $elm$core$List$filter = F2(
-	function (isGood, list) {
-		return A3(
-			$elm$core$List$foldr,
-			F2(
-				function (x, xs) {
-					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
+var $author$project$Main$checkMouseEventForPointHover = F2(
+	function (event, _v0) {
+		var model = _v0.a;
+		var cmd = _v0.b;
+		return _Utils_Tuple2(
+			_Utils_update(
+				model,
+				{
+					x: A2(
+						$author$project$Main$animateHoveredPoint,
+						model.x,
+						A2($author$project$Main$getHoveringVertex, model, event))
 				}),
-			_List_Nil,
-			list);
+			cmd);
 	});
-var $elm$core$Dict$Black = 1;
-var $elm$core$Dict$RBNode_elm_builtin = F5(
-	function (a, b, c, d, e) {
-		return {$: -1, a: a, b: b, c: c, d: d, e: e};
+var $author$project$Main$Primary = 0;
+var $author$project$Main$checkToStartDrag = F2(
+	function (event, _v0) {
+		var model = _v0.a;
+		var cmd = _v0.b;
+		return _Utils_Tuple2(
+			(!event.az) ? _Utils_update(
+				model,
+				{a8: false, al: false, aO: true, bY: event.d}) : model,
+			cmd);
 	});
-var $elm$core$Dict$Red = 0;
-var $elm$core$Dict$balance = F5(
-	function (color, key, value, left, right) {
-		if ((right.$ === -1) && (!right.a)) {
-			var _v1 = right.a;
-			var rK = right.b;
-			var rV = right.c;
-			var rLeft = right.d;
-			var rRight = right.e;
-			if ((left.$ === -1) && (!left.a)) {
-				var _v3 = left.a;
-				var lK = left.b;
-				var lV = left.c;
-				var lLeft = left.d;
-				var lRight = left.e;
-				return A5(
-					$elm$core$Dict$RBNode_elm_builtin,
-					0,
-					key,
-					value,
-					A5($elm$core$Dict$RBNode_elm_builtin, 1, lK, lV, lLeft, lRight),
-					A5($elm$core$Dict$RBNode_elm_builtin, 1, rK, rV, rLeft, rRight));
-			} else {
-				return A5(
-					$elm$core$Dict$RBNode_elm_builtin,
-					color,
-					rK,
-					rV,
-					A5($elm$core$Dict$RBNode_elm_builtin, 0, key, value, left, rLeft),
-					rRight);
-			}
+var $author$project$Main$Edge = F6(
+	function (id, title, start, end, edgeType, points) {
+		return {bP: edgeType, bQ: end, bU: id, bC: points, bH: start, c3: title};
+	});
+var $author$project$Main$Unfinished = {$: 2};
+var $author$project$Main$checkToStartDrawing = F2(
+	function (event, _v0) {
+		var model = _v0.a;
+		var cmd = _v0.b;
+		var _v1 = _Utils_Tuple3(
+			event.az,
+			A2($author$project$Main$getHoveringVertex, model, event),
+			model.z);
+		if (((!_v1.a) && (!_v1.b.$)) && (_v1.c.$ === 1)) {
+			var _v2 = _v1.a;
+			var vertex = _v1.b.a;
+			var _v3 = _v1.c;
+			var edgeId = $elm$core$String$fromInt(model.a5 + 1);
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{
+						z: $elm$core$Maybe$Just(
+							A6(
+								$author$project$Main$Edge,
+								edgeId,
+								$elm$core$Maybe$Just('Edge ' + edgeId),
+								vertex,
+								$elm$core$Maybe$Nothing,
+								$author$project$Main$Unfinished,
+								_List_Nil))
+					}),
+				cmd);
 		} else {
-			if ((((left.$ === -1) && (!left.a)) && (left.d.$ === -1)) && (!left.d.a)) {
-				var _v5 = left.a;
-				var lK = left.b;
-				var lV = left.c;
-				var _v6 = left.d;
-				var _v7 = _v6.a;
-				var llK = _v6.b;
-				var llV = _v6.c;
-				var llLeft = _v6.d;
-				var llRight = _v6.e;
-				var lRight = left.e;
-				return A5(
-					$elm$core$Dict$RBNode_elm_builtin,
-					0,
-					lK,
-					lV,
-					A5($elm$core$Dict$RBNode_elm_builtin, 1, llK, llV, llLeft, llRight),
-					A5($elm$core$Dict$RBNode_elm_builtin, 1, key, value, lRight, right));
-			} else {
-				return A5($elm$core$Dict$RBNode_elm_builtin, color, key, value, left, right);
-			}
+			return _Utils_Tuple2(model, cmd);
 		}
 	});
-var $elm$core$Basics$compare = _Utils_compare;
-var $elm$core$Dict$insertHelp = F3(
-	function (key, value, dict) {
-		if (dict.$ === -2) {
-			return A5($elm$core$Dict$RBNode_elm_builtin, 0, key, value, $elm$core$Dict$RBEmpty_elm_builtin, $elm$core$Dict$RBEmpty_elm_builtin);
-		} else {
-			var nColor = dict.a;
-			var nKey = dict.b;
-			var nValue = dict.c;
-			var nLeft = dict.d;
-			var nRight = dict.e;
-			var _v1 = A2($elm$core$Basics$compare, key, nKey);
-			switch (_v1) {
-				case 0:
-					return A5(
-						$elm$core$Dict$balance,
-						nColor,
-						nKey,
-						nValue,
-						A3($elm$core$Dict$insertHelp, key, value, nLeft),
-						nRight);
-				case 1:
-					return A5($elm$core$Dict$RBNode_elm_builtin, nColor, nKey, value, nLeft, nRight);
-				default:
-					return A5(
-						$elm$core$Dict$balance,
-						nColor,
-						nKey,
-						nValue,
-						nLeft,
-						A3($elm$core$Dict$insertHelp, key, value, nRight));
-			}
-		}
+var $author$project$Main$Vertex = F3(
+	function (id, title, position) {
+		return {bU: id, d: position, c3: title};
 	});
-var $elm$core$Dict$insert = F3(
-	function (key, value, dict) {
-		var _v0 = A3($elm$core$Dict$insertHelp, key, value, dict);
-		if ((_v0.$ === -1) && (!_v0.a)) {
-			var _v1 = _v0.a;
-			var k = _v0.b;
-			var v = _v0.c;
-			var l = _v0.d;
-			var r = _v0.e;
-			return A5($elm$core$Dict$RBNode_elm_builtin, 1, k, v, l, r);
-		} else {
-			var x = _v0;
-			return x;
-		}
+var $author$project$Main$checkVertexCreation = F2(
+	function (event, _v0) {
+		var model = _v0.a;
+		var cmd = _v0.b;
+		var id = $elm$core$String$fromInt(model.a$);
+		var condition = model.a8 || ($author$project$Main$maybeHasValue(model.z) || (!(!event.az)));
+		return _Utils_Tuple2(
+			_Utils_update(
+				model,
+				{
+					aO: false,
+					a$: condition ? model.a$ : (model.a$ + 1),
+					ar: condition ? model.ar : A3(
+						$elm$core$Dict$insert,
+						id,
+						A3(
+							$author$project$Main$Vertex,
+							id,
+							$elm$core$Maybe$Nothing,
+							A3($author$project$Main$canvasPointToBackgroundPoint, event.d, model.d, model.l)),
+						model.ar)
+				}),
+			cmd);
 	});
-var $author$project$Main$backgroundPointToCanvasPoint = F3(
-	function (backgroundPoint, backgroundPosition, zoomLevel) {
-		return A2(
-			$author$project$Main$addPoints,
-			backgroundPosition,
-			A2($author$project$Main$mulPoint, backgroundPoint, zoomLevel));
-	});
-var $author$project$Main$pointSize = 10;
-var $elm$core$Basics$pow = _Basics_pow;
-var $elm$core$Basics$sqrt = _Basics_sqrt;
-var $author$project$Main$pointToLength = function (point) {
-	return $elm$core$Basics$sqrt(
-		A2($elm$core$Basics$pow, point.C, 2) + A2($elm$core$Basics$pow, point.D, 2));
-};
-var $author$project$Main$mouseOverPoint = F4(
-	function (backgroundPosition, zoomLevel, mousePosition, point) {
-		var a = A3($author$project$Main$backgroundPointToCanvasPoint, point, backgroundPosition, zoomLevel);
-		return _Utils_cmp(
-			$author$project$Main$pointSize,
-			$author$project$Main$pointToLength(
-				A2($author$project$Main$subPoints, a, mousePosition))) > -1;
-	});
-var $elm$core$Basics$not = _Basics_not;
 var $elm$json$Json$Encode$list = F2(
 	function (func, entries) {
 		return _Json_wrap(
@@ -6680,21 +6891,21 @@ var $author$project$Main$saveToLocalStorage = _Platform_outgoingPort(
 					$elm$json$Json$Encode$string(b)
 				]));
 	});
+var $author$project$Main$setModelMousePosition = F2(
+	function (event, _v0) {
+		var model = _v0.a;
+		var cmd = _v0.b;
+		return _Utils_Tuple2(
+			_Utils_update(
+				model,
+				{aP: event.d}),
+			cmd);
+	});
 var $mdgriffith$elm_animator$Animator$update = F3(
 	function (newTime, _v0, model) {
 		var updateModel = _v0.b;
 		return A2(updateModel, newTime, model);
 	});
-var $elm$core$Dict$values = function (dict) {
-	return A3(
-		$elm$core$Dict$foldr,
-		F3(
-			function (key, value, valueList) {
-				return A2($elm$core$List$cons, value, valueList);
-			}),
-		_List_Nil,
-		dict);
-};
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
@@ -6706,7 +6917,7 @@ var $author$project$Main$update = F2(
 					_Utils_update(
 						model,
 						{
-							s: A3($mdgriffith$elm_animator$Animator$update, newTime, $author$project$Main$animator, model.s)
+							x: A3($mdgriffith$elm_animator$Animator$update, newTime, $author$project$Main$animator, model.x)
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 1:
@@ -6717,83 +6928,61 @@ var $author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{
-								bl: model.F,
-								I: 0,
-								M: $elm$core$Maybe$Just(t)
+								bp: model.G,
+								J: 0,
+								N: $elm$core$Maybe$Just(t)
 							}),
 						$author$project$Main$saveToLocalStorage(
-							_Utils_Tuple2('background', model.F)));
+							_Utils_Tuple2('background', model.G)));
 				} else {
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{I: 2}),
+							{J: 2}),
 						$elm$core$Platform$Cmd$none);
 				}
 			case 3:
 				var mouseEvent = msg.a;
-				var id = $elm$core$String$fromInt(model.aZ);
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							aN: false,
-							aZ: model.aI ? model.aZ : (model.aZ + 1),
-							aq: model.aI ? model.aq : A3(
-								$elm$core$Dict$insert,
-								id,
-								A3(
-									$author$project$Main$Vertex,
-									id,
-									$elm$core$Maybe$Nothing,
-									A3($author$project$Main$canvasPointToBackgroundPoint, mouseEvent.f, model.f, model.r)),
-								model.aq)
-						}),
-					$elm$core$Platform$Cmd$none);
+				return A2(
+					$author$project$Main$checkConnectDrawing,
+					mouseEvent,
+					A2(
+						$author$project$Main$checkEndDrawing,
+						mouseEvent,
+						A2(
+							$author$project$Main$checkVertexCreation,
+							mouseEvent,
+							_Utils_Tuple2(model, $elm$core$Platform$Cmd$none))));
 			case 2:
 				var mouseEvent = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{aI: false, ak: false, aN: true, bP: mouseEvent.f}),
-					$elm$core$Platform$Cmd$none);
+				return A2(
+					$author$project$Main$checkToStartDrawing,
+					mouseEvent,
+					A2(
+						$author$project$Main$checkToStartDrag,
+						mouseEvent,
+						_Utils_Tuple2(model, $elm$core$Platform$Cmd$none)));
 			case 4:
 				var mouseEvent = msg.a;
-				var newHovered = $elm$core$List$head(
+				return A2(
+					$author$project$Main$checkModelDragging,
+					mouseEvent,
 					A2(
-						$elm$core$List$filter,
-						function (v) {
-							return A4($author$project$Main$mouseOverPoint, model.f, model.r, mouseEvent.f, v.f);
-						},
-						$elm$core$Dict$values(model.aq)));
-				var newModel = _Utils_update(
-					model,
-					{
-						s: A2($author$project$Main$animateHoveredPoint, model.s, newHovered),
-						a8: mouseEvent.f
-					});
-				if (model.aN) {
-					var _new = A2($author$project$Main$addPoints, mouseEvent.cA, model.f);
-					return _Utils_Tuple2(
-						_Utils_update(
-							newModel,
-							{
-								aI: true,
-								f: A2($author$project$Main$constrainBackgroundToCanvas, model, _new)
-							}),
-						$elm$core$Platform$Cmd$none);
-				} else {
-					return _Utils_Tuple2(newModel, $elm$core$Platform$Cmd$none);
-				}
+						$author$project$Main$checkMouseEventForPointHover,
+						mouseEvent,
+						A2(
+							$author$project$Main$setModelMousePosition,
+							mouseEvent,
+							_Utils_Tuple2(model, $elm$core$Platform$Cmd$none))));
 			case 6:
 				var bool = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
-							F: ((!bool) && $elm$core$String$isEmpty(model.F)) ? model.bl : model.F,
-							I: ((!bool) && $elm$core$String$isEmpty(model.F)) ? 1 : model.I,
-							ak: bool
+							G: ((!bool) && $elm$core$String$isEmpty(model.G)) ? model.bp : model.G,
+							J: ((!bool) && $elm$core$String$isEmpty(model.G)) ? 1 : model.J,
+							al: bool
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 7:
@@ -6801,7 +6990,7 @@ var $author$project$Main$update = F2(
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{F: string, I: 1}),
+						{G: string, J: 1}),
 					$elm$core$Platform$Cmd$none);
 			case 8:
 				var _v2 = msg.a;
@@ -6813,82 +7002,82 @@ var $author$project$Main$update = F2(
 					A2(
 						$elm$core$Maybe$map,
 						function (t) {
-							return $joakin$elm_canvas$Canvas$Texture$dimensions(t).q;
+							return $joakin$elm_canvas$Canvas$Texture$dimensions(t).r;
 						},
-						model.M));
+						model.N));
 				var newModel = _Utils_update(
 					model,
-					{o: height, q: width});
+					{p: height, r: width});
 				var h = A2(
 					$elm$core$Maybe$withDefault,
 					height,
 					A2(
 						$elm$core$Maybe$map,
 						function (t) {
-							return $joakin$elm_canvas$Canvas$Texture$dimensions(t).o;
+							return $joakin$elm_canvas$Canvas$Texture$dimensions(t).p;
 						},
-						model.M));
+						model.N));
 				var zoomAfter = A2(
 					$elm$core$Basics$max,
-					model.r,
+					model.l,
 					A2($elm$core$Basics$max, width / w, height / h));
 				return _Utils_Tuple2(
 					_Utils_update(
 						newModel,
 						{
-							f: A2($author$project$Main$constrainBackgroundToCanvas, newModel, newModel.f),
-							r: zoomAfter
+							d: A2($author$project$Main$constrainBackgroundToCanvas, newModel, newModel.d),
+							l: zoomAfter
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 9:
 				var delta = msg.a;
-				var zoomBefore = model.r;
+				var zoomBefore = model.l;
 				var w = A2(
 					$elm$core$Maybe$withDefault,
-					model.q,
+					model.r,
 					A2(
 						$elm$core$Maybe$map,
 						function (t) {
-							return $joakin$elm_canvas$Canvas$Texture$dimensions(t).q;
+							return $joakin$elm_canvas$Canvas$Texture$dimensions(t).r;
 						},
-						model.M));
+						model.N));
 				var h = A2(
 					$elm$core$Maybe$withDefault,
-					model.o,
+					model.p,
 					A2(
 						$elm$core$Maybe$map,
 						function (t) {
-							return $joakin$elm_canvas$Canvas$Texture$dimensions(t).o;
+							return $joakin$elm_canvas$Canvas$Texture$dimensions(t).p;
 						},
-						model.M));
+						model.N));
 				var zoomAfter = A2(
 					$elm$core$Basics$max,
-					model.r - (delta / 1000),
-					A2($elm$core$Basics$max, model.q / w, model.o / h));
+					model.l - (delta / 1000),
+					A2($elm$core$Basics$max, model.r / w, model.p / h));
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
-							f: A2(
+							d: A2(
 								$author$project$Main$constrainBackgroundToCanvas,
 								_Utils_update(
 									model,
-									{r: zoomAfter}),
+									{l: zoomAfter}),
 								A2(
 									$author$project$Main$subPoints,
-									model.a8,
+									model.aP,
 									A2(
 										$author$project$Main$mulPoint,
-										A3($author$project$Main$canvasPointToBackgroundPoint, model.a8, model.f, zoomBefore),
+										A3($author$project$Main$canvasPointToBackgroundPoint, model.aP, model.d, zoomBefore),
 										zoomAfter))),
-							r: zoomAfter
+							l: zoomAfter
 						}),
 					$elm$core$Platform$Cmd$none);
 			default:
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{aN: false}),
+						{aO: false}),
 					$elm$core$Platform$Cmd$none);
 		}
 	});
@@ -6917,9 +7106,9 @@ var $joakin$elm_canvas$Canvas$Internal$Canvas$Renderable = $elm$core$Basics$iden
 var $joakin$elm_canvas$Canvas$clear = F3(
 	function (point, w, h) {
 		return {
-			H: _List_Nil,
-			V: $joakin$elm_canvas$Canvas$Internal$Canvas$NotSpecified,
-			W: A3($joakin$elm_canvas$Canvas$Internal$Canvas$DrawableClear, point, w, h)
+			I: _List_Nil,
+			W: $joakin$elm_canvas$Canvas$Internal$Canvas$NotSpecified,
+			X: A3($joakin$elm_canvas$Canvas$Internal$Canvas$DrawableClear, point, w, h)
 		};
 	});
 var $joakin$elm_canvas$Canvas$Internal$Canvas$DrawableTexture = F2(
@@ -7006,28 +7195,28 @@ var $joakin$elm_canvas$Canvas$addSettingsToRenderable = F2(
 						return _Utils_update(
 							r,
 							{
-								H: A2($elm$core$List$cons, cmd, r.H)
+								I: A2($elm$core$List$cons, cmd, r.I)
 							});
 					case 1:
 						var cmds = setting.a;
 						return _Utils_update(
 							r,
 							{
-								H: A3($elm$core$List$foldl, $elm$core$List$cons, r.H, cmds)
+								I: A3($elm$core$List$foldl, $elm$core$List$cons, r.I, cmds)
 							});
 					case 3:
 						var f = setting.a;
 						return _Utils_update(
 							r,
 							{
-								W: f(r.W)
+								X: f(r.X)
 							});
 					default:
 						var op = setting.a;
 						return _Utils_update(
 							r,
 							{
-								V: A2($joakin$elm_canvas$Canvas$mergeDrawOp, r.V, op)
+								W: A2($joakin$elm_canvas$Canvas$mergeDrawOp, r.W, op)
 							});
 				}
 			});
@@ -7039,9 +7228,9 @@ var $joakin$elm_canvas$Canvas$texture = F3(
 			$joakin$elm_canvas$Canvas$addSettingsToRenderable,
 			settings,
 			{
-				H: _List_Nil,
-				V: $joakin$elm_canvas$Canvas$Internal$Canvas$NotSpecified,
-				W: A2($joakin$elm_canvas$Canvas$Internal$Canvas$DrawableTexture, p, t)
+				I: _List_Nil,
+				W: $joakin$elm_canvas$Canvas$Internal$Canvas$NotSpecified,
+				X: A2($joakin$elm_canvas$Canvas$Internal$Canvas$DrawableTexture, p, t)
 			});
 	});
 var $author$project$Main$addBackground = F5(
@@ -7071,6 +7260,247 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 			$elm$json$Json$Encode$string(string));
 	});
 var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
+var $joakin$elm_canvas$Canvas$Settings$Line$RoundCap = 1;
+var $joakin$elm_canvas$Canvas$Settings$Line$RoundJoin = 1;
+var $avh4$elm_color$Color$RgbaSpace = F4(
+	function (a, b, c, d) {
+		return {$: 0, a: a, b: b, c: c, d: d};
+	});
+var $avh4$elm_color$Color$black = A4($avh4$elm_color$Color$RgbaSpace, 0 / 255, 0 / 255, 0 / 255, 1.0);
+var $avh4$elm_color$Color$blue = A4($avh4$elm_color$Color$RgbaSpace, 52 / 255, 101 / 255, 164 / 255, 1.0);
+var $avh4$elm_color$Color$green = A4($avh4$elm_color$Color$RgbaSpace, 115 / 255, 210 / 255, 22 / 255, 1.0);
+var $joakin$elm_canvas$Canvas$Internal$Canvas$SettingCommand = function (a) {
+	return {$: 0, a: a};
+};
+var $elm$json$Json$Encode$object = function (pairs) {
+	return _Json_wrap(
+		A3(
+			$elm$core$List$foldl,
+			F2(
+				function (_v0, obj) {
+					var k = _v0.a;
+					var v = _v0.b;
+					return A3(_Json_addField, k, v, obj);
+				}),
+			_Json_emptyObject(0),
+			pairs));
+};
+var $joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$field = F2(
+	function (name, value) {
+		return $elm$json$Json$Encode$object(
+			_List_fromArray(
+				[
+					_Utils_Tuple2(
+					'type',
+					$elm$json$Json$Encode$string('field')),
+					_Utils_Tuple2(
+					'name',
+					$elm$json$Json$Encode$string(name)),
+					_Utils_Tuple2('value', value)
+				]));
+	});
+var $joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$lineCap = function (cap) {
+	return A2(
+		$joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$field,
+		'lineCap',
+		$elm$json$Json$Encode$string(cap));
+};
+var $joakin$elm_canvas$Canvas$Settings$Line$lineCapToString = function (cap) {
+	switch (cap) {
+		case 0:
+			return 'butt';
+		case 1:
+			return 'round';
+		default:
+			return 'square';
+	}
+};
+var $joakin$elm_canvas$Canvas$Settings$Line$lineCap = function (cap) {
+	return $joakin$elm_canvas$Canvas$Internal$Canvas$SettingCommand(
+		$joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$lineCap(
+			$joakin$elm_canvas$Canvas$Settings$Line$lineCapToString(cap)));
+};
+var $elm$json$Json$Encode$float = _Json_wrap;
+var $joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$fn = F2(
+	function (name, args) {
+		return $elm$json$Json$Encode$object(
+			_List_fromArray(
+				[
+					_Utils_Tuple2(
+					'type',
+					$elm$json$Json$Encode$string('function')),
+					_Utils_Tuple2(
+					'name',
+					$elm$json$Json$Encode$string(name)),
+					_Utils_Tuple2(
+					'args',
+					A2($elm$json$Json$Encode$list, $elm$core$Basics$identity, args))
+				]));
+	});
+var $joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$setLineDash = function (segments) {
+	return A2(
+		$joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$fn,
+		'setLineDash',
+		_List_fromArray(
+			[
+				A2($elm$json$Json$Encode$list, $elm$json$Json$Encode$float, segments)
+			]));
+};
+var $joakin$elm_canvas$Canvas$Settings$Line$lineDash = function (dashSettings) {
+	return $joakin$elm_canvas$Canvas$Internal$Canvas$SettingCommand(
+		$joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$setLineDash(dashSettings));
+};
+var $joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$lineJoin = function (join) {
+	return A2(
+		$joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$field,
+		'lineJoin',
+		$elm$json$Json$Encode$string(join));
+};
+var $joakin$elm_canvas$Canvas$Settings$Line$lineJoinToString = function (join) {
+	switch (join) {
+		case 0:
+			return 'bevel';
+		case 1:
+			return 'round';
+		default:
+			return 'miter';
+	}
+};
+var $joakin$elm_canvas$Canvas$Settings$Line$lineJoin = function (join) {
+	return $joakin$elm_canvas$Canvas$Internal$Canvas$SettingCommand(
+		$joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$lineJoin(
+			$joakin$elm_canvas$Canvas$Settings$Line$lineJoinToString(join)));
+};
+var $joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$lineWidth = function (value) {
+	return A2(
+		$joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$field,
+		'lineWidth',
+		$elm$json$Json$Encode$float(value));
+};
+var $joakin$elm_canvas$Canvas$Settings$Line$lineWidth = function (width) {
+	return $joakin$elm_canvas$Canvas$Internal$Canvas$SettingCommand(
+		$joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$lineWidth(width));
+};
+var $author$project$Main$lineWidth = 5;
+var $avh4$elm_color$Color$red = A4($avh4$elm_color$Color$RgbaSpace, 204 / 255, 0 / 255, 0 / 255, 1.0);
+var $joakin$elm_canvas$Canvas$Internal$Canvas$SettingDrawOp = function (a) {
+	return {$: 2, a: a};
+};
+var $joakin$elm_canvas$Canvas$Settings$stroke = function (color) {
+	return $joakin$elm_canvas$Canvas$Internal$Canvas$SettingDrawOp(
+		$joakin$elm_canvas$Canvas$Internal$Canvas$Stroke(color));
+};
+var $author$project$Main$edgeStyle = F2(
+	function (edgeType, zoom) {
+		return _Utils_ap(
+			_List_fromArray(
+				[
+					$joakin$elm_canvas$Canvas$Settings$Line$lineWidth($author$project$Main$lineWidth / zoom),
+					$joakin$elm_canvas$Canvas$Settings$Line$lineCap(1),
+					$joakin$elm_canvas$Canvas$Settings$Line$lineJoin(1)
+				]),
+			function () {
+				switch (edgeType.$) {
+					case 0:
+						var skiRunType = edgeType.a;
+						switch (skiRunType) {
+							case 0:
+								return _List_fromArray(
+									[
+										$joakin$elm_canvas$Canvas$Settings$stroke($avh4$elm_color$Color$blue)
+									]);
+							case 1:
+								return _List_fromArray(
+									[
+										$joakin$elm_canvas$Canvas$Settings$stroke($avh4$elm_color$Color$red)
+									]);
+							case 2:
+								return _List_fromArray(
+									[
+										$joakin$elm_canvas$Canvas$Settings$stroke($avh4$elm_color$Color$black)
+									]);
+							default:
+								return _List_fromArray(
+									[
+										$joakin$elm_canvas$Canvas$Settings$stroke($avh4$elm_color$Color$red),
+										$joakin$elm_canvas$Canvas$Settings$Line$lineDash(
+										_List_fromArray(
+											[5, 5]))
+									]);
+						}
+					case 1:
+						return _List_fromArray(
+							[
+								$joakin$elm_canvas$Canvas$Settings$stroke($avh4$elm_color$Color$black)
+							]);
+					default:
+						return _List_fromArray(
+							[
+								$joakin$elm_canvas$Canvas$Settings$stroke($avh4$elm_color$Color$green)
+							]);
+				}
+			}());
+	});
+var $joakin$elm_canvas$Canvas$Internal$Canvas$LineTo = function (a) {
+	return {$: 2, a: a};
+};
+var $joakin$elm_canvas$Canvas$lineTo = function (point) {
+	return $joakin$elm_canvas$Canvas$Internal$Canvas$LineTo(point);
+};
+var $joakin$elm_canvas$Canvas$Internal$Canvas$Path = F2(
+	function (a, b) {
+		return {$: 2, a: a, b: b};
+	});
+var $joakin$elm_canvas$Canvas$path = F2(
+	function (startingPoint, segments) {
+		return A2($joakin$elm_canvas$Canvas$Internal$Canvas$Path, startingPoint, segments);
+	});
+var $author$project$Main$pointToCanvasLibPoint = function (point) {
+	return _Utils_Tuple2(point.v, point.w);
+};
+var $joakin$elm_canvas$Canvas$Internal$Canvas$DrawableShapes = function (a) {
+	return {$: 1, a: a};
+};
+var $joakin$elm_canvas$Canvas$shapes = F2(
+	function (settings, ss) {
+		return A2(
+			$joakin$elm_canvas$Canvas$addSettingsToRenderable,
+			settings,
+			{
+				I: _List_Nil,
+				W: $joakin$elm_canvas$Canvas$Internal$Canvas$NotSpecified,
+				X: $joakin$elm_canvas$Canvas$Internal$Canvas$DrawableShapes(ss)
+			});
+	});
+var $author$project$Main$edgeView = F2(
+	function (model, edge) {
+		return A2(
+			$joakin$elm_canvas$Canvas$shapes,
+			A2($author$project$Main$edgeStyle, edge.bP, model.l),
+			_List_fromArray(
+				[
+					A2(
+					$joakin$elm_canvas$Canvas$path,
+					$author$project$Main$pointToCanvasLibPoint(edge.bH.d),
+					A2(
+						$elm$core$List$map,
+						A2($elm$core$Basics$composeL, $joakin$elm_canvas$Canvas$lineTo, $author$project$Main$pointToCanvasLibPoint),
+						_Utils_ap(
+							edge.bC,
+							_List_fromArray(
+								[
+									function () {
+									var _v0 = edge.bQ;
+									if (_v0.$ === 1) {
+										return A3($author$project$Main$canvasPointToBackgroundPoint, model.aP, model.d, model.l);
+									} else {
+										var vertex = _v0.a;
+										return vertex.d;
+									}
+								}()
+								]))))
+				]));
+	});
 var $joakin$elm_canvas$Canvas$Internal$Canvas$DrawableGroup = function (a) {
 	return {$: 4, a: a};
 };
@@ -7080,9 +7510,9 @@ var $joakin$elm_canvas$Canvas$group = F2(
 			$joakin$elm_canvas$Canvas$addSettingsToRenderable,
 			settings,
 			{
-				H: _List_Nil,
-				V: $joakin$elm_canvas$Canvas$Internal$Canvas$NotSpecified,
-				W: $joakin$elm_canvas$Canvas$Internal$Canvas$DrawableGroup(entities)
+				I: _List_Nil,
+				W: $joakin$elm_canvas$Canvas$Internal$Canvas$NotSpecified,
+				X: $joakin$elm_canvas$Canvas$Internal$Canvas$DrawableGroup(entities)
 			});
 	});
 var $joakin$elm_canvas$Canvas$Internal$Texture$TSImageUrl = F2(
@@ -7113,7 +7543,7 @@ var $elm$html$Html$Attributes$classList = function (classes) {
 				$elm$core$Tuple$first,
 				A2($elm$core$List$filter, $elm$core$Tuple$second, classes))));
 };
-var $perzanko$elm_loading$Loading$defaultConfig = {cf: '', dd: '#74b4c9', dV: 30, cU: 1};
+var $perzanko$elm_loading$Loading$defaultConfig = {co: '', dj: '#74b4c9', dZ: 30, c_: 1};
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
 var $elm$svg$Svg$Attributes$d = _VirtualDom_attribute('d');
@@ -7171,7 +7601,6 @@ var $author$project$Icons$mapIcon = A2(
 				]),
 			_List_Nil)
 		]));
-var $elm$core$Basics$neq = _Utils_notEqual;
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 0, a: a};
 };
@@ -7585,8 +8014,8 @@ var $rtfeldman$elm_css$Css$Structure$compactHelp = F2(
 					A2($elm$core$List$cons, declaration, declarations));
 			case 6:
 				var record = declaration.a;
-				return $elm$core$String$isEmpty(record.df) ? _Utils_Tuple2(keyframesByName, declarations) : _Utils_Tuple2(
-					A3($elm$core$Dict$insert, record.dI, record.df, keyframesByName),
+				return $elm$core$String$isEmpty(record.dl) ? _Utils_Tuple2(keyframesByName, declarations) : _Utils_Tuple2(
+					A3($elm$core$Dict$insert, record.dM, record.dl, keyframesByName),
 					declarations);
 			case 7:
 				var properties = declaration.a;
@@ -7632,16 +8061,16 @@ var $rtfeldman$elm_css$Css$Structure$withKeyframeDeclarations = F2(
 					var name = _v0.a;
 					var decl = _v0.b;
 					return $rtfeldman$elm_css$Css$Structure$Keyframes(
-						{df: decl, dI: name});
+						{dl: decl, dM: name});
 				},
 				$elm$core$Dict$toList(keyframesByName)),
 			compactedDeclarations);
 	});
 var $rtfeldman$elm_css$Css$Structure$compactStylesheet = function (_v0) {
-	var charset = _v0.ce;
-	var imports = _v0.cr;
-	var namespaces = _v0.cB;
-	var declarations = _v0.dg;
+	var charset = _v0.cn;
+	var imports = _v0.cx;
+	var namespaces = _v0.cH;
+	var declarations = _v0.dm;
 	var _v1 = A3(
 		$elm$core$List$foldr,
 		$rtfeldman$elm_css$Css$Structure$compactHelp,
@@ -7650,7 +8079,7 @@ var $rtfeldman$elm_css$Css$Structure$compactStylesheet = function (_v0) {
 	var keyframesByName = _v1.a;
 	var compactedDeclarations = _v1.b;
 	var finalDeclarations = A2($rtfeldman$elm_css$Css$Structure$withKeyframeDeclarations, keyframesByName, compactedDeclarations);
-	return {ce: charset, dg: finalDeclarations, cr: imports, cB: namespaces};
+	return {cn: charset, dm: finalDeclarations, cx: imports, cH: namespaces};
 };
 var $rtfeldman$elm_css$Css$Structure$Output$charsetToString = function (charset) {
 	return A2(
@@ -7664,13 +8093,13 @@ var $rtfeldman$elm_css$Css$Structure$Output$charsetToString = function (charset)
 			charset));
 };
 var $rtfeldman$elm_css$Css$Structure$Output$mediaExpressionToString = function (expression) {
-	return '(' + (expression.cm + (A2(
+	return '(' + (expression.ct + (A2(
 		$elm$core$Maybe$withDefault,
 		'',
 		A2(
 			$elm$core$Maybe$map,
 			$elm$core$Basics$append(': '),
-			expression.S)) + ')'));
+			expression.T)) + ')'));
 };
 var $rtfeldman$elm_css$Css$Structure$Output$mediaTypeToString = function (mediaType) {
 	switch (mediaType) {
@@ -7912,8 +8341,8 @@ var $rtfeldman$elm_css$Css$Structure$Output$prettyPrintDeclaration = function (d
 		case 5:
 			return 'TODO';
 		case 6:
-			var name = decl.a.dI;
-			var declaration = decl.a.df;
+			var name = decl.a.dM;
+			var declaration = decl.a.dl;
 			return '@keyframes ' + (name + (' {\n' + (declaration + '\n}')));
 		case 7:
 			return 'TODO';
@@ -7924,10 +8353,10 @@ var $rtfeldman$elm_css$Css$Structure$Output$prettyPrintDeclaration = function (d
 	}
 };
 var $rtfeldman$elm_css$Css$Structure$Output$prettyPrint = function (_v0) {
-	var charset = _v0.ce;
-	var imports = _v0.cr;
-	var namespaces = _v0.cB;
-	var declarations = _v0.dg;
+	var charset = _v0.cn;
+	var imports = _v0.cx;
+	var namespaces = _v0.cH;
+	var declarations = _v0.dm;
 	return A2(
 		$elm$core$String$join,
 		'\n\n',
@@ -8346,7 +8775,7 @@ var $rtfeldman$elm_css$Css$Structure$concatMapLastStyleBlock = F2(
 var $elm$core$String$cons = _String_cons;
 var $rtfeldman$elm_css$ElmCssVendor$Murmur3$HashData = F4(
 	function (shift, seed, hash, charsProcessed) {
-		return {ay: charsProcessed, aJ: hash, an: seed, aQ: shift};
+		return {aA: charsProcessed, aK: hash, ao: seed, aS: shift};
 	});
 var $rtfeldman$elm_css$ElmCssVendor$Murmur3$c1 = 3432918353;
 var $rtfeldman$elm_css$ElmCssVendor$Murmur3$c2 = 461845907;
@@ -8364,14 +8793,14 @@ var $rtfeldman$elm_css$ElmCssVendor$Murmur3$rotlBy = F2(
 	});
 var $elm$core$Bitwise$xor = _Bitwise_xor;
 var $rtfeldman$elm_css$ElmCssVendor$Murmur3$finalize = function (data) {
-	var acc = (!(!data.aJ)) ? (data.an ^ A2(
+	var acc = (!(!data.aK)) ? (data.ao ^ A2(
 		$rtfeldman$elm_css$ElmCssVendor$Murmur3$multiplyBy,
 		$rtfeldman$elm_css$ElmCssVendor$Murmur3$c2,
 		A2(
 			$rtfeldman$elm_css$ElmCssVendor$Murmur3$rotlBy,
 			15,
-			A2($rtfeldman$elm_css$ElmCssVendor$Murmur3$multiplyBy, $rtfeldman$elm_css$ElmCssVendor$Murmur3$c1, data.aJ)))) : data.an;
-	var h0 = acc ^ data.ay;
+			A2($rtfeldman$elm_css$ElmCssVendor$Murmur3$multiplyBy, $rtfeldman$elm_css$ElmCssVendor$Murmur3$c1, data.aK)))) : data.ao;
+	var h0 = acc ^ data.aA;
 	var h1 = A2($rtfeldman$elm_css$ElmCssVendor$Murmur3$multiplyBy, 2246822507, h0 ^ (h0 >>> 16));
 	var h2 = A2($rtfeldman$elm_css$ElmCssVendor$Murmur3$multiplyBy, 3266489909, h1 ^ (h1 >>> 13));
 	return (h2 ^ (h2 >>> 16)) >>> 0;
@@ -8395,17 +8824,17 @@ var $rtfeldman$elm_css$ElmCssVendor$Murmur3$mix = F2(
 	});
 var $rtfeldman$elm_css$ElmCssVendor$Murmur3$hashFold = F2(
 	function (c, data) {
-		var res = data.aJ | ((255 & $elm$core$Char$toCode(c)) << data.aQ);
-		var _v0 = data.aQ;
+		var res = data.aK | ((255 & $elm$core$Char$toCode(c)) << data.aS);
+		var _v0 = data.aS;
 		if (_v0 === 24) {
 			return {
-				ay: data.ay + 1,
-				aJ: 0,
-				an: A2($rtfeldman$elm_css$ElmCssVendor$Murmur3$mix, data.an, res),
-				aQ: 0
+				aA: data.aA + 1,
+				aK: 0,
+				ao: A2($rtfeldman$elm_css$ElmCssVendor$Murmur3$mix, data.ao, res),
+				aS: 0
 			};
 		} else {
-			return {ay: data.ay + 1, aJ: res, an: data.an, aQ: data.aQ + 8};
+			return {aA: data.aA + 1, aK: res, ao: data.ao, aS: data.aS + 8};
 		}
 	});
 var $rtfeldman$elm_css$ElmCssVendor$Murmur3$hashString = F2(
@@ -9008,7 +9437,7 @@ var $rtfeldman$elm_css$Css$Preprocess$Resolve$applyStyles = F2(
 						_List_fromArray(
 							[
 								$rtfeldman$elm_css$Css$Structure$Keyframes(
-								{df: str, dI: name})
+								{dl: str, dM: name})
 							]));
 				case 4:
 					var _v12 = styles.a;
@@ -9143,13 +9572,13 @@ var $rtfeldman$elm_css$Css$Preprocess$Resolve$toDeclarations = function (snippet
 	}
 };
 var $rtfeldman$elm_css$Css$Preprocess$Resolve$toStructure = function (_v0) {
-	var charset = _v0.ce;
-	var imports = _v0.cr;
-	var namespaces = _v0.cB;
-	var snippets = _v0.cT;
+	var charset = _v0.cn;
+	var imports = _v0.cx;
+	var namespaces = _v0.cH;
+	var snippets = _v0.cZ;
 	var declarations = $rtfeldman$elm_css$Css$Preprocess$Resolve$extract(
 		A2($elm$core$List$concatMap, $rtfeldman$elm_css$Css$Preprocess$unwrapSnippet, snippets));
-	return {ce: charset, dg: declarations, cr: imports, cB: namespaces};
+	return {cn: charset, dm: declarations, cx: imports, cH: namespaces};
 };
 var $rtfeldman$elm_css$Css$Preprocess$Resolve$compileHelp = function (sheet) {
 	return $rtfeldman$elm_css$Css$Structure$Output$prettyPrint(
@@ -9195,7 +9624,7 @@ var $rtfeldman$elm_css$VirtualDom$Styled$snippetFromPair = function (_v0) {
 				])));
 };
 var $rtfeldman$elm_css$Css$Preprocess$stylesheet = function (snippets) {
-	return {ce: $elm$core$Maybe$Nothing, cr: _List_Nil, cB: _List_Nil, cT: snippets};
+	return {cn: $elm$core$Maybe$Nothing, cx: _List_Nil, cH: _List_Nil, cZ: snippets};
 };
 var $rtfeldman$elm_css$VirtualDom$Styled$toDeclaration = function (dict) {
 	return $rtfeldman$elm_css$Css$Preprocess$Resolve$compile(
@@ -9454,23 +9883,23 @@ var $elm$core$String$fromFloat = _String_fromNumber;
 var $rtfeldman$elm_css$Css$Internal$lengthConverter = F3(
 	function (units, unitLabel, numericValue) {
 		return {
-			b2: 0,
-			cc: 0,
-			aF: 0,
-			v: 0,
-			a5: 0,
-			aK: 0,
-			aa: 0,
+			cb: 0,
+			cl: 0,
+			aH: 0,
+			t: 0,
+			ba: 0,
 			aL: 0,
+			ab: 0,
 			aM: 0,
-			ai: 0,
+			aN: 0,
 			aj: 0,
-			P: 0,
-			ac: numericValue,
-			aU: 0,
-			aX: unitLabel,
-			bi: units,
-			S: _Utils_ap(
+			ak: 0,
+			Q: 0,
+			ad: numericValue,
+			aW: 0,
+			aZ: unitLabel,
+			bm: units,
+			T: _Utils_ap(
 				$elm$core$String$fromFloat(numericValue),
 				unitLabel)
 		};
@@ -9492,14 +9921,14 @@ var $rtfeldman$elm_css$Css$property = F2(
 	});
 var $rtfeldman$elm_css$Css$prop1 = F2(
 	function (key, arg) {
-		return A2($rtfeldman$elm_css$Css$property, key, arg.S);
+		return A2($rtfeldman$elm_css$Css$property, key, arg.T);
 	});
 var $rtfeldman$elm_css$Css$animationName = function (arg) {
-	return ((arg.S === 'none') || ((arg.S === 'inherit') || ((arg.S === 'unset') || (arg.S === 'initial')))) ? A2($rtfeldman$elm_css$Css$prop1, 'animation-name', arg) : $rtfeldman$elm_css$Css$Preprocess$WithKeyframes(arg.S);
+	return ((arg.T === 'none') || ((arg.T === 'inherit') || ((arg.T === 'unset') || (arg.T === 'initial')))) ? A2($rtfeldman$elm_css$Css$prop1, 'animation-name', arg) : $rtfeldman$elm_css$Css$Preprocess$WithKeyframes(arg.T);
 };
-var $rtfeldman$elm_css$Css$auto = {c4: 0, a: 0, aF: 0, bp: 0, dz: 0, aK: 0, aa: 0, P: 0, aO: 0, L: 0, bC: 0, aV: 0, B: 0, S: 'auto'};
+var $rtfeldman$elm_css$Css$auto = {da: 0, a: 0, aH: 0, bt: 0, dD: 0, aL: 0, ab: 0, Q: 0, aQ: 0, M: 0, bI: 0, aX: 0, D: 0, T: 'auto'};
 var $rtfeldman$elm_css$Css$backgroundColor = function (c) {
-	return A2($rtfeldman$elm_css$Css$property, 'background-color', c.S);
+	return A2($rtfeldman$elm_css$Css$property, 'background-color', c.T);
 };
 var $rtfeldman$elm_css$Css$borderRadius = $rtfeldman$elm_css$Css$prop1('border-radius');
 var $rtfeldman$elm_css$VirtualDom$Styled$Attribute = F3(
@@ -9570,12 +9999,12 @@ var $rtfeldman$elm_css$Css$withPrecedingHash = function (str) {
 };
 var $rtfeldman$elm_css$Css$erroneousHex = function (str) {
 	return {
-		as: 1,
-		bG: 0,
-		dd: 0,
-		bL: 0,
-		bV: 0,
-		S: $rtfeldman$elm_css$Css$withPrecedingHash(str)
+		at: 1,
+		bM: 0,
+		dj: 0,
+		bT: 0,
+		b2: 0,
+		T: $rtfeldman$elm_css$Css$withPrecedingHash(str)
 	};
 };
 var $elm$core$String$foldr = _String_foldr;
@@ -9833,12 +10262,12 @@ var $rtfeldman$elm_css$Css$validHex = F5(
 			var blue = _v6.a.a;
 			var alpha = _v6.b.a;
 			return {
-				as: alpha / 255,
-				bG: blue,
-				dd: 0,
-				bL: green,
-				bV: red,
-				S: $rtfeldman$elm_css$Css$withPrecedingHash(str)
+				at: alpha / 255,
+				bM: blue,
+				dj: 0,
+				bT: green,
+				b2: red,
+				T: $rtfeldman$elm_css$Css$withPrecedingHash(str)
 			};
 		} else {
 			return $rtfeldman$elm_css$Css$erroneousHex(str);
@@ -9969,10 +10398,10 @@ var $rtfeldman$elm_css$Css$Internal$compileKeyframes = function (tuples) {
 		A2($elm$core$List$map, $rtfeldman$elm_css$Css$Internal$printKeyframeSelector, tuples));
 };
 var $rtfeldman$elm_css$Css$Animations$keyframes = function (tuples) {
-	return $elm$core$List$isEmpty(tuples) ? {br: 0, bQ: 0, S: 'none'} : {
-		br: 0,
-		bQ: 0,
-		S: $rtfeldman$elm_css$Css$Internal$compileKeyframes(tuples)
+	return $elm$core$List$isEmpty(tuples) ? {bv: 0, bZ: 0, T: 'none'} : {
+		bv: 0,
+		bZ: 0,
+		T: $rtfeldman$elm_css$Css$Internal$compileKeyframes(tuples)
 	};
 };
 var $rtfeldman$elm_css$Css$prop2 = F3(
@@ -9984,7 +10413,7 @@ var $rtfeldman$elm_css$Css$prop2 = F3(
 				$elm$core$String$join,
 				' ',
 				_List_fromArray(
-					[argA.S, argB.S])));
+					[argA.T, argB.T])));
 	});
 var $rtfeldman$elm_css$Css$margin2 = $rtfeldman$elm_css$Css$prop2('margin');
 var $rtfeldman$elm_css$Css$position = $rtfeldman$elm_css$Css$prop1('position');
@@ -9995,19 +10424,19 @@ var $rtfeldman$elm_css$Css$Animations$property = F2(
 	});
 var $rtfeldman$elm_css$Css$PxUnits = 0;
 var $rtfeldman$elm_css$Css$px = A2($rtfeldman$elm_css$Css$Internal$lengthConverter, 0, 'px');
-var $rtfeldman$elm_css$Css$relative = {f: 0, S: 'relative'};
+var $rtfeldman$elm_css$Css$relative = {d: 0, T: 'relative'};
 var $rtfeldman$elm_css$Css$spaceBetween = $rtfeldman$elm_css$Css$prop1('space-between');
 var $rtfeldman$elm_css$Css$width = $rtfeldman$elm_css$Css$prop1('width');
 var $perzanko$elm_loading$Loading$Bars$view = function (config) {
 	var withSpeed = function (x) {
-		return $elm$core$String$fromFloat(x / config.cU);
+		return $elm$core$String$fromFloat(x / config.c_);
 	};
 	var outerStyle = _List_fromArray(
 		[
 			$rtfeldman$elm_css$Css$width(
-			$rtfeldman$elm_css$Css$px(config.dV)),
+			$rtfeldman$elm_css$Css$px(config.dZ)),
 			$rtfeldman$elm_css$Css$height(
-			$rtfeldman$elm_css$Css$px(config.dV)),
+			$rtfeldman$elm_css$Css$px(config.dZ)),
 			$rtfeldman$elm_css$Css$position($rtfeldman$elm_css$Css$relative),
 			A2(
 			$rtfeldman$elm_css$Css$margin2,
@@ -10020,13 +10449,13 @@ var $perzanko$elm_loading$Loading$Bars$view = function (config) {
 	var childStyle = _List_fromArray(
 		[
 			$rtfeldman$elm_css$Css$width(
-			$rtfeldman$elm_css$Css$px(config.dV / 3.5)),
+			$rtfeldman$elm_css$Css$px(config.dZ / 3.5)),
 			$rtfeldman$elm_css$Css$height(
-			$rtfeldman$elm_css$Css$px(config.dV / 3.5)),
+			$rtfeldman$elm_css$Css$px(config.dZ / 3.5)),
 			$rtfeldman$elm_css$Css$borderRadius(
 			$rtfeldman$elm_css$Css$px(5)),
 			$rtfeldman$elm_css$Css$backgroundColor(
-			$rtfeldman$elm_css$Css$hex(config.dd)),
+			$rtfeldman$elm_css$Css$hex(config.dj)),
 			A2(
 			$rtfeldman$elm_css$Css$property,
 			'animation-duration',
@@ -10044,7 +10473,7 @@ var $perzanko$elm_loading$Loading$Bars$view = function (config) {
 								A2(
 								$rtfeldman$elm_css$Css$Animations$property,
 								'height',
-								$elm$core$String$fromFloat(config.dV / 3.5) + 'px'),
+								$elm$core$String$fromFloat(config.dZ / 3.5) + 'px'),
 								A2($rtfeldman$elm_css$Css$Animations$property, 'transform', 'translate3d(0,0,0)')
 							])),
 						_Utils_Tuple2(
@@ -10054,7 +10483,7 @@ var $perzanko$elm_loading$Loading$Bars$view = function (config) {
 								A2(
 								$rtfeldman$elm_css$Css$Animations$property,
 								'height',
-								$elm$core$String$fromFloat(config.dV) + 'px'),
+								$elm$core$String$fromFloat(config.dZ) + 'px'),
 								A2($rtfeldman$elm_css$Css$Animations$property, 'transform', 'translate3d(0,0,0)')
 							])),
 						_Utils_Tuple2(
@@ -10064,7 +10493,7 @@ var $perzanko$elm_loading$Loading$Bars$view = function (config) {
 								A2(
 								$rtfeldman$elm_css$Css$Animations$property,
 								'height',
-								$elm$core$String$fromFloat(config.dV / 3.5) + 'px'),
+								$elm$core$String$fromFloat(config.dZ / 3.5) + 'px'),
 								A2($rtfeldman$elm_css$Css$Animations$property, 'transform', 'translate3d(0,0,0)')
 							]))
 					])))
@@ -10074,7 +10503,7 @@ var $perzanko$elm_loading$Loading$Bars$view = function (config) {
 		_List_fromArray(
 			[
 				$rtfeldman$elm_css$Html$Styled$Attributes$css(outerStyle),
-				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.cf)
+				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.co)
 			]),
 		_List_fromArray(
 			[
@@ -10128,21 +10557,21 @@ var $perzanko$elm_loading$Loading$Bars$view = function (config) {
 				_List_Nil)
 			]));
 };
-var $rtfeldman$elm_css$Css$block = {h: 0, S: 'block'};
+var $rtfeldman$elm_css$Css$block = {h: 0, T: 'block'};
 var $rtfeldman$elm_css$Css$center = $rtfeldman$elm_css$Css$prop1('center');
 var $rtfeldman$elm_css$Css$display = $rtfeldman$elm_css$Css$prop1('display');
 var $rtfeldman$elm_css$Css$PercentageUnits = 0;
 var $rtfeldman$elm_css$Css$pct = A2($rtfeldman$elm_css$Css$Internal$lengthConverter, 0, '%');
 var $perzanko$elm_loading$Loading$BouncingBalls$view = function (config) {
 	var withSpeed = function (x) {
-		return $elm$core$String$fromFloat(x / config.cU);
+		return $elm$core$String$fromFloat(x / config.c_);
 	};
 	var outerStyle = _List_fromArray(
 		[
 			$rtfeldman$elm_css$Css$width(
-			$rtfeldman$elm_css$Css$px(config.dV)),
+			$rtfeldman$elm_css$Css$px(config.dZ)),
 			$rtfeldman$elm_css$Css$height(
-			$rtfeldman$elm_css$Css$px(config.dV)),
+			$rtfeldman$elm_css$Css$px(config.dZ)),
 			$rtfeldman$elm_css$Css$position($rtfeldman$elm_css$Css$relative),
 			A2(
 			$rtfeldman$elm_css$Css$margin2,
@@ -10156,13 +10585,13 @@ var $perzanko$elm_loading$Loading$BouncingBalls$view = function (config) {
 		[
 			$rtfeldman$elm_css$Css$display($rtfeldman$elm_css$Css$block),
 			$rtfeldman$elm_css$Css$width(
-			$rtfeldman$elm_css$Css$px(config.dV / 3.5)),
+			$rtfeldman$elm_css$Css$px(config.dZ / 3.5)),
 			$rtfeldman$elm_css$Css$height(
-			$rtfeldman$elm_css$Css$px(config.dV / 3.5)),
+			$rtfeldman$elm_css$Css$px(config.dZ / 3.5)),
 			$rtfeldman$elm_css$Css$borderRadius(
 			$rtfeldman$elm_css$Css$pct(100)),
 			$rtfeldman$elm_css$Css$backgroundColor(
-			$rtfeldman$elm_css$Css$hex(config.dd)),
+			$rtfeldman$elm_css$Css$hex(config.dj)),
 			A2(
 			$rtfeldman$elm_css$Css$property,
 			'animation-duration',
@@ -10190,7 +10619,7 @@ var $perzanko$elm_loading$Loading$BouncingBalls$view = function (config) {
 								A2(
 								$rtfeldman$elm_css$Css$Animations$property,
 								'transform',
-								'translate3d(0,0,0) translateZ(0) translate(0,' + ($elm$core$String$fromFloat(config.dV / 3.5) + 'px)'))
+								'translate3d(0,0,0) translateZ(0) translate(0,' + ($elm$core$String$fromFloat(config.dZ / 3.5) + 'px)'))
 							])),
 						_Utils_Tuple2(
 						100,
@@ -10205,7 +10634,7 @@ var $perzanko$elm_loading$Loading$BouncingBalls$view = function (config) {
 		_List_fromArray(
 			[
 				$rtfeldman$elm_css$Html$Styled$Attributes$css(outerStyle),
-				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.cf)
+				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.co)
 			]),
 		_List_fromArray(
 			[
@@ -10259,33 +10688,33 @@ var $perzanko$elm_loading$Loading$BouncingBalls$view = function (config) {
 				_List_Nil)
 			]));
 };
-var $rtfeldman$elm_css$Css$absolute = {f: 0, S: 'absolute'};
+var $rtfeldman$elm_css$Css$absolute = {d: 0, T: 'absolute'};
 var $rtfeldman$elm_css$Css$left = $rtfeldman$elm_css$Css$prop1('left');
 var $rtfeldman$elm_css$Css$UnitlessFloat = 0;
 var $rtfeldman$elm_css$Css$num = function (val) {
 	return {
-		aj: 0,
-		P: 0,
-		a9: 0,
-		bt: 0,
-		ac: val,
-		aX: '',
-		bi: 0,
-		S: $elm$core$String$fromFloat(val)
+		ak: 0,
+		Q: 0,
+		bd: 0,
+		bx: 0,
+		ad: val,
+		aZ: '',
+		bm: 0,
+		T: $elm$core$String$fromFloat(val)
 	};
 };
 var $rtfeldman$elm_css$Css$opacity = $rtfeldman$elm_css$Css$prop1('opacity');
 var $rtfeldman$elm_css$Css$top = $rtfeldman$elm_css$Css$prop1('top');
 var $perzanko$elm_loading$Loading$Circle$view = function (config) {
 	var withSpeed = function (x) {
-		return $elm$core$String$fromFloat(x / config.cU);
+		return $elm$core$String$fromFloat(x / config.c_);
 	};
 	var outerStyle = _List_fromArray(
 		[
 			$rtfeldman$elm_css$Css$width(
-			$rtfeldman$elm_css$Css$px(config.dV)),
+			$rtfeldman$elm_css$Css$px(config.dZ)),
 			$rtfeldman$elm_css$Css$height(
-			$rtfeldman$elm_css$Css$px(config.dV * 0.95)),
+			$rtfeldman$elm_css$Css$px(config.dZ * 0.95)),
 			$rtfeldman$elm_css$Css$position($rtfeldman$elm_css$Css$relative),
 			A2(
 			$rtfeldman$elm_css$Css$margin2,
@@ -10295,9 +10724,9 @@ var $perzanko$elm_loading$Loading$Circle$view = function (config) {
 	var childStyle = _List_fromArray(
 		[
 			$rtfeldman$elm_css$Css$width(
-			$rtfeldman$elm_css$Css$px(config.dV - (2 * (config.dV * 0.17)))),
+			$rtfeldman$elm_css$Css$px(config.dZ - (2 * (config.dZ * 0.17)))),
 			$rtfeldman$elm_css$Css$height(
-			$rtfeldman$elm_css$Css$px(config.dV - (2 * (config.dV * 0.17)))),
+			$rtfeldman$elm_css$Css$px(config.dZ - (2 * (config.dZ * 0.17)))),
 			$rtfeldman$elm_css$Css$borderRadius(
 			$rtfeldman$elm_css$Css$pct(50)),
 			$rtfeldman$elm_css$Css$position($rtfeldman$elm_css$Css$absolute),
@@ -10334,7 +10763,7 @@ var $perzanko$elm_loading$Loading$Circle$view = function (config) {
 		_List_fromArray(
 			[
 				$rtfeldman$elm_css$Html$Styled$Attributes$css(outerStyle),
-				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.cf)
+				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.co)
 			]),
 		_List_fromArray(
 			[
@@ -10352,7 +10781,7 @@ var $perzanko$elm_loading$Loading$Circle$view = function (config) {
 										A2(
 										$rtfeldman$elm_css$Css$property,
 										'border',
-										$elm$core$String$fromFloat(config.dV * 0.17) + ('px ' + (config.dd + ' solid'))),
+										$elm$core$String$fromFloat(config.dZ * 0.17) + ('px ' + (config.dj + ' solid'))),
 										$rtfeldman$elm_css$Css$opacity(
 										$rtfeldman$elm_css$Css$num(0.25))
 									])
@@ -10373,11 +10802,11 @@ var $perzanko$elm_loading$Loading$Circle$view = function (config) {
 										A2(
 										$rtfeldman$elm_css$Css$property,
 										'border',
-										$elm$core$String$fromFloat(config.dV * 0.17) + 'px transparent solid'),
+										$elm$core$String$fromFloat(config.dZ * 0.17) + 'px transparent solid'),
 										A2(
 										$rtfeldman$elm_css$Css$property,
 										'border-top',
-										$elm$core$String$fromFloat(config.dV * 0.17) + ('px ' + (config.dd + ' solid'))),
+										$elm$core$String$fromFloat(config.dZ * 0.17) + ('px ' + (config.dj + ' solid'))),
 										$rtfeldman$elm_css$Css$opacity(
 										$rtfeldman$elm_css$Css$num(0.8))
 									])
@@ -10390,9 +10819,9 @@ var $perzanko$elm_loading$Loading$DoubleBounce$view = function (config) {
 	var outerStyle = _List_fromArray(
 		[
 			$rtfeldman$elm_css$Css$width(
-			$rtfeldman$elm_css$Css$px(config.dV)),
+			$rtfeldman$elm_css$Css$px(config.dZ)),
 			$rtfeldman$elm_css$Css$height(
-			$rtfeldman$elm_css$Css$px(config.dV)),
+			$rtfeldman$elm_css$Css$px(config.dZ)),
 			$rtfeldman$elm_css$Css$position($rtfeldman$elm_css$Css$relative),
 			A2(
 			$rtfeldman$elm_css$Css$margin2,
@@ -10408,7 +10837,7 @@ var $perzanko$elm_loading$Loading$DoubleBounce$view = function (config) {
 			$rtfeldman$elm_css$Css$borderRadius(
 			$rtfeldman$elm_css$Css$pct(50)),
 			$rtfeldman$elm_css$Css$backgroundColor(
-			$rtfeldman$elm_css$Css$hex(config.dd)),
+			$rtfeldman$elm_css$Css$hex(config.dj)),
 			$rtfeldman$elm_css$Css$opacity(
 			$rtfeldman$elm_css$Css$num(0.6)),
 			$rtfeldman$elm_css$Css$position($rtfeldman$elm_css$Css$absolute),
@@ -10442,7 +10871,7 @@ var $perzanko$elm_loading$Loading$DoubleBounce$view = function (config) {
 			A2(
 			$rtfeldman$elm_css$Css$property,
 			'animation-duration',
-			$elm$core$String$fromFloat(2 / config.cU) + 's'),
+			$elm$core$String$fromFloat(2 / config.c_) + 's'),
 			A2($rtfeldman$elm_css$Css$property, 'animation-timing-function', 'ease-in-out'),
 			A2($rtfeldman$elm_css$Css$property, 'animation-iteration-count', 'infinite')
 		]);
@@ -10451,7 +10880,7 @@ var $perzanko$elm_loading$Loading$DoubleBounce$view = function (config) {
 		_List_fromArray(
 			[
 				$rtfeldman$elm_css$Html$Styled$Attributes$css(outerStyle),
-				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.cf)
+				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.co)
 			]),
 		_List_fromArray(
 			[
@@ -10476,7 +10905,7 @@ var $perzanko$elm_loading$Loading$DoubleBounce$view = function (config) {
 										A2(
 										$rtfeldman$elm_css$Css$property,
 										'animation-delay',
-										'-' + ($elm$core$String$fromFloat(1 / config.cU) + 's'))
+										'-' + ($elm$core$String$fromFloat(1 / config.c_) + 's'))
 									])
 								])))
 					]),
@@ -10502,21 +10931,21 @@ var $rtfeldman$elm_css$Css$prop3 = F4(
 				$elm$core$String$join,
 				' ',
 				_List_fromArray(
-					[argA.S, argB.S, argC.S])));
+					[argA.T, argB.T, argC.T])));
 	});
 var $rtfeldman$elm_css$Css$border3 = $rtfeldman$elm_css$Css$prop3('border');
 var $rtfeldman$elm_css$Css$Animations$opacity = function (_v0) {
-	var value = _v0.S;
+	var value = _v0.T;
 	return 'opacity:' + value;
 };
-var $rtfeldman$elm_css$Css$solid = {x: 0, ao: 0, S: 'solid'};
+var $rtfeldman$elm_css$Css$solid = {y: 0, ap: 0, T: 'solid'};
 var $perzanko$elm_loading$Loading$Sonar$view = function (config) {
 	var outerStyle = _List_fromArray(
 		[
 			$rtfeldman$elm_css$Css$width(
-			$rtfeldman$elm_css$Css$px(config.dV)),
+			$rtfeldman$elm_css$Css$px(config.dZ)),
 			$rtfeldman$elm_css$Css$height(
-			$rtfeldman$elm_css$Css$px(config.dV)),
+			$rtfeldman$elm_css$Css$px(config.dZ)),
 			$rtfeldman$elm_css$Css$position($rtfeldman$elm_css$Css$relative),
 			A2(
 			$rtfeldman$elm_css$Css$margin2,
@@ -10530,23 +10959,23 @@ var $perzanko$elm_loading$Loading$Sonar$view = function (config) {
 					$rtfeldman$elm_css$Css$borderRadius(
 					$rtfeldman$elm_css$Css$pct(50)),
 					$rtfeldman$elm_css$Css$width(
-					$rtfeldman$elm_css$Css$px(config.dV / 3)),
+					$rtfeldman$elm_css$Css$px(config.dZ / 3)),
 					$rtfeldman$elm_css$Css$height(
-					$rtfeldman$elm_css$Css$px(config.dV / 3)),
+					$rtfeldman$elm_css$Css$px(config.dZ / 3)),
 					A2(
 					$rtfeldman$elm_css$Css$property,
 					'top',
-					'calc(50% - ' + ($elm$core$String$fromFloat(config.dV / 6) + 'px)')),
+					'calc(50% - ' + ($elm$core$String$fromFloat(config.dZ / 6) + 'px)')),
 					A2(
 					$rtfeldman$elm_css$Css$property,
 					'left',
-					'calc(50% - ' + ($elm$core$String$fromFloat(config.dV / 6) + 'px)')),
+					'calc(50% - ' + ($elm$core$String$fromFloat(config.dZ / 6) + 'px)')),
 					$rtfeldman$elm_css$Css$backgroundColor(
-					$rtfeldman$elm_css$Css$hex(config.dd)),
+					$rtfeldman$elm_css$Css$hex(config.dj)),
 					A2(
 					$rtfeldman$elm_css$Css$property,
 					'animation-duration',
-					$elm$core$String$fromFloat(3 / config.cU) + 's'),
+					$elm$core$String$fromFloat(3 / config.c_) + 's'),
 					A2($rtfeldman$elm_css$Css$property, 'animation-timing-funtion', 'linear'),
 					A2($rtfeldman$elm_css$Css$property, 'animation-iteration-count', 'infinite'),
 					$rtfeldman$elm_css$Css$animationName(
@@ -10609,28 +11038,28 @@ var $perzanko$elm_loading$Loading$Sonar$view = function (config) {
 					$rtfeldman$elm_css$Css$borderRadius(
 					$rtfeldman$elm_css$Css$pct(50)),
 					$rtfeldman$elm_css$Css$width(
-					$rtfeldman$elm_css$Css$px(config.dV / 3)),
+					$rtfeldman$elm_css$Css$px(config.dZ / 3)),
 					$rtfeldman$elm_css$Css$height(
-					$rtfeldman$elm_css$Css$px(config.dV / 3)),
+					$rtfeldman$elm_css$Css$px(config.dZ / 3)),
 					A2(
 					$rtfeldman$elm_css$Css$property,
 					'top',
-					'calc(50% - ' + ($elm$core$String$fromFloat(config.dV / 6) + 'px)')),
+					'calc(50% - ' + ($elm$core$String$fromFloat(config.dZ / 6) + 'px)')),
 					A2(
 					$rtfeldman$elm_css$Css$property,
 					'left',
-					'calc(50% - ' + ($elm$core$String$fromFloat(config.dV / 6) + 'px)')),
+					'calc(50% - ' + ($elm$core$String$fromFloat(config.dZ / 6) + 'px)')),
 					A3(
 					$rtfeldman$elm_css$Css$border3,
 					$rtfeldman$elm_css$Css$px(1),
 					$rtfeldman$elm_css$Css$solid,
-					$rtfeldman$elm_css$Css$hex(config.dd)),
+					$rtfeldman$elm_css$Css$hex(config.dj)),
 					$rtfeldman$elm_css$Css$opacity(
 					$rtfeldman$elm_css$Css$num(0)),
 					A2(
 					$rtfeldman$elm_css$Css$property,
 					'animation-duration',
-					$elm$core$String$fromFloat(3 / config.cU) + 's'),
+					$elm$core$String$fromFloat(3 / config.c_) + 's'),
 					A2($rtfeldman$elm_css$Css$property, 'animation-timing-funtion', 'linear'),
 					A2($rtfeldman$elm_css$Css$property, 'animation-iteration-count', 'infinite'),
 					$rtfeldman$elm_css$Css$animationName(
@@ -10681,7 +11110,7 @@ var $perzanko$elm_loading$Loading$Sonar$view = function (config) {
 		_List_fromArray(
 			[
 				$rtfeldman$elm_css$Html$Styled$Attributes$css(outerStyle),
-				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.cf)
+				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.co)
 			]),
 		_List_Nil);
 };
@@ -10689,9 +11118,9 @@ var $perzanko$elm_loading$Loading$Spinner$view = function (config) {
 	var outerStyle = _List_fromArray(
 		[
 			$rtfeldman$elm_css$Css$width(
-			$rtfeldman$elm_css$Css$px(config.dV)),
+			$rtfeldman$elm_css$Css$px(config.dZ)),
 			$rtfeldman$elm_css$Css$height(
-			$rtfeldman$elm_css$Css$px(config.dV)),
+			$rtfeldman$elm_css$Css$px(config.dZ)),
 			$rtfeldman$elm_css$Css$position($rtfeldman$elm_css$Css$relative),
 			A2(
 			$rtfeldman$elm_css$Css$margin2,
@@ -10707,14 +11136,14 @@ var $perzanko$elm_loading$Loading$Spinner$view = function (config) {
 			$rtfeldman$elm_css$Css$pct(100))
 		]);
 	var calcAnimationDelay = function (x) {
-		return (x === 1) ? '0s' : ($elm$core$String$fromFloat(-((1.1 - (x / 10)) / config.cU)) + 's');
+		return (x === 1) ? '0s' : ($elm$core$String$fromFloat(-((1.1 - (x / 10)) / config.c_)) + 's');
 	};
 	return A2(
 		$rtfeldman$elm_css$Html$Styled$div,
 		_List_fromArray(
 			[
 				$rtfeldman$elm_css$Html$Styled$Attributes$css(outerStyle),
-				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.cf)
+				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.co)
 			]),
 		_List_fromArray(
 			[
@@ -10765,13 +11194,13 @@ var $perzanko$elm_loading$Loading$Spinner$view = function (config) {
 													$rtfeldman$elm_css$Css$height(
 													$rtfeldman$elm_css$Css$pct(15)),
 													$rtfeldman$elm_css$Css$backgroundColor(
-													$rtfeldman$elm_css$Css$hex(config.dd)),
+													$rtfeldman$elm_css$Css$hex(config.dj)),
 													$rtfeldman$elm_css$Css$borderRadius(
 													$rtfeldman$elm_css$Css$pct(100)),
 													A2(
 													$rtfeldman$elm_css$Css$property,
 													'animation-duration',
-													$elm$core$String$fromFloat(1.2 / config.cU) + 's'),
+													$elm$core$String$fromFloat(1.2 / config.c_) + 's'),
 													A2($rtfeldman$elm_css$Css$property, 'animation-iteration-count', 'infinite'),
 													A2($rtfeldman$elm_css$Css$property, 'animation-fill-mode', 'both'),
 													$rtfeldman$elm_css$Css$animationName(
@@ -10858,7 +11287,7 @@ var $author$project$Main$mapField = function (model) {
 			]),
 		_Utils_ap(
 			function () {
-				var _v0 = model.I;
+				var _v0 = model.J;
 				switch (_v0) {
 					case 1:
 						return _List_fromArray(
@@ -10868,7 +11297,7 @@ var $author$project$Main$mapField = function (model) {
 								5,
 								_Utils_update(
 									$perzanko$elm_loading$Loading$defaultConfig,
-									{dd: '#60a5fa'}),
+									{dj: '#60a5fa'}),
 								0)
 							]);
 					case 0:
@@ -10896,13 +11325,13 @@ var $author$project$Main$mapField = function (model) {
 							$elm$html$Html$Attributes$classList(
 							_List_fromArray(
 								[
-									_Utils_Tuple2('max-w-0', !model.ak),
-									_Utils_Tuple2('max-w-xs border-2 px-4 py-2', model.ak),
-									_Utils_Tuple2('border-red-600', model.I === 2),
-									_Utils_Tuple2('border-primary', model.I !== 2)
+									_Utils_Tuple2('max-w-0', !model.al),
+									_Utils_Tuple2('max-w-xs border-2 px-4 py-2', model.al),
+									_Utils_Tuple2('border-red-600', model.J === 2),
+									_Utils_Tuple2('border-primary', model.J !== 2)
 								])),
 							$elm$html$Html$Attributes$class('w-max rounded-full shadow-lg transition-color focus:border-blue-600 focus-visible:border-blue-600 transition-all mx-2'),
-							$elm$html$Html$Attributes$value(model.F),
+							$elm$html$Html$Attributes$value(model.G),
 							$elm$html$Html$Events$onInput($author$project$Main$TrySettingBackground)
 						]),
 					_List_Nil),
@@ -10912,32 +11341,48 @@ var $author$project$Main$mapField = function (model) {
 						[
 							$elm$html$Html$Attributes$class('rounded-full shadow-lg bg-blue-400 text-yellow-300 p-4 text-center'),
 							$elm$html$Html$Events$onClick(
-							$author$project$Main$SetMapFieldVisible(!model.ak))
+							$author$project$Main$SetMapFieldVisible(!model.al))
 						]),
 					_List_fromArray(
 						[$author$project$Icons$mapIcon]))
 				])));
 };
-var $author$project$Main$MouseEvent = F2(
-	function (position, movement) {
-		return {cA: movement, f: position};
+var $author$project$Main$MouseEvent = F3(
+	function (position, movement, button) {
+		return {az: button, cG: movement, d: position};
 	});
-var $elm$json$Json$Decode$map4 = _Json_map4;
+var $author$project$Main$Other = 3;
+var $author$project$Main$Wheel = 2;
+var $elm$json$Json$Decode$int = _Json_decodeInt;
+var $elm$json$Json$Decode$map5 = _Json_map5;
 var $author$project$Main$mouseDecoder = function (msg) {
-	return A5(
-		$elm$json$Json$Decode$map4,
-		F4(
-			function (offsetX, offsetY, movementX, movementY) {
+	return A6(
+		$elm$json$Json$Decode$map5,
+		F5(
+			function (offsetX, offsetY, movementX, movementY, button) {
 				return msg(
-					A2(
+					A3(
 						$author$project$Main$MouseEvent,
 						A2($author$project$Main$Point, offsetX, offsetY),
-						A2($author$project$Main$Point, movementX, movementY)));
+						A2($author$project$Main$Point, movementX, movementY),
+						function () {
+							switch (button) {
+								case 0:
+									return 0;
+								case 1:
+									return 2;
+								case 2:
+									return 1;
+								default:
+									return 3;
+							}
+						}()));
 			}),
 		A2($elm$json$Json$Decode$field, 'offsetX', $elm$json$Json$Decode$float),
 		A2($elm$json$Json$Decode$field, 'offsetY', $elm$json$Json$Decode$float),
 		A2($elm$json$Json$Decode$field, 'movementX', $elm$json$Json$Decode$float),
-		A2($elm$json$Json$Decode$field, 'movementY', $elm$json$Json$Decode$float));
+		A2($elm$json$Json$Decode$field, 'movementY', $elm$json$Json$Decode$float),
+		A2($elm$json$Json$Decode$field, 'button', $elm$json$Json$Decode$int));
 };
 var $joakin$elm_canvas$Canvas$Settings$Advanced$Scale = F2(
 	function (a, b) {
@@ -10967,50 +11412,7 @@ var $elm$html$Html$Attributes$height = function (n) {
 };
 var $elm$html$Html$Keyed$node = $elm$virtual_dom$VirtualDom$keyedNode;
 var $joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$empty = _List_Nil;
-var $elm$json$Json$Encode$object = function (pairs) {
-	return _Json_wrap(
-		A3(
-			$elm$core$List$foldl,
-			F2(
-				function (_v0, obj) {
-					var k = _v0.a;
-					var v = _v0.b;
-					return A3(_Json_addField, k, v, obj);
-				}),
-			_Json_emptyObject(0),
-			pairs));
-};
-var $joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$fn = F2(
-	function (name, args) {
-		return $elm$json$Json$Encode$object(
-			_List_fromArray(
-				[
-					_Utils_Tuple2(
-					'type',
-					$elm$json$Json$Encode$string('function')),
-					_Utils_Tuple2(
-					'name',
-					$elm$json$Json$Encode$string(name)),
-					_Utils_Tuple2(
-					'args',
-					A2($elm$json$Json$Encode$list, $elm$core$Basics$identity, args))
-				]));
-	});
 var $joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$beginPath = A2($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$fn, 'beginPath', _List_Nil);
-var $joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$field = F2(
-	function (name, value) {
-		return $elm$json$Json$Encode$object(
-			_List_fromArray(
-				[
-					_Utils_Tuple2(
-					'type',
-					$elm$json$Json$Encode$string('field')),
-					_Utils_Tuple2(
-					'name',
-					$elm$json$Json$Encode$string(name)),
-					_Utils_Tuple2('value', value)
-				]));
-	});
 var $elm$core$String$concat = function (strings) {
 	return A2($elm$core$String$join, '', strings);
 };
@@ -11051,7 +11453,6 @@ var $joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$fillStyle = function
 		$elm$json$Json$Encode$string(
 			$avh4$elm_color$Color$toCssString(color)));
 };
-var $elm$json$Json$Encode$float = _Json_wrap;
 var $joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$clearRect = F4(
 	function (x, y, width, height) {
 		return A2(
@@ -11421,7 +11822,7 @@ var $joakin$elm_canvas$Canvas$renderTextFill = F5(
 	function (txt, x, y, maybeColor, cmds) {
 		return A2(
 			$elm$core$List$cons,
-			A4($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$fillText, txt.b_, x, y, txt.bN),
+			A4($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$fillText, txt.b7, x, y, txt.bW),
 			function () {
 				if (!maybeColor.$) {
 					var color = maybeColor.a;
@@ -11464,7 +11865,7 @@ var $joakin$elm_canvas$Canvas$renderTextStroke = F5(
 	function (txt, x, y, maybeColor, cmds) {
 		return A2(
 			$elm$core$List$cons,
-			A4($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$strokeText, txt.b_, x, y, txt.bN),
+			A4($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$strokeText, txt.b7, x, y, txt.bW),
 			function () {
 				if (!maybeColor.$) {
 					var color = maybeColor.a;
@@ -11479,7 +11880,7 @@ var $joakin$elm_canvas$Canvas$renderTextStroke = F5(
 	});
 var $joakin$elm_canvas$Canvas$renderTextDrawOp = F3(
 	function (drawOp, txt, cmds) {
-		var _v0 = txt.cG;
+		var _v0 = txt.cM;
 		var x = _v0.a;
 		var y = _v0.b;
 		switch (drawOp.$) {
@@ -11556,11 +11957,11 @@ var $joakin$elm_canvas$Canvas$Internal$Texture$drawTexture = F4(
 			function () {
 				if (!t.$) {
 					var image = t.a;
-					return A9($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$drawImage, 0, 0, image.q, image.o, x, y, image.q, image.o, image.bq);
+					return A9($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$drawImage, 0, 0, image.r, image.p, x, y, image.r, image.p, image.bu);
 				} else {
 					var sprite = t.a;
 					var image = t.b;
-					return A9($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$drawImage, sprite.C, sprite.D, sprite.q, sprite.o, x, y, sprite.q, sprite.o, image.bq);
+					return A9($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$drawImage, sprite.v, sprite.w, sprite.r, sprite.p, x, y, sprite.r, sprite.p, image.bu);
 				}
 			}(),
 			cmds);
@@ -11641,9 +12042,9 @@ var $joakin$elm_canvas$Canvas$renderGroup = F3(
 	});
 var $joakin$elm_canvas$Canvas$renderOne = F3(
 	function (parentDrawOp, _v0, cmds) {
-		var commands = _v0.H;
-		var drawable = _v0.W;
-		var drawOp = _v0.V;
+		var commands = _v0.I;
+		var drawable = _v0.X;
+		var drawOp = _v0.W;
 		return A2(
 			$elm$core$List$cons,
 			$joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$restore,
@@ -11684,7 +12085,7 @@ var $joakin$elm_canvas$Canvas$Internal$Texture$decodeTextureImage = A2(
 				function (tagName, width, height) {
 					return (tagName === 'IMG') ? $elm$core$Maybe$Just(
 						$joakin$elm_canvas$Canvas$Internal$Texture$TImage(
-							{o: height, bq: image, q: width})) : $elm$core$Maybe$Nothing;
+							{p: height, bu: image, r: width})) : $elm$core$Maybe$Nothing;
 				}),
 			A2($elm$json$Json$Decode$field, 'tagName', $elm$json$Json$Decode$string),
 			A2($elm$json$Json$Decode$field, 'width', $elm$json$Json$Decode$float),
@@ -11742,15 +12143,15 @@ var $joakin$elm_canvas$Canvas$toHtmlWith = F3(
 					$joakin$elm_canvas$Canvas$render(entities)),
 				A2(
 					$elm$core$List$cons,
-					$elm$html$Html$Attributes$height(options.o),
+					$elm$html$Html$Attributes$height(options.p),
 					A2(
 						$elm$core$List$cons,
-						$elm$html$Html$Attributes$width(options.q),
+						$elm$html$Html$Attributes$width(options.r),
 						attrs))),
 			A2(
 				$elm$core$List$cons,
 				_Utils_Tuple2('__canvas', $joakin$elm_canvas$Canvas$cnvs),
-				A2($elm$core$List$map, $joakin$elm_canvas$Canvas$renderTextureSource, options.d0)));
+				A2($elm$core$List$map, $joakin$elm_canvas$Canvas$renderTextureSource, options.d3)));
 	});
 var $joakin$elm_canvas$Canvas$Internal$Canvas$SettingCommands = function (a) {
 	return {$: 1, a: a};
@@ -11819,12 +12220,12 @@ var $joakin$elm_canvas$Canvas$Settings$Advanced$transform = function (transforms
 						var y = t.b;
 						return A2($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$translate, x, y);
 					default:
-						var m11 = t.a.dB;
-						var m12 = t.a.dC;
-						var m21 = t.a.dD;
-						var m22 = t.a.dE;
-						var dx = t.a.dl;
-						var dy = t.a.dm;
+						var m11 = t.a.dF;
+						var m12 = t.a.dG;
+						var m21 = t.a.dH;
+						var m22 = t.a.dI;
+						var dx = t.a.dr;
+						var dy = t.a.ds;
 						return A6($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$transform, m11, m12, m21, m22, dx, dy);
 				}
 			},
@@ -11835,6 +12236,18 @@ var $joakin$elm_canvas$Canvas$Settings$Advanced$Translate = F2(
 		return {$: 2, a: a, b: b};
 	});
 var $joakin$elm_canvas$Canvas$Settings$Advanced$translate = $joakin$elm_canvas$Canvas$Settings$Advanced$Translate;
+var $joakin$elm_canvas$Canvas$Internal$Canvas$Circle = F2(
+	function (a, b) {
+		return {$: 1, a: a, b: b};
+	});
+var $joakin$elm_canvas$Canvas$circle = F2(
+	function (pos, radius) {
+		return A2($joakin$elm_canvas$Canvas$Internal$Canvas$Circle, pos, radius);
+	});
+var $joakin$elm_canvas$Canvas$Settings$fill = function (color) {
+	return $joakin$elm_canvas$Canvas$Internal$Canvas$SettingDrawOp(
+		$joakin$elm_canvas$Canvas$Internal$Canvas$Fill(color));
+};
 var $ianmackenzie$elm_units$Quantity$greaterThan = F2(
 	function (_v0, _v1) {
 		var y = _v0;
@@ -11870,12 +12283,12 @@ var $mdgriffith$elm_animator$Internal$Timeline$adjustTime = F4(
 			var nextStartTime = _v1.b;
 			var personality = getPersonality(
 				lookup(event));
-			if (!(!personality.di)) {
+			if (!(!personality.$7)) {
 				var totalDuration = A2($mdgriffith$elm_animator$Internal$Time$duration, eventEnd, nextStartTime);
 				var nextPersonality = getPersonality(
 					lookup(next));
-				var totalPortions = A2($elm$core$Basics$max, personality.di + nextPersonality.c8, 1);
-				var lateBy = A2($ianmackenzie$elm_units$Quantity$multiplyBy, personality.di / totalPortions, totalDuration);
+				var totalPortions = A2($elm$core$Basics$max, personality.$7 + nextPersonality.de, 1);
+				var lateBy = A2($ianmackenzie$elm_units$Quantity$multiplyBy, personality.$7 / totalPortions, totalDuration);
 				return A3(
 					$mdgriffith$elm_animator$Internal$Timeline$Occurring,
 					event,
@@ -11916,8 +12329,8 @@ var $mdgriffith$elm_animator$Internal$Timeline$adjustTimeWithPrevious = F5(
 			lookup(prev));
 		var personality = getPersonality(
 			lookup(event));
-		var totalPrevPortions = A2($elm$core$Basics$max, prevPersonality.di + personality.c8, 1);
-		var earlyBy = A2($ianmackenzie$elm_units$Quantity$multiplyBy, personality.c8 / totalPrevPortions, totalPrevDuration);
+		var totalPrevPortions = A2($elm$core$Basics$max, prevPersonality.$7 + personality.de, 1);
+		var earlyBy = A2($ianmackenzie$elm_units$Quantity$multiplyBy, personality.de / totalPrevPortions, totalPrevDuration);
 		if (!upcomingOccurring.b) {
 			return $mdgriffith$elm_animator$Internal$Time$zeroDuration(earlyBy) ? unmodified : A3(
 				$mdgriffith$elm_animator$Internal$Timeline$Occurring,
@@ -11928,12 +12341,12 @@ var $mdgriffith$elm_animator$Internal$Timeline$adjustTimeWithPrevious = F5(
 			var _v2 = upcomingOccurring.a;
 			var next = _v2.a;
 			var nextStartTime = _v2.b;
-			if (!(!personality.di)) {
+			if (!(!personality.$7)) {
 				var totalDuration = A2($mdgriffith$elm_animator$Internal$Time$duration, eventEnd, nextStartTime);
 				var nextPersonality = getPersonality(
 					lookup(next));
-				var totalPortions = A2($elm$core$Basics$max, personality.di + nextPersonality.c8, 1);
-				var lateBy = A2($ianmackenzie$elm_units$Quantity$multiplyBy, personality.di / totalPortions, totalDuration);
+				var totalPortions = A2($elm$core$Basics$max, personality.$7 + nextPersonality.de, 1);
+				var lateBy = A2($ianmackenzie$elm_units$Quantity$multiplyBy, personality.$7 / totalPortions, totalDuration);
 				return A3(
 					$mdgriffith$elm_animator$Internal$Timeline$Occurring,
 					event,
@@ -11964,13 +12377,13 @@ var $mdgriffith$elm_animator$Internal$Timeline$createLookAhead = F4(
 		} else {
 			var unadjustedUpcoming = upcomingEvents.a;
 			var remain = upcomingEvents.b;
-			var upcomingOccurring = A5($mdgriffith$elm_animator$Internal$Timeline$adjustTimeWithPrevious, lookup, fn.bE, currentEvent, unadjustedUpcoming, remain);
+			var upcomingOccurring = A5($mdgriffith$elm_animator$Internal$Timeline$adjustTimeWithPrevious, lookup, fn.bK, currentEvent, unadjustedUpcoming, remain);
 			return $elm$core$Maybe$Just(
 				{
-					c5: lookup(
+					db: lookup(
 						$mdgriffith$elm_animator$Internal$Timeline$getEvent(upcomingOccurring)),
-					dQ: $mdgriffith$elm_animator$Internal$Timeline$hasDwell(upcomingOccurring),
-					cY: $mdgriffith$elm_animator$Internal$Time$inMilliseconds(
+					dU: $mdgriffith$elm_animator$Internal$Timeline$hasDwell(upcomingOccurring),
+					c2: $mdgriffith$elm_animator$Internal$Time$inMilliseconds(
 						$mdgriffith$elm_animator$Internal$Timeline$startTime(upcomingOccurring))
 				});
 		}
@@ -11991,27 +12404,27 @@ var $mdgriffith$elm_animator$Internal$Timeline$overLines = F7(
 					var futureStartEv = future.b;
 					var futureRemain = future.c;
 					var restOfFuture = futureLines.b;
-					return A2($mdgriffith$elm_animator$Internal$Time$thisBeforeOrEqualThat, futureStart, details.cC) ? A7($mdgriffith$elm_animator$Internal$Timeline$overLines, fn, lookup, details, $elm$core$Maybe$Nothing, future, restOfFuture, newState) : newState;
+					return A2($mdgriffith$elm_animator$Internal$Time$thisBeforeOrEqualThat, futureStart, details.cI) ? A7($mdgriffith$elm_animator$Internal$Timeline$overLines, fn, lookup, details, $elm$core$Maybe$Nothing, future, restOfFuture, newState) : newState;
 				}
 			};
 			var now = function () {
 				if (!futureLines.b) {
-					return details.cC;
+					return details.cI;
 				} else {
 					var _v5 = futureLines.a;
 					var futureStart = _v5.a;
 					var futureStartEv = _v5.b;
 					var futureRemain = _v5.c;
 					var restOfFuture = futureLines.b;
-					return A2($mdgriffith$elm_animator$Internal$Time$thisBeforeThat, futureStart, details.cC) ? futureStart : details.cC;
+					return A2($mdgriffith$elm_animator$Internal$Time$thisBeforeThat, futureStart, details.cI) ? futureStart : details.cI;
 				}
 			}();
 			var lineStartEv = function () {
 				if (maybePreviousEvent.$ === 1) {
-					return A4($mdgriffith$elm_animator$Internal$Timeline$adjustTime, lookup, fn.bE, unadjustedStartEvent, lineRemain);
+					return A4($mdgriffith$elm_animator$Internal$Timeline$adjustTime, lookup, fn.bK, unadjustedStartEvent, lineRemain);
 				} else {
 					var prev = maybePreviousEvent.a;
-					return A5($mdgriffith$elm_animator$Internal$Timeline$adjustTimeWithPrevious, lookup, fn.bE, prev, unadjustedStartEvent, lineRemain);
+					return A5($mdgriffith$elm_animator$Internal$Timeline$adjustTimeWithPrevious, lookup, fn.bK, prev, unadjustedStartEvent, lineRemain);
 				}
 			}();
 			if (A2(
@@ -12020,10 +12433,10 @@ var $mdgriffith$elm_animator$Internal$Timeline$overLines = F7(
 				$mdgriffith$elm_animator$Internal$Timeline$startTime(lineStartEv))) {
 				return transition(
 					A7(
-						fn.bM,
+						fn.bV,
 						$mdgriffith$elm_animator$Internal$Time$inMilliseconds(lineStart),
 						$elm$core$Maybe$Just(
-							lookup(details.ct)),
+							lookup(details.cz)),
 						lookup(
 							$mdgriffith$elm_animator$Internal$Timeline$getEvent(lineStartEv)),
 						$mdgriffith$elm_animator$Internal$Time$inMilliseconds(
@@ -12038,7 +12451,7 @@ var $mdgriffith$elm_animator$Internal$Timeline$overLines = F7(
 					$mdgriffith$elm_animator$Internal$Timeline$endTime(lineStartEv))) {
 					return transition(
 						A5(
-							fn.b1,
+							fn.ca,
 							lookup,
 							lineStartEv,
 							now,
@@ -12047,18 +12460,18 @@ var $mdgriffith$elm_animator$Internal$Timeline$overLines = F7(
 				} else {
 					if (!lineRemain.b) {
 						return transition(
-							A5(fn.b1, lookup, lineStartEv, now, $elm$core$Maybe$Nothing, state));
+							A5(fn.ca, lookup, lineStartEv, now, $elm$core$Maybe$Nothing, state));
 					} else {
 						var unadjustedNext = lineRemain.a;
 						var lineRemain2 = lineRemain.b;
-						var next = A5($mdgriffith$elm_animator$Internal$Timeline$adjustTimeWithPrevious, lookup, fn.bE, unadjustedStartEvent, unadjustedNext, lineRemain2);
+						var next = A5($mdgriffith$elm_animator$Internal$Timeline$adjustTimeWithPrevious, lookup, fn.bK, unadjustedStartEvent, unadjustedNext, lineRemain2);
 						if (A2(
 							$mdgriffith$elm_animator$Internal$Time$thisBeforeThat,
 							now,
 							$mdgriffith$elm_animator$Internal$Timeline$startTime(next))) {
 							return transition(
 								A7(
-									fn.bM,
+									fn.bV,
 									$mdgriffith$elm_animator$Internal$Time$inMilliseconds(
 										$mdgriffith$elm_animator$Internal$Timeline$endTime(lineStartEv)),
 									$elm$core$Maybe$Just(
@@ -12071,7 +12484,7 @@ var $mdgriffith$elm_animator$Internal$Timeline$overLines = F7(
 									$mdgriffith$elm_animator$Internal$Time$inMilliseconds(now),
 									A4($mdgriffith$elm_animator$Internal$Timeline$createLookAhead, fn, lookup, unadjustedNext, lineRemain2),
 									A5(
-										fn.b1,
+										fn.ca,
 										lookup,
 										lineStartEv,
 										now,
@@ -12084,7 +12497,7 @@ var $mdgriffith$elm_animator$Internal$Timeline$overLines = F7(
 								$mdgriffith$elm_animator$Internal$Timeline$endTime(next))) {
 								return transition(
 									A5(
-										fn.b1,
+										fn.ca,
 										lookup,
 										next,
 										now,
@@ -12093,17 +12506,17 @@ var $mdgriffith$elm_animator$Internal$Timeline$overLines = F7(
 							} else {
 								if (!lineRemain2.b) {
 									return transition(
-										A5(fn.b1, lookup, next, now, $elm$core$Maybe$Nothing, state));
+										A5(fn.ca, lookup, next, now, $elm$core$Maybe$Nothing, state));
 								} else {
 									var unadjustedNext2 = lineRemain2.a;
 									var lineRemain3 = lineRemain2.b;
-									var next2 = A5($mdgriffith$elm_animator$Internal$Timeline$adjustTimeWithPrevious, lookup, fn.bE, unadjustedNext, unadjustedNext2, lineRemain3);
+									var next2 = A5($mdgriffith$elm_animator$Internal$Timeline$adjustTimeWithPrevious, lookup, fn.bK, unadjustedNext, unadjustedNext2, lineRemain3);
 									if (A2(
 										$mdgriffith$elm_animator$Internal$Time$thisBeforeThat,
 										now,
 										$mdgriffith$elm_animator$Internal$Timeline$startTime(next2))) {
 										var after = A5(
-											fn.b1,
+											fn.ca,
 											lookup,
 											next,
 											now,
@@ -12111,7 +12524,7 @@ var $mdgriffith$elm_animator$Internal$Timeline$overLines = F7(
 											state);
 										return transition(
 											A7(
-												fn.bM,
+												fn.bV,
 												$mdgriffith$elm_animator$Internal$Time$inMilliseconds(
 													$mdgriffith$elm_animator$Internal$Timeline$endTime(next)),
 												$elm$core$Maybe$Just(
@@ -12131,7 +12544,7 @@ var $mdgriffith$elm_animator$Internal$Timeline$overLines = F7(
 											$mdgriffith$elm_animator$Internal$Timeline$endTime(next2))) {
 											return transition(
 												A5(
-													fn.b1,
+													fn.ca,
 													lookup,
 													next2,
 													now,
@@ -12139,7 +12552,7 @@ var $mdgriffith$elm_animator$Internal$Timeline$overLines = F7(
 													state));
 										} else {
 											var after = A5(
-												fn.b1,
+												fn.ca,
 												lookup,
 												next2,
 												now,
@@ -12177,10 +12590,10 @@ var $mdgriffith$elm_animator$Internal$Timeline$overLines = F7(
 var $mdgriffith$elm_animator$Internal$Timeline$foldp = F3(
 	function (lookup, fn, _v0) {
 		var timelineDetails = _v0;
-		var _v1 = timelineDetails.cl;
+		var _v1 = timelineDetails.cs;
 		var timetable = _v1;
-		var start = fn.dW(
-			lookup(timelineDetails.ct));
+		var start = fn.bH(
+			lookup(timelineDetails.cz));
 		if (!timetable.b) {
 			return start;
 		} else {
@@ -12189,76 +12602,6 @@ var $mdgriffith$elm_animator$Internal$Timeline$foldp = F3(
 			return A7($mdgriffith$elm_animator$Internal$Timeline$overLines, fn, lookup, timelineDetails, $elm$core$Maybe$Nothing, firstLine, remainingLines, start);
 		}
 	});
-var $mdgriffith$elm_animator$Internal$Timeline$linearDefault = {c8: 0, c9: 0, di: 0, dj: 0, d5: 0};
-var $mdgriffith$elm_animator$Internal$Timeline$arrived = function (timeline) {
-	var details = timeline;
-	return A3(
-		$mdgriffith$elm_animator$Internal$Timeline$foldp,
-		$elm$core$Basics$identity,
-		{
-			bE: function (_v0) {
-				return $mdgriffith$elm_animator$Internal$Timeline$linearDefault;
-			},
-			bI: function (_v1) {
-				return $elm$core$Maybe$Nothing;
-			},
-			bM: F7(
-				function (_v2, _v3, _v4, _v5, _v6, _v7, state) {
-					return state;
-				}),
-			dW: function (_v8) {
-				return details.ct;
-			},
-			b1: F5(
-				function (lookup, target, targetTime, maybeLookAhead, state) {
-					return $mdgriffith$elm_animator$Internal$Timeline$getEvent(target);
-				})
-		},
-		timeline);
-};
-var $mdgriffith$elm_animator$Animator$arrived = $mdgriffith$elm_animator$Internal$Timeline$arrived;
-var $joakin$elm_canvas$Canvas$Internal$Canvas$Circle = F2(
-	function (a, b) {
-		return {$: 1, a: a, b: b};
-	});
-var $joakin$elm_canvas$Canvas$circle = F2(
-	function (pos, radius) {
-		return A2($joakin$elm_canvas$Canvas$Internal$Canvas$Circle, pos, radius);
-	});
-var $mdgriffith$elm_animator$Internal$Timeline$current = function (timeline) {
-	var details = timeline;
-	return A3(
-		$mdgriffith$elm_animator$Internal$Timeline$foldp,
-		$elm$core$Basics$identity,
-		{
-			bE: function (_v0) {
-				return $mdgriffith$elm_animator$Internal$Timeline$linearDefault;
-			},
-			bI: function (_v1) {
-				return $elm$core$Maybe$Nothing;
-			},
-			bM: F7(
-				function (_v2, _v3, target, _v4, _v5, _v6, _v7) {
-					return target;
-				}),
-			dW: function (_v8) {
-				return details.ct;
-			},
-			b1: F5(
-				function (lookup, target, targetTime, maybeLookAhead, state) {
-					return $mdgriffith$elm_animator$Internal$Timeline$getEvent(target);
-				})
-		},
-		timeline);
-};
-var $mdgriffith$elm_animator$Animator$current = $mdgriffith$elm_animator$Internal$Timeline$current;
-var $joakin$elm_canvas$Canvas$Internal$Canvas$SettingDrawOp = function (a) {
-	return {$: 2, a: a};
-};
-var $joakin$elm_canvas$Canvas$Settings$fill = function (color) {
-	return $joakin$elm_canvas$Canvas$Internal$Canvas$SettingDrawOp(
-		$joakin$elm_canvas$Canvas$Internal$Canvas$Fill(color));
-};
 var $mdgriffith$elm_animator$Internal$Interpolate$dwellPeriod = function (movement) {
 	if (movement.$ === 1) {
 		return $elm$core$Maybe$Nothing;
@@ -12288,19 +12631,19 @@ var $mdgriffith$elm_animator$Internal$Interpolate$Spline = F4(
 	function (a, b, c, d) {
 		return {$: 0, a: a, b: b, c: c, d: d};
 	});
-var $mdgriffith$elm_animator$Internal$Interpolate$zeroPoint = {C: 0, D: 0};
+var $mdgriffith$elm_animator$Internal$Interpolate$zeroPoint = {v: 0, w: 0};
 var $mdgriffith$elm_animator$Internal$Interpolate$createSpline = function (config) {
-	var totalX = config.dp.C - config.dW.C;
-	var startVelScale = 1 / (config.aS.C / totalX);
-	var startVelocity = (!config.a2.dj) ? {C: 0, D: 0} : (((!(config.aS.C - $mdgriffith$elm_animator$Internal$Interpolate$zeroPoint.C)) && (!(config.aS.D - $mdgriffith$elm_animator$Internal$Interpolate$zeroPoint.D))) ? {C: totalX * (config.a2.dj * 3), D: 0} : {C: (startVelScale * config.aS.C) * (config.a2.dj * 3), D: (startVelScale * config.aS.D) * (config.a2.dj * 3)});
-	var endVelScale = 1 / (config.aC.C / totalX);
-	var endVelocity = (!config.a$.c9) ? {C: 0, D: 0} : (((!(config.aC.C - $mdgriffith$elm_animator$Internal$Interpolate$zeroPoint.C)) && (!(config.aC.D - $mdgriffith$elm_animator$Internal$Interpolate$zeroPoint.D))) ? {C: totalX * (config.a$.c9 * 3), D: 0} : {C: (endVelScale * config.aC.C) * (config.a$.c9 * 3), D: (endVelScale * config.aC.D) * (config.a$.c9 * 3)});
+	var totalX = config.bQ.v - config.bH.v;
+	var startVelScale = 1 / (config.aU.v / totalX);
+	var startVelocity = (!config.a4.dp) ? {v: 0, w: 0} : (((!(config.aU.v - $mdgriffith$elm_animator$Internal$Interpolate$zeroPoint.v)) && (!(config.aU.w - $mdgriffith$elm_animator$Internal$Interpolate$zeroPoint.w))) ? {v: totalX * (config.a4.dp * 3), w: 0} : {v: (startVelScale * config.aU.v) * (config.a4.dp * 3), w: (startVelScale * config.aU.w) * (config.a4.dp * 3)});
+	var endVelScale = 1 / (config.aE.v / totalX);
+	var endVelocity = (!config.a1.df) ? {v: 0, w: 0} : (((!(config.aE.v - $mdgriffith$elm_animator$Internal$Interpolate$zeroPoint.v)) && (!(config.aE.w - $mdgriffith$elm_animator$Internal$Interpolate$zeroPoint.w))) ? {v: totalX * (config.a1.df * 3), w: 0} : {v: (endVelScale * config.aE.v) * (config.a1.df * 3), w: (endVelScale * config.aE.w) * (config.a1.df * 3)});
 	return A4(
 		$mdgriffith$elm_animator$Internal$Interpolate$Spline,
-		config.dW,
-		{C: config.dW.C + ((1 / 3) * startVelocity.C), D: config.dW.D + ((1 / 3) * startVelocity.D)},
-		{C: config.dp.C + (((-1) / 3) * endVelocity.C), D: config.dp.D + (((-1) / 3) * endVelocity.D)},
-		config.dp);
+		config.bH,
+		{v: config.bH.v + ((1 / 3) * startVelocity.v), w: config.bH.w + ((1 / 3) * startVelocity.w)},
+		{v: config.bQ.v + (((-1) / 3) * endVelocity.v), w: config.bQ.w + (((-1) / 3) * endVelocity.w)},
+		config.bQ);
 };
 var $mdgriffith$elm_animator$Internal$Interpolate$findAtXOnSpline = F6(
 	function (spline, desiredX, tolerance, jumpSize, t, depth) {
@@ -12312,28 +12655,28 @@ var $mdgriffith$elm_animator$Internal$Interpolate$findAtXOnSpline = F6(
 			var p4 = spline.d;
 			var point = function () {
 				if (t <= 0.5) {
-					var q3 = {C: p3.C + (t * (p4.C - p3.C)), D: p3.D + (t * (p4.D - p3.D))};
-					var q2 = {C: p2.C + (t * (p3.C - p2.C)), D: p2.D + (t * (p3.D - p2.D))};
-					var r2 = {C: q2.C + (t * (q3.C - q2.C)), D: q2.D + (t * (q3.D - q2.D))};
-					var q1 = {C: p1.C + (t * (p2.C - p1.C)), D: p1.D + (t * (p2.D - p1.D))};
-					var r1 = {C: q1.C + (t * (q2.C - q1.C)), D: q1.D + (t * (q2.D - q1.D))};
-					return {C: r1.C + (t * (r2.C - r1.C)), D: r1.D + (t * (r2.D - r1.D))};
+					var q3 = {v: p3.v + (t * (p4.v - p3.v)), w: p3.w + (t * (p4.w - p3.w))};
+					var q2 = {v: p2.v + (t * (p3.v - p2.v)), w: p2.w + (t * (p3.w - p2.w))};
+					var r2 = {v: q2.v + (t * (q3.v - q2.v)), w: q2.w + (t * (q3.w - q2.w))};
+					var q1 = {v: p1.v + (t * (p2.v - p1.v)), w: p1.w + (t * (p2.w - p1.w))};
+					var r1 = {v: q1.v + (t * (q2.v - q1.v)), w: q1.w + (t * (q2.w - q1.w))};
+					return {v: r1.v + (t * (r2.v - r1.v)), w: r1.w + (t * (r2.w - r1.w))};
 				} else {
-					var q3 = {C: p4.C + ((1 - t) * (p3.C - p4.C)), D: p4.D + ((1 - t) * (p3.D - p4.D))};
-					var q2 = {C: p3.C + ((1 - t) * (p2.C - p3.C)), D: p3.D + ((1 - t) * (p2.D - p3.D))};
-					var r2 = {C: q3.C + ((1 - t) * (q2.C - q3.C)), D: q3.D + ((1 - t) * (q2.D - q3.D))};
-					var q1 = {C: p2.C + ((1 - t) * (p1.C - p2.C)), D: p2.D + ((1 - t) * (p1.D - p2.D))};
-					var r1 = {C: q2.C + ((1 - t) * (q1.C - q2.C)), D: q2.D + ((1 - t) * (q1.D - q2.D))};
-					return {C: r2.C + ((1 - t) * (r1.C - r2.C)), D: r2.D + ((1 - t) * (r1.D - r2.D))};
+					var q3 = {v: p4.v + ((1 - t) * (p3.v - p4.v)), w: p4.w + ((1 - t) * (p3.w - p4.w))};
+					var q2 = {v: p3.v + ((1 - t) * (p2.v - p3.v)), w: p3.w + ((1 - t) * (p2.w - p3.w))};
+					var r2 = {v: q3.v + ((1 - t) * (q2.v - q3.v)), w: q3.w + ((1 - t) * (q2.w - q3.w))};
+					var q1 = {v: p2.v + ((1 - t) * (p1.v - p2.v)), w: p2.w + ((1 - t) * (p1.w - p2.w))};
+					var r1 = {v: q2.v + ((1 - t) * (q1.v - q2.v)), w: q2.w + ((1 - t) * (q1.w - q2.w))};
+					return {v: r2.v + ((1 - t) * (r1.v - r2.v)), w: r2.w + ((1 - t) * (r1.w - r2.w))};
 				}
 			}();
 			if (depth === 10) {
-				return {cG: point, bZ: t};
+				return {cM: point, b6: t};
 			} else {
-				if (($elm$core$Basics$abs(point.C - desiredX) < 1) && ($elm$core$Basics$abs(point.C - desiredX) >= 0)) {
-					return {cG: point, bZ: t};
+				if (($elm$core$Basics$abs(point.v - desiredX) < 1) && ($elm$core$Basics$abs(point.v - desiredX) >= 0)) {
+					return {cM: point, b6: t};
 				} else {
-					if ((point.C - desiredX) > 0) {
+					if ((point.v - desiredX) > 0) {
 						var $temp$spline = spline,
 							$temp$desiredX = desiredX,
 							$temp$tolerance = tolerance,
@@ -12376,19 +12719,19 @@ var $mdgriffith$elm_animator$Internal$Interpolate$firstDerivativeOnSpline = F2(
 		var p2 = _v0.b;
 		var p3 = _v0.c;
 		var p4 = _v0.d;
-		var vy3 = p4.D - p3.D;
-		var vy2 = p3.D - p2.D;
+		var vy3 = p4.w - p3.w;
+		var vy2 = p3.w - p2.w;
 		var wy2 = A3($mdgriffith$elm_animator$Internal$Interpolate$interpolateValue, vy2, vy3, proportion);
-		var vy1 = p2.D - p1.D;
+		var vy1 = p2.w - p1.w;
 		var wy1 = A3($mdgriffith$elm_animator$Internal$Interpolate$interpolateValue, vy1, vy2, proportion);
-		var vx3 = p4.C - p3.C;
-		var vx2 = p3.C - p2.C;
+		var vx3 = p4.v - p3.v;
+		var vx2 = p3.v - p2.v;
 		var wx2 = A3($mdgriffith$elm_animator$Internal$Interpolate$interpolateValue, vx2, vx3, proportion);
-		var vx1 = p2.C - p1.C;
+		var vx1 = p2.v - p1.v;
 		var wx1 = A3($mdgriffith$elm_animator$Internal$Interpolate$interpolateValue, vx1, vx2, proportion);
 		return {
-			C: 3 * A3($mdgriffith$elm_animator$Internal$Interpolate$interpolateValue, wx1, wx2, proportion),
-			D: 3 * A3($mdgriffith$elm_animator$Internal$Interpolate$interpolateValue, wy1, wy2, proportion)
+			v: 3 * A3($mdgriffith$elm_animator$Internal$Interpolate$interpolateValue, wx1, wx2, proportion),
+			w: 3 * A3($mdgriffith$elm_animator$Internal$Interpolate$interpolateValue, wy1, wy2, proportion)
 		};
 	});
 var $mdgriffith$elm_animator$Internal$Interpolate$guessTime = F2(
@@ -12397,9 +12740,9 @@ var $mdgriffith$elm_animator$Internal$Interpolate$guessTime = F2(
 		var two = _v0.b;
 		var three = _v0.c;
 		var four = _v0.d;
-		return (!(four.C - one.C)) ? 0.5 : ((now - one.C) / (four.C - one.C));
+		return (!(four.v - one.v)) ? 0.5 : ((now - one.v) / (four.v - one.v));
 	});
-var $mdgriffith$elm_animator$Internal$Interpolate$linearDefault = {c8: 0, c9: 0, di: 0, dj: 0, d5: 0};
+var $mdgriffith$elm_animator$Internal$Interpolate$linearDefault = {de: 0, df: 0, $7: 0, dp: 0, d8: 0};
 var $ianmackenzie$elm_units$Quantity$divideBy = F2(
 	function (divisor, _v0) {
 		var value = _v0;
@@ -12488,7 +12831,7 @@ var $mdgriffith$elm_animator$Internal$Interpolate$newVelocityAtTarget = F3(
 					return $ianmackenzie$elm_units$Pixels$pixels(x);
 				}
 			}();
-			var _v3 = lookAhead.c5;
+			var _v3 = lookAhead.db;
 			if (_v3.$ === 1) {
 				var aheadPosition = _v3.b;
 				return A4(
@@ -12496,11 +12839,11 @@ var $mdgriffith$elm_animator$Internal$Interpolate$newVelocityAtTarget = F3(
 					targetPosition,
 					$mdgriffith$elm_animator$Internal$Time$millis(targetTime),
 					$ianmackenzie$elm_units$Pixels$pixels(aheadPosition),
-					$mdgriffith$elm_animator$Internal$Time$millis(lookAhead.cY));
+					$mdgriffith$elm_animator$Internal$Time$millis(lookAhead.c2));
 			} else {
 				var period = _v3.b;
 				var toX = _v3.c;
-				if (lookAhead.dQ) {
+				if (lookAhead.dU) {
 					if (!period.$) {
 						var periodDuration = period.a;
 						return A3($mdgriffith$elm_animator$Internal$Interpolate$derivativeOfEasing, toX, periodDuration, 0);
@@ -12516,7 +12859,7 @@ var $mdgriffith$elm_animator$Internal$Interpolate$newVelocityAtTarget = F3(
 						$mdgriffith$elm_animator$Internal$Time$millis(targetTime),
 						$ianmackenzie$elm_units$Pixels$pixels(
 							toX(0)),
-						$mdgriffith$elm_animator$Internal$Time$millis(lookAhead.cY));
+						$mdgriffith$elm_animator$Internal$Time$millis(lookAhead.c2));
 				}
 			}
 		}
@@ -12537,7 +12880,7 @@ var $mdgriffith$elm_animator$Internal$Interpolate$interpolateBetween = F7(
 		}();
 		var curve = $mdgriffith$elm_animator$Internal$Interpolate$createSpline(
 			{
-				a$: function () {
+				a1: function () {
 					if (target.$ === 1) {
 						var personality = target.a;
 						return personality;
@@ -12546,7 +12889,7 @@ var $mdgriffith$elm_animator$Internal$Interpolate$interpolateBetween = F7(
 						return personality;
 					}
 				}(),
-				a2: function () {
+				a4: function () {
 					if (maybePrevious.$ === 1) {
 						return $mdgriffith$elm_animator$Internal$Interpolate$linearDefault;
 					} else {
@@ -12561,18 +12904,18 @@ var $mdgriffith$elm_animator$Internal$Interpolate$interpolateBetween = F7(
 						}
 					}
 				}(),
-				dp: {
-					C: targetTimeInMs,
-					D: $ianmackenzie$elm_units$Pixels$inPixels(targetPosition)
+				bQ: {
+					v: targetTimeInMs,
+					w: $ianmackenzie$elm_units$Pixels$inPixels(targetPosition)
 				},
-				aC: {C: 1000, D: targetVelocity},
-				dW: {
-					C: startTimeInMs,
-					D: $ianmackenzie$elm_units$Pixels$inPixels(state.f)
+				aE: {v: 1000, w: targetVelocity},
+				bH: {
+					v: startTimeInMs,
+					w: $ianmackenzie$elm_units$Pixels$inPixels(state.d)
 				},
-				aS: {
-					C: 1000,
-					D: $ianmackenzie$elm_units$Pixels$inPixelsPerSecond(state.c0)
+				aU: {
+					v: 1000,
+					w: $ianmackenzie$elm_units$Pixels$inPixelsPerSecond(state.c6)
 				}
 			});
 		var current = A6(
@@ -12583,10 +12926,10 @@ var $mdgriffith$elm_animator$Internal$Interpolate$interpolateBetween = F7(
 			0.25,
 			A2($mdgriffith$elm_animator$Internal$Interpolate$guessTime, now, curve),
 			0);
-		var firstDerivative = A2($mdgriffith$elm_animator$Internal$Interpolate$firstDerivativeOnSpline, curve, current.bZ);
+		var firstDerivative = A2($mdgriffith$elm_animator$Internal$Interpolate$firstDerivativeOnSpline, curve, current.b6);
 		return {
-			f: $ianmackenzie$elm_units$Pixels$pixels(current.cG.D),
-			c0: $ianmackenzie$elm_units$Pixels$pixelsPerSecond(1000 * (firstDerivative.D / firstDerivative.C))
+			d: $ianmackenzie$elm_units$Pixels$pixels(current.cM.w),
+			c6: $ianmackenzie$elm_units$Pixels$pixelsPerSecond(1000 * (firstDerivative.w / firstDerivative.v))
 		};
 	});
 var $mdgriffith$elm_animator$Internal$Spring$criticalDamping = F2(
@@ -12596,9 +12939,9 @@ var $mdgriffith$elm_animator$Internal$Spring$criticalDamping = F2(
 var $elm$core$Basics$e = _Basics_e;
 var $mdgriffith$elm_animator$Internal$Spring$toleranceForSpringSettleTimeCalculation = (-1) * A2($elm$core$Basics$logBase, $elm$core$Basics$e, 0.005);
 var $mdgriffith$elm_animator$Internal$Spring$settlesAt = function (_v0) {
-	var stiffness = _v0.bd;
-	var damping = _v0.a1;
-	var mass = _v0.a7;
+	var stiffness = _v0.bh;
+	var damping = _v0.a3;
+	var mass = _v0.bc;
 	var m = mass;
 	var k = stiffness;
 	var springAspect = $elm$core$Basics$sqrt(k / m);
@@ -12647,9 +12990,9 @@ var $mdgriffith$elm_animator$Internal$Spring$select = F2(
 		var durMS = $ianmackenzie$elm_units$Duration$inMilliseconds(duration);
 		var damping = A4($mdgriffith$elm_animator$Internal$Spring$wobble2Damping, wobbliness, k, 1, duration);
 		var initiallySettlesAt = $mdgriffith$elm_animator$Internal$Spring$settlesAt(
-			{a1: damping, a7: 1, bd: k});
+			{a3: damping, bc: 1, bh: k});
 		var newCritical = A2($mdgriffith$elm_animator$Internal$Spring$criticalDamping, k, durMS / initiallySettlesAt);
-		return {a1: damping, a7: durMS / initiallySettlesAt, bd: k};
+		return {a3: damping, bc: durMS / initiallySettlesAt, bh: k};
 	});
 var $elm$core$List$repeatHelp = F3(
 	function (result, n, value) {
@@ -12674,16 +13017,16 @@ var $elm$core$List$repeat = F2(
 	});
 var $mdgriffith$elm_animator$Internal$Spring$step = F4(
 	function (target, _v0, dtms, motion) {
-		var stiffness = _v0.bd;
-		var damping = _v0.a1;
-		var mass = _v0.a7;
-		var fspring = stiffness * (target - motion.f);
-		var fdamper = ((-1) * damping) * motion.c0;
+		var stiffness = _v0.bh;
+		var damping = _v0.a3;
+		var mass = _v0.bc;
+		var fspring = stiffness * (target - motion.d);
+		var fdamper = ((-1) * damping) * motion.c6;
 		var dt = dtms / 1000;
 		var a = (fspring + fdamper) / mass;
-		var newVelocity = motion.c0 + (a * dt);
-		var newPos = motion.f + (newVelocity * dt);
-		return {f: newPos, c0: newVelocity};
+		var newVelocity = motion.c6 + (a * dt);
+		var newPos = motion.d + (newVelocity * dt);
+		return {d: newPos, c6: newVelocity};
 	});
 var $mdgriffith$elm_animator$Internal$Spring$stepOver = F4(
 	function (duration, params, target, state) {
@@ -12711,10 +13054,10 @@ var $mdgriffith$elm_animator$Internal$Interpolate$springInterpolation = F7(
 		var wobble = function () {
 			if (!target.$) {
 				var personality = target.a;
-				return personality.d5;
+				return personality.d8;
 			} else {
 				var personality = target.a;
-				return personality.d5;
+				return personality.d8;
 			}
 		}();
 		var targetPos = function () {
@@ -12740,12 +13083,12 @@ var $mdgriffith$elm_animator$Internal$Interpolate$springInterpolation = F7(
 			params,
 			targetPos,
 			{
-				f: $ianmackenzie$elm_units$Pixels$inPixels(state.f),
-				c0: $ianmackenzie$elm_units$Pixels$inPixelsPerSecond(state.c0)
+				d: $ianmackenzie$elm_units$Pixels$inPixels(state.d),
+				c6: $ianmackenzie$elm_units$Pixels$inPixelsPerSecond(state.c6)
 			});
 		return {
-			f: $ianmackenzie$elm_units$Pixels$pixels(_new.f),
-			c0: $ianmackenzie$elm_units$Pixels$pixelsPerSecond(_new.c0)
+			d: $ianmackenzie$elm_units$Pixels$pixels(_new.d),
+			c6: $ianmackenzie$elm_units$Pixels$pixelsPerSecond(_new.c6)
 		};
 	});
 var $mdgriffith$elm_animator$Internal$Interpolate$lerp = F7(
@@ -12753,10 +13096,10 @@ var $mdgriffith$elm_animator$Internal$Interpolate$lerp = F7(
 		var wobble = function () {
 			if (!target.$) {
 				var personality = target.a;
-				return personality.d5;
+				return personality.d8;
 			} else {
 				var personality = target.a;
-				return personality.d5;
+				return personality.d8;
 			}
 		}();
 		var nothingHappened = function () {
@@ -12766,7 +13109,7 @@ var $mdgriffith$elm_animator$Internal$Interpolate$lerp = F7(
 				var x = target.b;
 				return _Utils_eq(
 					x,
-					$ianmackenzie$elm_units$Pixels$inPixels(state.f)) && (!$ianmackenzie$elm_units$Pixels$inPixelsPerSecond(state.c0));
+					$ianmackenzie$elm_units$Pixels$inPixels(state.d)) && (!$ianmackenzie$elm_units$Pixels$inPixelsPerSecond(state.c6));
 			}
 		}();
 		if (nothingHappened) {
@@ -12781,7 +13124,7 @@ var $mdgriffith$elm_animator$Internal$Interpolate$lerp = F7(
 	});
 var $mdgriffith$elm_animator$Internal$Interpolate$startMoving = function (movement) {
 	return {
-		f: function () {
+		d: function () {
 			if (!movement.$) {
 				var toX = movement.c;
 				return $ianmackenzie$elm_units$Pixels$pixels(
@@ -12791,7 +13134,7 @@ var $mdgriffith$elm_animator$Internal$Interpolate$startMoving = function (moveme
 				return $ianmackenzie$elm_units$Pixels$pixels(x);
 			}
 		}(),
-		c0: $ianmackenzie$elm_units$Pixels$pixelsPerSecond(0)
+		c6: $ianmackenzie$elm_units$Pixels$pixelsPerSecond(0)
 	};
 };
 var $mdgriffith$elm_animator$Internal$Time$earliest = F2(
@@ -12830,7 +13173,7 @@ var $mdgriffith$elm_animator$Internal$Interpolate$visit = F5(
 		}();
 		if ($mdgriffith$elm_animator$Internal$Time$zeroDuration(dwellTime)) {
 			return {
-				f: function () {
+				d: function () {
 					var _v0 = lookup(event);
 					if (!_v0.$) {
 						var period = _v0.b;
@@ -12842,7 +13185,7 @@ var $mdgriffith$elm_animator$Internal$Interpolate$visit = F5(
 						return $ianmackenzie$elm_units$Pixels$pixels(x);
 					}
 				}(),
-				c0: A3(
+				c6: A3(
 					$mdgriffith$elm_animator$Internal$Interpolate$newVelocityAtTarget,
 					lookup(event),
 					$mdgriffith$elm_animator$Internal$Time$inMilliseconds(start),
@@ -12853,8 +13196,8 @@ var $mdgriffith$elm_animator$Internal$Interpolate$visit = F5(
 			if (_v1.$ === 1) {
 				var pos = _v1.b;
 				return {
-					f: $ianmackenzie$elm_units$Pixels$pixels(pos),
-					c0: $ianmackenzie$elm_units$Pixels$pixelsPerSecond(0)
+					d: $ianmackenzie$elm_units$Pixels$pixels(pos),
+					c6: $ianmackenzie$elm_units$Pixels$pixelsPerSecond(0)
 				};
 			} else {
 				var period = _v1.b;
@@ -12863,9 +13206,9 @@ var $mdgriffith$elm_animator$Internal$Interpolate$visit = F5(
 					var periodDuration = period.a;
 					var progress = A2($mdgriffith$elm_animator$Internal$Interpolate$wrapUnitAfter, periodDuration, dwellTime);
 					return {
-						f: $ianmackenzie$elm_units$Pixels$pixels(
+						d: $ianmackenzie$elm_units$Pixels$pixels(
 							toX(progress)),
-						c0: A3($mdgriffith$elm_animator$Internal$Interpolate$derivativeOfEasing, toX, periodDuration, progress)
+						c6: A3($mdgriffith$elm_animator$Internal$Interpolate$derivativeOfEasing, toX, periodDuration, progress)
 					};
 				} else {
 					var n = period.a;
@@ -12875,32 +13218,32 @@ var $mdgriffith$elm_animator$Internal$Interpolate$visit = F5(
 					var iteration = $elm$core$Basics$floor(totalMS / iterationTimeMS);
 					if (_Utils_cmp(iteration, n) > -1) {
 						return {
-							f: $ianmackenzie$elm_units$Pixels$pixels(
+							d: $ianmackenzie$elm_units$Pixels$pixels(
 								toX(1)),
-							c0: $ianmackenzie$elm_units$Pixels$pixelsPerSecond(0)
+							c6: $ianmackenzie$elm_units$Pixels$pixelsPerSecond(0)
 						};
 					} else {
 						var progress = A2($mdgriffith$elm_animator$Internal$Interpolate$wrapUnitAfter, periodDuration, dwellTime);
 						return {
-							f: $ianmackenzie$elm_units$Pixels$pixels(
+							d: $ianmackenzie$elm_units$Pixels$pixels(
 								toX(progress)),
-							c0: A3($mdgriffith$elm_animator$Internal$Interpolate$derivativeOfEasing, toX, periodDuration, progress)
+							c6: A3($mdgriffith$elm_animator$Internal$Interpolate$derivativeOfEasing, toX, periodDuration, progress)
 						};
 					}
 				}
 			}
 		}
 	});
-var $mdgriffith$elm_animator$Internal$Interpolate$moving = {bE: $mdgriffith$elm_animator$Internal$Interpolate$getPersonality, bI: $mdgriffith$elm_animator$Internal$Interpolate$dwellPeriod, bM: $mdgriffith$elm_animator$Internal$Interpolate$lerp, dW: $mdgriffith$elm_animator$Internal$Interpolate$startMoving, b1: $mdgriffith$elm_animator$Internal$Interpolate$visit};
+var $mdgriffith$elm_animator$Internal$Interpolate$moving = {bK: $mdgriffith$elm_animator$Internal$Interpolate$getPersonality, bO: $mdgriffith$elm_animator$Internal$Interpolate$dwellPeriod, bV: $mdgriffith$elm_animator$Internal$Interpolate$lerp, bH: $mdgriffith$elm_animator$Internal$Interpolate$startMoving, ca: $mdgriffith$elm_animator$Internal$Interpolate$visit};
 var $mdgriffith$elm_animator$Internal$Interpolate$unwrapUnits = function (_v0) {
-	var position = _v0.f;
-	var velocity = _v0.c0;
+	var position = _v0.d;
+	var velocity = _v0.c6;
 	return {
-		f: function () {
+		d: function () {
 			var val = position;
 			return val;
 		}(),
-		c0: function () {
+		c6: function () {
 			var val = velocity;
 			return val;
 		}()
@@ -12935,11 +13278,11 @@ var $mdgriffith$elm_animator$Internal$Interpolate$fillDefaults = F2(
 		} else {
 			var partial = specified.a;
 			return {
-				c8: A2($mdgriffith$elm_animator$Internal$Interpolate$withDefault, builtInDefault.c8, partial.c8),
-				c9: A2($mdgriffith$elm_animator$Internal$Interpolate$withDefault, builtInDefault.c9, partial.c9),
-				di: A2($mdgriffith$elm_animator$Internal$Interpolate$withDefault, builtInDefault.di, partial.di),
-				dj: A2($mdgriffith$elm_animator$Internal$Interpolate$withDefault, builtInDefault.dj, partial.dj),
-				d5: A2($mdgriffith$elm_animator$Internal$Interpolate$withDefault, builtInDefault.d5, partial.d5)
+				de: A2($mdgriffith$elm_animator$Internal$Interpolate$withDefault, builtInDefault.de, partial.de),
+				df: A2($mdgriffith$elm_animator$Internal$Interpolate$withDefault, builtInDefault.df, partial.df),
+				$7: A2($mdgriffith$elm_animator$Internal$Interpolate$withDefault, builtInDefault.$7, partial.$7),
+				dp: A2($mdgriffith$elm_animator$Internal$Interpolate$withDefault, builtInDefault.dp, partial.dp),
+				d8: A2($mdgriffith$elm_animator$Internal$Interpolate$withDefault, builtInDefault.d8, partial.d8)
 			};
 		}
 	});
@@ -12962,9 +13305,9 @@ var $mdgriffith$elm_animator$Animator$linear = F2(
 		return A2(
 			$mdgriffith$elm_animator$Internal$Interpolate$details,
 			timeline,
-			A2($elm$core$Basics$composeL, $mdgriffith$elm_animator$Internal$Interpolate$withLinearDefault, lookup)).f;
+			A2($elm$core$Basics$composeL, $mdgriffith$elm_animator$Internal$Interpolate$withLinearDefault, lookup)).d;
 	});
-var $mdgriffith$elm_animator$Internal$Interpolate$standardDefault = {c8: 0, c9: 0.8, di: 0, dj: 0.4, d5: 0};
+var $mdgriffith$elm_animator$Internal$Interpolate$standardDefault = {de: 0, df: 0.8, $7: 0, dp: 0.4, d8: 0};
 var $mdgriffith$elm_animator$Internal$Interpolate$withStandardDefault = function (defMovement) {
 	if (!defMovement.$) {
 		var specifiedPersonality = defMovement.a;
@@ -12984,8 +13327,74 @@ var $mdgriffith$elm_animator$Animator$move = F2(
 		return A2(
 			$mdgriffith$elm_animator$Internal$Interpolate$details,
 			timeline,
-			A2($elm$core$Basics$composeL, $mdgriffith$elm_animator$Internal$Interpolate$withStandardDefault, lookup)).f;
+			A2($elm$core$Basics$composeL, $mdgriffith$elm_animator$Internal$Interpolate$withStandardDefault, lookup)).d;
 	});
+var $author$project$Main$vertexEdgeDrawingCondition = F2(
+	function (model, vertex) {
+		return _Utils_eq(
+			A2(
+				$elm$core$Maybe$map,
+				function ($) {
+					return $.bH;
+				},
+				model.z),
+			$elm$core$Maybe$Just(vertex));
+	});
+var $mdgriffith$elm_animator$Internal$Timeline$linearDefault = {de: 0, df: 0, $7: 0, dp: 0, d8: 0};
+var $mdgriffith$elm_animator$Internal$Timeline$arrived = function (timeline) {
+	var details = timeline;
+	return A3(
+		$mdgriffith$elm_animator$Internal$Timeline$foldp,
+		$elm$core$Basics$identity,
+		{
+			bK: function (_v0) {
+				return $mdgriffith$elm_animator$Internal$Timeline$linearDefault;
+			},
+			bO: function (_v1) {
+				return $elm$core$Maybe$Nothing;
+			},
+			bV: F7(
+				function (_v2, _v3, _v4, _v5, _v6, _v7, state) {
+					return state;
+				}),
+			bH: function (_v8) {
+				return details.cz;
+			},
+			ca: F5(
+				function (lookup, target, targetTime, maybeLookAhead, state) {
+					return $mdgriffith$elm_animator$Internal$Timeline$getEvent(target);
+				})
+		},
+		timeline);
+};
+var $mdgriffith$elm_animator$Animator$arrived = $mdgriffith$elm_animator$Internal$Timeline$arrived;
+var $mdgriffith$elm_animator$Internal$Timeline$current = function (timeline) {
+	var details = timeline;
+	return A3(
+		$mdgriffith$elm_animator$Internal$Timeline$foldp,
+		$elm$core$Basics$identity,
+		{
+			bK: function (_v0) {
+				return $mdgriffith$elm_animator$Internal$Timeline$linearDefault;
+			},
+			bO: function (_v1) {
+				return $elm$core$Maybe$Nothing;
+			},
+			bV: F7(
+				function (_v2, _v3, target, _v4, _v5, _v6, _v7) {
+					return target;
+				}),
+			bH: function (_v8) {
+				return details.cz;
+			},
+			ca: F5(
+				function (lookup, target, targetTime, maybeLookAhead, state) {
+					return $mdgriffith$elm_animator$Internal$Timeline$getEvent(target);
+				})
+		},
+		timeline);
+};
+var $mdgriffith$elm_animator$Animator$current = $mdgriffith$elm_animator$Internal$Timeline$current;
 var $mdgriffith$elm_animator$Internal$Timeline$getPrev = F7(
 	function (_v0, maybePrevious, target, _v1, _v2, _v3, previouslyRecorded) {
 		if (!maybePrevious.$) {
@@ -13001,17 +13410,17 @@ var $mdgriffith$elm_animator$Internal$Timeline$previous = function (timeline) {
 		$mdgriffith$elm_animator$Internal$Timeline$foldp,
 		$elm$core$Basics$identity,
 		{
-			bE: function (_v0) {
+			bK: function (_v0) {
 				return $mdgriffith$elm_animator$Internal$Timeline$linearDefault;
 			},
-			bI: function (_v1) {
+			bO: function (_v1) {
 				return $elm$core$Maybe$Nothing;
 			},
-			bM: $mdgriffith$elm_animator$Internal$Timeline$getPrev,
-			dW: function (_v2) {
-				return details.ct;
+			bV: $mdgriffith$elm_animator$Internal$Timeline$getPrev,
+			bH: function (_v2) {
+				return details.cz;
 			},
-			b1: F5(
+			ca: F5(
 				function (lookup, target, targetTime, maybeLookAhead, state) {
 					return state;
 				})
@@ -13019,19 +13428,15 @@ var $mdgriffith$elm_animator$Internal$Timeline$previous = function (timeline) {
 		timeline);
 };
 var $mdgriffith$elm_animator$Animator$previous = $mdgriffith$elm_animator$Internal$Timeline$previous;
-var $joakin$elm_canvas$Canvas$Internal$Canvas$DrawableShapes = function (a) {
-	return {$: 1, a: a};
-};
-var $joakin$elm_canvas$Canvas$shapes = F2(
-	function (settings, ss) {
-		return A2(
-			$joakin$elm_canvas$Canvas$addSettingsToRenderable,
-			settings,
-			{
-				H: _List_Nil,
-				V: $joakin$elm_canvas$Canvas$Internal$Canvas$NotSpecified,
-				W: $joakin$elm_canvas$Canvas$Internal$Canvas$DrawableShapes(ss)
-			});
+var $author$project$Main$vertexExpansionCondition = F2(
+	function (model, vertex) {
+		return _Utils_eq(
+			$mdgriffith$elm_animator$Animator$current(model.x.E),
+			$elm$core$Maybe$Just(vertex)) || (_Utils_eq(
+			$mdgriffith$elm_animator$Animator$arrived(model.x.E),
+			$elm$core$Maybe$Just(vertex)) || _Utils_eq(
+			$mdgriffith$elm_animator$Animator$previous(model.x.E),
+			$elm$core$Maybe$Just(vertex)));
 	});
 var $mdgriffith$elm_animator$Internal$Interpolate$FullDefault = {$: 0};
 var $mdgriffith$elm_animator$Internal$Interpolate$Position = F2(
@@ -13059,10 +13464,6 @@ var $author$project$Main$vertexMovementAnimation = function (state) {
 			}
 		}());
 };
-var $avh4$elm_color$Color$RgbaSpace = F4(
-	function (a, b, c, d) {
-		return {$: 0, a: a, b: b, c: c, d: d};
-	});
 var $avh4$elm_color$Color$white = A4($avh4$elm_color$Color$RgbaSpace, 255 / 255, 255 / 255, 255 / 255, 1.0);
 var $author$project$Main$vertexView = F2(
 	function (model, vertex) {
@@ -13078,33 +13479,22 @@ var $author$project$Main$vertexView = F2(
 						[
 							A2(
 							$joakin$elm_canvas$Canvas$circle,
-							_Utils_Tuple2(vertex.f.C, vertex.f.D),
-							((_Utils_eq(
-								$mdgriffith$elm_animator$Animator$current(model.s.u),
-								$elm$core$Maybe$Just(vertex)) || (_Utils_eq(
-								$mdgriffith$elm_animator$Animator$arrived(model.s.u),
-								$elm$core$Maybe$Just(vertex)) || _Utils_eq(
-								$mdgriffith$elm_animator$Animator$previous(model.s.u),
-								$elm$core$Maybe$Just(vertex)))) ? A2($mdgriffith$elm_animator$Animator$move, model.s.u, $author$project$Main$vertexMovementAnimation) : $author$project$Main$pointSize) / model.r)
+							_Utils_Tuple2(vertex.d.v, vertex.d.w),
+							(A2($author$project$Main$vertexExpansionCondition, model, vertex) ? A2($mdgriffith$elm_animator$Animator$move, model.x.E, $author$project$Main$vertexMovementAnimation) : (A2($author$project$Main$vertexEdgeDrawingCondition, model, vertex) ? (1.5 * $author$project$Main$pointSize) : $author$project$Main$pointSize)) / model.l)
 						])),
 					A2(
 					$joakin$elm_canvas$Canvas$shapes,
 					_List_fromArray(
 						[
-							$joakin$elm_canvas$Canvas$Settings$fill($avh4$elm_color$Color$white)
+							$joakin$elm_canvas$Canvas$Settings$fill(
+							A2($author$project$Main$vertexEdgeDrawingCondition, model, vertex) ? $avh4$elm_color$Color$green : $avh4$elm_color$Color$white)
 						]),
 					_List_fromArray(
 						[
 							A2(
 							$joakin$elm_canvas$Canvas$circle,
-							_Utils_Tuple2(vertex.f.C, vertex.f.D),
-							((_Utils_eq(
-								$mdgriffith$elm_animator$Animator$current(model.s.u),
-								$elm$core$Maybe$Just(vertex)) || (_Utils_eq(
-								$mdgriffith$elm_animator$Animator$arrived(model.s.u),
-								$elm$core$Maybe$Just(vertex)) || _Utils_eq(
-								$mdgriffith$elm_animator$Animator$previous(model.s.u),
-								$elm$core$Maybe$Just(vertex)))) ? A2($mdgriffith$elm_animator$Animator$linear, model.s.u, $author$project$Main$vertexFillAnimation) : 0) / model.r)
+							_Utils_Tuple2(vertex.d.v, vertex.d.w),
+							(A2($author$project$Main$vertexExpansionCondition, model, vertex) ? A2($mdgriffith$elm_animator$Animator$linear, model.x.E, $author$project$Main$vertexFillAnimation) : (A2($author$project$Main$vertexEdgeDrawingCondition, model, vertex) ? $author$project$Main$pointSize : 0)) / model.l)
 						]))
 				]));
 	});
@@ -13120,12 +13510,12 @@ var $author$project$Main$view = function (model) {
 				A3(
 				$joakin$elm_canvas$Canvas$toHtmlWith,
 				{
-					o: $elm$core$Basics$ceiling(model.o),
-					d0: _List_fromArray(
+					p: $elm$core$Basics$ceiling(model.p),
+					d3: _List_fromArray(
 						[
-							A2($joakin$elm_canvas$Canvas$Texture$loadFromImageUrl, model.F, $author$project$Main$TextureLoaded)
+							A2($joakin$elm_canvas$Canvas$Texture$loadFromImageUrl, model.G, $author$project$Main$TextureLoaded)
 						]),
-					q: $elm$core$Basics$ceiling(model.q)
+					r: $elm$core$Basics$ceiling(model.r)
 				},
 				_List_fromArray(
 					[
@@ -13163,32 +13553,50 @@ var $author$project$Main$view = function (model) {
 								$joakin$elm_canvas$Canvas$Settings$Advanced$transform(
 								_List_fromArray(
 									[
-										A2($joakin$elm_canvas$Canvas$Settings$Advanced$translate, model.f.C, model.f.D),
-										A2($joakin$elm_canvas$Canvas$Settings$Advanced$scale, model.r, model.r)
+										A2($joakin$elm_canvas$Canvas$Settings$Advanced$translate, model.d.v, model.d.w),
+										A2($joakin$elm_canvas$Canvas$Settings$Advanced$scale, model.l, model.l)
 									]))
 							]),
 						A5(
 							$author$project$Main$addBackground,
-							model.q,
-							model.o,
+							model.r,
+							model.p,
 							_Utils_Tuple2(0, 0),
-							model.M,
+							model.N,
 							_List_fromArray(
 								[
 									A2(
 									$joakin$elm_canvas$Canvas$group,
 									_List_Nil,
-									A2(
-										$elm$core$List$map,
-										$author$project$Main$vertexView(model),
-										$elm$core$Dict$values(model.aq)))
+									_Utils_ap(
+										A2(
+											$elm$core$List$map,
+											$author$project$Main$edgeView(model),
+											$elm$core$Dict$values(model.a6)),
+										_Utils_ap(
+											A2(
+												$elm$core$List$map,
+												$author$project$Main$vertexView(model),
+												$elm$core$Dict$values(model.ar)),
+											function () {
+												var _v1 = model.z;
+												if (_v1.$ === 1) {
+													return _List_Nil;
+												} else {
+													var edge = _v1.a;
+													return _List_fromArray(
+														[
+															A2($author$project$Main$edgeView, model, edge)
+														]);
+												}
+											}())))
 								])))
 					])),
 				$author$project$Main$mapField(model)
 			]));
 };
 var $author$project$Main$main = $elm$browser$Browser$element(
-	{dx: $author$project$Main$init, dZ: $author$project$Main$subscriptions, d2: $author$project$Main$update, d4: $author$project$Main$view});
+	{dB: $author$project$Main$init, d0: $author$project$Main$subscriptions, d5: $author$project$Main$update, d7: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
 	A2(
 		$elm$json$Json$Decode$andThen,
@@ -13200,7 +13608,7 @@ _Platform_export({'Main':{'init':$author$project$Main$main(
 						$elm$json$Json$Decode$andThen,
 						function (height) {
 							return $elm$json$Json$Decode$succeed(
-								{o: height, bW: savedBackground, q: width});
+								{p: height, b3: savedBackground, r: width});
 						},
 						A2($elm$json$Json$Decode$field, 'height', $elm$json$Json$Decode$float));
 				},
