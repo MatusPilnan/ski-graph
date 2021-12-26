@@ -88,6 +88,7 @@ type alias Model =
   , mapFieldState : BackgroundState
   , zoom : Float
   , drawingEdge : Maybe Edge
+  , activeEdgeDrawingMode : EdgeType
   }
 
 type MouseButton
@@ -145,6 +146,7 @@ init flags =
     , mapFieldState = Loading
     , zoom = 1
     , drawingEdge = Nothing
+    , activeEdgeDrawingMode = Lift
     }
   , Cmd.none
   )
@@ -166,6 +168,7 @@ type Msg
   | DimensionsChanged (Float, Float)
   | ZoomChanged Float
   | AnimationFrame Time.Posix
+  | SetActiveEdgeType EdgeType
 
 port saveToLocalStorage : (String, String) -> Cmd msg
 port dimensionsChanged : ((Float, Float) -> msg) -> Sub msg
@@ -258,6 +261,9 @@ update msg model =
     MouseLeave ->
       ( { model | mouseDown = False }, Cmd.none )
 
+    SetActiveEdgeType edgeType ->
+      ( { model | activeEdgeDrawingMode = edgeType}, Cmd.none )
+
 
 checkMouseEventForPointHover : MouseEvent -> (Model, Cmd Msg) -> (Model, Cmd Msg)
 checkMouseEventForPointHover event (model, cmd) =
@@ -344,10 +350,10 @@ checkConnectDrawing event (model, cmd) =
       if vertex /= edge.start then
       { model | drawingEdge = Nothing
       , edgeCounter = model.edgeCounter + 1
-      , edges = Dict.insert edge.id { edge | end = Just vertex, edgeType = Lift } model.edges
+      , edges = Dict.insert edge.id { edge | end = Just vertex, edgeType = model.activeEdgeDrawingMode } model.edges
       } else model
     (Primary, Nothing, Just edge) ->
-      { model | drawingEdge = Just { edge | points = edge.points ++ [ event.position ] }
+      { model | drawingEdge = Just { edge | points = edge.points ++ [ canvasPointToBackgroundPoint event.position model.position model.zoom ] }
       }
     (_, _, _) -> model
   , cmd
@@ -432,6 +438,7 @@ view model =
       ]
     ]
   , mapField model
+  , modeSelectionButtons model.activeEdgeDrawingMode
   ]
 
 pointToCanvasLibPoint point =
@@ -614,6 +621,64 @@ mapField model =
       ]
       [ Icons.mapIcon ]
     ]
+
+
+modeSelectionButtons selected =
+  let btn = modeSelectionButton selected in
+  Html.div
+  [ Attr.class "fixed right-0 bottom-24 group" ]
+  [ Html.div
+    [ Attr.class "flex flex-col items-end mr-4 group-hover:mr-6 transition-all" ]
+    [ btn Lift
+    , btn <| SkiRun Easy
+    , btn <| SkiRun Medium
+    , btn <| SkiRun Difficult
+    , btn <| SkiRun SkiRoute
+    ]
+  , Html.div
+    [ Attr.class "transition-all bg-primary text-white py-2 pl-1 mb-4 rounded-tl-md rounded-bl-md absolute h-max bottom-0 -right-full group-hover:right-0 text-xs [writing-mode:vertical-rl] [text-orientation:mixed]" ]
+    [ Html.text "Icons made by ", Html.a
+      [ Attr.href "https://www.flaticon.com/authors/freepik"
+      , Attr.title "Freepik"
+      , Attr.class "text-secondary"
+      ]
+      [ Html.text "Freepik" ]
+    , Html.text " from ", Html.a
+      [ Attr.href "https://www.flaticon.com/"
+      , Attr.class "text-secondary"
+      , Attr.title "Flaticon"
+      ]
+      [ Html.text "www.flaticon.com" ]
+    ]
+  ]
+
+modeSelectionButton : EdgeType -> EdgeType -> Html.Html Msg
+modeSelectionButton selected edgeType =
+  let
+    active = selected == edgeType
+    icon =
+      case edgeType of
+        SkiRun skiRunType ->
+          Icons.skiRunIcon <|
+          case skiRunType of
+            Easy -> "#0000ff"
+            Medium -> "#ff0000"
+            Difficult -> "#000000"
+            SkiRoute -> "#890202"
+        Lift -> Icons.liftIcon
+        Unfinished -> Html.text ""
+
+  in
+  Html.button
+  [ Attr.class "rounded-full shadow-lg transition-all text-center mb-4 hover:h-12 hover:w-12 hover:p-3 hover:shadow-xl"
+  , Attr.classList
+    [ ("p-3 h-12 w-12 bg-blue-400", active)
+    , ("p-2 h-8 w-8 bg-white", not active)
+    ]
+  , Events.onClick <| if active then Noop else SetActiveEdgeType edgeType
+  ]
+  [ icon ]
+
 
 addPoints : Point -> Point -> Point
 addPoints a b =
