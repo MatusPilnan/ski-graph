@@ -6,7 +6,7 @@ import Dict exposing (Dict)
 
 
 type alias Vertex =
-  { id : String
+  { id : Int
   , title : Maybe String
   , position : Point
   }
@@ -24,7 +24,7 @@ type EdgeType
   | Unfinished
 
 type alias Edge =
-  { id : String
+  { id : Int
   , title : Maybe String
   , start : Vertex
   , end : Maybe Vertex
@@ -46,8 +46,8 @@ type alias Model =
   { background : String
   , animations : Animations
   , texture :  Maybe Canvas.Texture.Texture
-  , vertices : Dict String Vertex
-  , edges : Dict String Edge
+  , vertices : Dict Int Vertex
+  , edges : Dict Int Edge
   , width : Float
   , height : Float
   , vertexCounter : Int
@@ -95,4 +95,5 @@ type alias Flags =
   { width : Float
   , height : Float
   , savedBackground : String
+  , graphJson : Maybe String
   }

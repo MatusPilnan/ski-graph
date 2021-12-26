@@ -18,6 +18,7 @@ import Loading exposing (defaultConfig)
 import Model exposing (..)
 import Saves
 import Time
+import Utils
 
 
 
@@ -57,7 +58,7 @@ init flags =
     , zoom = 1
     , drawingEdge = Nothing
     , activeEdgeDrawingMode = Lift
-    }
+    } |> Saves.graphFromJson flags.graphJson
   , Cmd.none
   )
 
@@ -202,7 +203,7 @@ setModelMousePosition event (model, cmd) =
 
 checkModelDragging : MouseEvent -> (Model, Cmd Msg) -> (Model, Cmd Msg)
 checkModelDragging event (model, cmd) =
-  if model.mouseDown && (not <| maybeHasValue model.drawingEdge) then
+  if model.mouseDown && (not <| Utils.maybeHasValue model.drawingEdge) then
     let
       new = addPoints event.movement model.position
     in
@@ -216,14 +217,13 @@ checkModelDragging event (model, cmd) =
 checkVertexCreation : MouseEvent -> (Model, Cmd Msg) -> (Model, Cmd Msg)
 checkVertexCreation event (model, cmd) =
   let
-    id = String.fromInt model.vertexCounter
-    condition = model.hasMovedWhileMouseDown || maybeHasValue model.drawingEdge || event.button /= Primary
+    condition = model.hasMovedWhileMouseDown || Utils.maybeHasValue model.drawingEdge || event.button /= Primary
   in
   ( { model
     | vertices =
       if condition
       then model.vertices
-      else Dict.insert id ( Vertex id Nothing <| canvasPointToBackgroundPoint event.position model.position model.zoom ) model.vertices
+      else Dict.insert model.vertexCounter ( Vertex model.vertexCounter Nothing <| canvasPointToBackgroundPoint event.position model.position model.zoom ) model.vertices
     , vertexCounter =
       if condition
       then model.vertexCounter
@@ -289,7 +289,7 @@ checkToStartDrawing event (model, cmd) =
   case (event.button, getHoveringVertex model event, model.drawingEdge) of
     ( Primary, Just vertex, Nothing ) ->
       let edgeId = String.fromInt <| model.edgeCounter + 1 in
-      ( { model | drawingEdge = Just <| Edge edgeId ( Just <| "Edge " ++ edgeId) vertex Nothing Unfinished []
+      ( { model | drawingEdge = Just <| Edge (model.edgeCounter + 1) ( Just <| "Edge " ++ edgeId) vertex Nothing Unfinished []
         }
       , cmd
       )
@@ -630,9 +630,3 @@ mulPoint : Point -> Float -> Point
 mulPoint point coef =
   Point (point.x * coef) (point.y * coef)
 
-
-maybeHasValue : Maybe a -> Bool
-maybeHasValue m =
-  case m of
-    Nothing -> False
-    Just _ -> True
