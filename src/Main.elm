@@ -14,6 +14,7 @@ import Html.Events as Events
 import Canvas
 import Icons
 import Json.Decode as D
+import Json.Encode as E
 import Loading exposing (defaultConfig)
 import Time
 
@@ -169,6 +170,7 @@ type Msg
   | ZoomChanged Float
   | AnimationFrame Time.Posix
   | SetActiveEdgeType EdgeType
+  | DownloadCurrentGraph
 
 port saveToLocalStorage : (String, String) -> Cmd msg
 port dimensionsChanged : ((Float, Float) -> msg) -> Sub msg
@@ -191,7 +193,7 @@ update msg model =
             , mapFieldState = Ok
             }
           , saveToLocalStorage ("background", model.mapFieldInput)
-          )
+          ) |> saveModel
         Nothing ->
           ( { model
             | mapFieldState = Invalid
@@ -204,6 +206,7 @@ update msg model =
       |> checkVertexCreation mouseEvent
       |> checkEndDrawing mouseEvent
       |> checkConnectDrawing mouseEvent
+      |> saveModel
 
     MouseDown mouseEvent ->
       ( model, Cmd.none )
@@ -256,13 +259,84 @@ update msg model =
           <| mulPoint (canvasPointToBackgroundPoint model.mousePosition model.position zoomBefore) zoomAfter
         }
       , Cmd.none
-      )
+      ) |> saveModel
 
     MouseLeave ->
       ( { model | mouseDown = False }, Cmd.none )
 
     SetActiveEdgeType edgeType ->
       ( { model | activeEdgeDrawingMode = edgeType}, Cmd.none )
+
+    DownloadCurrentGraph ->
+      ( model
+      , Cmd.batch
+        [ saveToLocalStorage ("graph", graphToJson model 0)
+        ]
+      )
+
+
+graphToJson : Model -> Int -> String
+graphToJson model indent =
+  E.encode indent <|
+    E.object
+      [ ("zoom", E.float model.zoom)
+      , ("background", E.string model.background)
+      , ("vertices", E.list vertexToJson <| Dict.values model.vertices )
+      , ("edges", E.list edgeToJson <| Dict.values model.edges)
+      ]
+
+
+vertexToJson : Vertex -> E.Value
+vertexToJson vertex =
+  E.object
+    [ ("id", E.string vertex.id)
+    , ("title", encodeMaybe E.string vertex.title)
+    , ("position", pointToJson vertex.position)
+    ]
+
+
+edgeToJson : Edge -> E.Value
+edgeToJson edge =
+  E.object
+    [ ("id", E.string edge.id)
+    , ("title", encodeMaybe E.string edge.title)
+    , ("points", E.list pointToJson edge.points)
+    , ("start_id", E.string edge.start.id)
+    , ("end_id", encodeMaybe E.string <| Maybe.map .id edge.end)
+    , ("type", E.string <| edgeTypeToString edge.edgeType)
+    ]
+
+edgeTypeToString : EdgeType -> String
+edgeTypeToString edgeType =
+  case edgeType of
+    SkiRun skiRunType ->
+      String.append "skirun." <|
+      case skiRunType of
+        Easy -> "easy"
+        Medium -> "medium"
+        Difficult -> "difficult"
+        SkiRoute -> "ski-route"
+    Lift -> "lift"
+    Unfinished -> "unfinished"
+
+
+
+pointToJson : Point -> E.Value
+pointToJson point =
+  E.list E.float [point.x, point.y]
+
+encodeMaybe : (a -> E.Value) -> Maybe a -> E.Value
+encodeMaybe enc m =
+  case m of
+    Just a -> enc a
+    Nothing -> E.null
+
+
+
+saveModel : (Model, Cmd Msg) -> (Model, Cmd Msg)
+saveModel (model, cmd) =
+  (model, Cmd.batch [ cmd, saveToLocalStorage ("graph", graphToJson model 0) ])
+
 
 
 checkMouseEventForPointHover : MouseEvent -> (Model, Cmd Msg) -> (Model, Cmd Msg)
@@ -439,6 +513,7 @@ view model =
     ]
   , mapField model
   , modeSelectionButtons model.activeEdgeDrawingMode
+  , saveMapButtons model
   ]
 
 pointToCanvasLibPoint point =
@@ -548,7 +623,7 @@ edgeStyle edgeType zoom =
         Easy -> [ Canvas.Settings.stroke Color.blue ]
         Medium -> [ Canvas.Settings.stroke Color.red ]
         Difficult -> [ Canvas.Settings.stroke Color.black ]
-        SkiRoute -> [ Canvas.Settings.stroke Color.red, Canvas.Settings.Line.lineDash [5, 5] ]
+        SkiRoute -> [ Canvas.Settings.stroke Color.red, Canvas.Settings.Line.lineDash [10 / zoom, 15 / zoom] ]
     Lift -> [ Canvas.Settings.stroke Color.black ]
     Unfinished -> [ Canvas.Settings.stroke Color.green ]
 
@@ -616,7 +691,7 @@ mapField model =
       ]
       []
     , Html.button
-      [ Attr.class "rounded-full shadow-lg bg-blue-400 text-yellow-300 p-4 text-center"
+      [ Attr.class "rounded-full transition-all shadow-md hover:shadow-lg bg-blue-400 hover:bg-white text-yellow-300 hover:text-primary p-4 text-center p-3 h-12 w-12"
       , Events.onClick <| SetMapFieldVisible <| not model.mapFieldVisible
       ]
       [ Icons.mapIcon ]
@@ -678,6 +753,19 @@ modeSelectionButton selected edgeType =
   , Events.onClick <| if active then Noop else SetActiveEdgeType edgeType
   ]
   [ icon ]
+
+saveMapButtons : Model -> Html.Html Msg
+saveMapButtons model =
+  Html.div
+  [ Attr.class "fixed top-4 right-4" ]
+  [ Html.a
+    [ Attr.class "h-12 w-12 rounded-full transition-all shadow-md hover:shadow-lg bg-blue-400 hover:bg-white text-yellow-300 hover:text-primary p-3 text-center block"
+    , Attr.href <| "data:text/plain;charset=utf-8," ++ graphToJson model 2
+    , Attr.download "graph.json"
+    , Events.onClick DownloadCurrentGraph
+    ]
+    [ Icons.saveIcon ]
+  ]
 
 
 addPoints : Point -> Point -> Point
