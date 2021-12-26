@@ -212,6 +212,7 @@ update msg model =
       |> setModelMousePosition mouseEvent
       |> checkMouseEventForPointHover mouseEvent
       |> checkModelDragging mouseEvent
+      |> checkDrawing mouseEvent
 
 
     SetMapFieldVisible bool ->
@@ -320,6 +321,18 @@ checkEndDrawing event (model, cmd) =
     { model
     | drawingEdge = Nothing
     } else model
+  , cmd
+  )
+
+
+checkDrawing : MouseEvent -> (Model, Cmd Msg) -> (Model, Cmd Msg)
+checkDrawing event (model, cmd) =
+  ( case (event.button, model.mouseDown, model.drawingEdge) of
+    (Primary, True, Just edge) ->
+      { model
+      | drawingEdge = Just { edge | points = List.append edge.points [ canvasPointToBackgroundPoint event.position model.position model.zoom ] }
+      }
+    (_, _, _) -> model
   , cmd
   )
 
