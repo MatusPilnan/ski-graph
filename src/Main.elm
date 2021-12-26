@@ -14,8 +14,9 @@ import Html.Events as Events
 import Canvas
 import Icons
 import Json.Decode as D
-import Json.Encode as E
 import Loading exposing (defaultConfig)
+import Model exposing (..)
+import Saves
 import Time
 
 
@@ -31,98 +32,6 @@ main =
     , view = view
     }
 
-
-type alias Vertex =
-  { id : String
-  , title : Maybe String
-  , position : Point
-  }
-
-type SkiRunType
-  = Easy
-  | Medium
-  | Difficult
-  | SkiRoute
-
-
-type EdgeType
-  = SkiRun SkiRunType
-  | Lift
-  | Unfinished
-
-type alias Edge =
-  { id : String
-  , title : Maybe String
-  , start : Vertex
-  , end : Maybe Vertex
-  , edgeType : EdgeType
-  , points : List Point
-  }
-
-type BackgroundState = Ok | Loading | Invalid
-
-type alias Animations =
-  { expandedPoint : Animator.Timeline (Maybe Vertex)
-  }
-
-
--- MODEL
-
-
-type alias Model =
-  { background : String
-  , animations : Animations
-  , texture :  Maybe Canvas.Texture.Texture
-  , vertices : Dict String Vertex
-  , edges : Dict String Edge
-  , width : Float
-  , height : Float
-  , vertexCounter : Int
-  , edgeCounter : Int
-  , position : Point
-  , mousePosition : Point
-  , mouseDown : Bool
-  , hasMovedWhileMouseDown : Bool
-  , mouseDownStartPosition : Point
-  , mapFieldVisible : Bool
-  , mapFieldInput : String
-  , mapFieldState : BackgroundState
-  , zoom : Float
-  , drawingEdge : Maybe Edge
-  , activeEdgeDrawingMode : EdgeType
-  }
-
-type MouseButton
-  = Primary
-  | Secondary
-  | Wheel
-  | Other
-
-
-type alias MouseEvent =
-  { position : Point
-  , movement : Point
-  , button : MouseButton
-  }
-
-type alias ScrollEvent =
-  { deltaX : Float
-  }
-
-type alias Point = { x : Float, y : Float}
-type alias CanvasPoint = { x : Float, y : Float}
-
-type alias DragEvent =
-  { movementX : Float
-  , movementY : Float
-  }
-
-
-type alias Flags =
-  { width : Float
-  , height : Float
-  , savedBackground : String
-  }
 
 init : Flags -> (Model, Cmd Msg)
 init flags =
@@ -190,7 +99,7 @@ update msg model =
           ( { model
             | texture = Just t
             , background = model.mapFieldInput
-            , mapFieldState = Ok
+            , mapFieldState = Loaded
             }
           , saveToLocalStorage ("background", model.mapFieldInput)
           ) |> saveModel
@@ -270,72 +179,13 @@ update msg model =
     DownloadCurrentGraph ->
       ( model
       , Cmd.batch
-        [ saveToLocalStorage ("graph", graphToJson model 0)
+        [ saveToLocalStorage ("graph", Saves.graphToJson model 0)
         ]
       )
 
-
-graphToJson : Model -> Int -> String
-graphToJson model indent =
-  E.encode indent <|
-    E.object
-      [ ("zoom", E.float model.zoom)
-      , ("background", E.string model.background)
-      , ("vertices", E.list vertexToJson <| Dict.values model.vertices )
-      , ("edges", E.list edgeToJson <| Dict.values model.edges)
-      ]
-
-
-vertexToJson : Vertex -> E.Value
-vertexToJson vertex =
-  E.object
-    [ ("id", E.string vertex.id)
-    , ("title", encodeMaybe E.string vertex.title)
-    , ("position", pointToJson vertex.position)
-    ]
-
-
-edgeToJson : Edge -> E.Value
-edgeToJson edge =
-  E.object
-    [ ("id", E.string edge.id)
-    , ("title", encodeMaybe E.string edge.title)
-    , ("points", E.list pointToJson edge.points)
-    , ("start_id", E.string edge.start.id)
-    , ("end_id", encodeMaybe E.string <| Maybe.map .id edge.end)
-    , ("type", E.string <| edgeTypeToString edge.edgeType)
-    ]
-
-edgeTypeToString : EdgeType -> String
-edgeTypeToString edgeType =
-  case edgeType of
-    SkiRun skiRunType ->
-      String.append "skirun." <|
-      case skiRunType of
-        Easy -> "easy"
-        Medium -> "medium"
-        Difficult -> "difficult"
-        SkiRoute -> "ski-route"
-    Lift -> "lift"
-    Unfinished -> "unfinished"
-
-
-
-pointToJson : Point -> E.Value
-pointToJson point =
-  E.list E.float [point.x, point.y]
-
-encodeMaybe : (a -> E.Value) -> Maybe a -> E.Value
-encodeMaybe enc m =
-  case m of
-    Just a -> enc a
-    Nothing -> E.null
-
-
-
 saveModel : (Model, Cmd Msg) -> (Model, Cmd Msg)
 saveModel (model, cmd) =
-  (model, Cmd.batch [ cmd, saveToLocalStorage ("graph", graphToJson model 0) ])
+  (model, Cmd.batch [ cmd, saveToLocalStorage ("graph", Saves.graphToJson model 0) ])
 
 
 
@@ -673,7 +523,7 @@ mapField model =
           { defaultConfig | color = "#60a5fa" } -- Config
           Loading.On -- LoadingState
         ]
-      Ok -> []
+      Loaded -> []
       Invalid ->
         [ Html.div [ Attr.class "text-red-600" ] [ Icons.errorIcon ]
         ]
@@ -760,7 +610,7 @@ saveMapButtons model =
   [ Attr.class "fixed top-4 right-4" ]
   [ Html.a
     [ Attr.class "h-12 w-12 rounded-full transition-all shadow-md hover:shadow-lg bg-blue-400 hover:bg-white text-yellow-300 hover:text-primary p-3 text-center block"
-    , Attr.href <| "data:text/plain;charset=utf-8," ++ graphToJson model 2
+    , Attr.href <| "data:text/plain;charset=utf-8," ++ Saves.graphToJson model 2
     , Attr.download "graph.json"
     , Events.onClick DownloadCurrentGraph
     ]
