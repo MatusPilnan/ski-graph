@@ -40,10 +40,19 @@ jobs:
         with:
           name: public
           path: public
-        
+
+  index:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Build stored graphs index
+        run: python ./index-stored-graphs.py
+
   publish:
     runs-on: ubuntu-latest
-    needs: build
+    needs:
+      - build
+      - index
     steps:
       - uses: actions/download-artifact@v2.1.0
         with:

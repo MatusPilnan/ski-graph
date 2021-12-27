@@ -1,5 +1,6 @@
 public/*.css
 public/*.js
+public/graphs/index.json
 elm-stuff
 node_modules
 .idea
