@@ -65,8 +65,10 @@ jobs:
         with:
           - name: public
             path: public
-          - name: graph-index
-            path: public/graphs/index.json
+      - uses: actions/download-artifact@v2.1.0
+      with:
+        - name: graph-index
+          path: public/graphs/index.json
           
       - name: GitHub Pages
         # You may pin to the exact commit or the version.
