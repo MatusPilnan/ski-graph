@@ -74,8 +74,6 @@ graphFromJson jsonString model =
         Ok value -> value
         Err _ -> model
 
-
-
 graphDecoder : Model -> D.Decoder Model
 graphDecoder model =
   D.map4
