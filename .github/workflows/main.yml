@@ -45,6 +45,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v2
+
       - name: Build stored graphs index
         run: python ./index-stored-graphs.py
 
