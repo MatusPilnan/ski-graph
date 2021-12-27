@@ -71,8 +71,8 @@ graphFromJson jsonString model =
     Nothing -> model
     Just json ->
       case D.decodeString (graphDecoder model) json of
-        Ok value ->  Debug.log "value" value
-        Err e -> let _ = Debug.log "error" e in model
+        Ok value -> value
+        Err _ -> model
 
 
 
