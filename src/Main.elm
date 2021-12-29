@@ -7,7 +7,7 @@ import Canvas.Settings.Advanced
 import Canvas.Settings.Line
 import Canvas.Texture
 import Color
-import Dict exposing (Dict)
+import Graph
 import Html
 import Html.Attributes as Attr
 import Html.Events as Events
@@ -36,28 +36,24 @@ main =
 
 init : Flags -> (Model, Cmd Msg)
 init flags =
-  ( { background = ""
+  ( { currentGraph = Nothing
     , animations =
       { expandedPoint = Animator.init Nothing
       }
     , texture = Nothing
-    , vertices = Dict.empty
-    , edges = Dict.empty
     , width = flags.width
     , height = flags.height
     , vertexCounter = 0
     , edgeCounter = 0
-    , position = Point 0 0
-    , mousePosition = Point 0 0
+    , mousePosition = Graph.Point 0 0
     , mouseDown = False
     , hasMovedWhileMouseDown = False
-    , mouseDownStartPosition = Point 0 0
+    , mouseDownStartPosition = Graph.Point 0 0
     , mapFieldVisible = False
     , mapFieldInput = flags.savedBackground
     , mapFieldState = Loading
-    , zoom = 1
     , drawingEdge = Nothing
-    , activeEdgeDrawingMode = Lift
+    , activeEdgeDrawingMode = Graph.Lift
     } |> Saves.graphFromJson flags.graphJson
   , Cmd.none
   )
@@ -79,7 +75,7 @@ type Msg
   | DimensionsChanged (Float, Float)
   | ZoomChanged Float
   | AnimationFrame Time.Posix
-  | SetActiveEdgeType EdgeType
+  | SetActiveEdgeType Graph.EdgeType
   | DownloadCurrentGraph
 
 port saveToLocalStorage : (String, String) -> Cmd msg
@@ -99,7 +95,7 @@ update msg model =
         Just t ->
           ( { model
             | texture = Just t
-            , background = model.mapFieldInput
+            , currentGraph = Maybe.map (Graph.setBackground model.mapFieldInput) model.currentGraph
             , mapFieldState = Loaded
             }
           , saveToLocalStorage ("background", model.mapFieldInput)
@@ -134,7 +130,7 @@ update msg model =
     SetMapFieldVisible bool ->
       ( { model
         | mapFieldVisible = bool
-        , mapFieldInput = if not bool && String.isEmpty model.mapFieldInput then model.background else model.mapFieldInput
+        , mapFieldInput = if not bool && String.isEmpty model.mapFieldInput then Graph.getBackground model.currentGraph else model.mapFieldInput
         , mapFieldState = if not bool && String.isEmpty model.mapFieldInput then Loading else model.mapFieldState
         }
       , Cmd.none
@@ -147,11 +143,16 @@ update msg model =
       let
         w = Maybe.withDefault width <| Maybe.map (\t -> (Canvas.Texture.dimensions t).width ) model.texture
         h = Maybe.withDefault height <| Maybe.map (\t -> (Canvas.Texture.dimensions t).height ) model.texture
-        zoomAfter = max (model.zoom) (max ( width / w ) ( height / h ) )
+        zoomAfter = max (Graph.getZoom model.currentGraph) (max ( width / w ) ( height / h ) )
         newModel = { model | width = width, height = height }
       in
-      ( { newModel | zoom = zoomAfter
-        , position = constrainBackgroundToCanvas newModel newModel.position
+      ( { newModel
+        | currentGraph = Maybe.map
+          ( Graph.setPosition
+            ( constrainBackgroundToCanvas newModel
+              <| Graph.getPosition model.currentGraph
+            ) << Graph.setZoom zoomAfter
+          ) model.currentGraph
         }
       , Cmd.none
       )
@@ -160,13 +161,21 @@ update msg model =
       let
         w = Maybe.withDefault model.width <| Maybe.map (\t -> (Canvas.Texture.dimensions t).width ) model.texture
         h = Maybe.withDefault model.height <| Maybe.map (\t -> (Canvas.Texture.dimensions t).height ) model.texture
-        zoomBefore = model.zoom
-        zoomAfter = max (model.zoom - ( delta / 1000) ) (max ( model.width / w ) ( model.height / h ) )
+        zoomBefore = (Graph.getZoom model.currentGraph)
+        zoomAfter = max ((Graph.getZoom model.currentGraph) - ( delta / 1000) ) (max ( model.width / w ) ( model.height / h ) )
       in
-      ( { model | zoom = zoomAfter
-        , position = constrainBackgroundToCanvas { model | zoom = zoomAfter}
-          <| subPoints model.mousePosition
-          <| mulPoint (canvasPointToBackgroundPoint model.mousePosition model.position zoomBefore) zoomAfter
+      ( { model
+        | currentGraph = Maybe.map
+          ( Graph.setPosition
+            ( constrainBackgroundToCanvas { model | currentGraph = Maybe.map (Graph.setZoom zoomAfter) model.currentGraph }
+                <| subPoints model.mousePosition
+                <| mulPoint (canvasPointToBackgroundPoint model.mousePosition (Graph.getPosition model.currentGraph) zoomBefore) zoomAfter
+            ) << Graph.setZoom zoomAfter
+          ) model.currentGraph
+        --zoomAfter
+        --, position = constrainBackgroundToCanvas { model | zoom = zoomAfter}
+        --  <| subPoints model.mousePosition
+        --  <| mulPoint (canvasPointToBackgroundPoint model.mousePosition model.position zoomBefore) zoomAfter
         }
       , Cmd.none
       ) |> saveModel
@@ -180,13 +189,18 @@ update msg model =
     DownloadCurrentGraph ->
       ( model
       , Cmd.batch
-        [ saveToLocalStorage ("graph", Saves.graphToJson model 0)
+        [ saveCmd model
         ]
       )
 
+saveCmd : Model -> Cmd msg
+saveCmd model =
+  Maybe.withDefault Cmd.none <| Maybe.map saveToLocalStorage <| Maybe.map (\g -> ("graph", Saves.graphToJson 0 g)) model.currentGraph
+
+
 saveModel : (Model, Cmd Msg) -> (Model, Cmd Msg)
 saveModel (model, cmd) =
-  (model, Cmd.batch [ cmd, saveToLocalStorage ("graph", Saves.graphToJson model 0) ])
+  (model, Cmd.batch [ cmd, saveCmd model ])
 
 
 
@@ -205,11 +219,11 @@ checkModelDragging : MouseEvent -> (Model, Cmd Msg) -> (Model, Cmd Msg)
 checkModelDragging event (model, cmd) =
   if model.mouseDown && (not <| Utils.maybeHasValue model.drawingEdge) then
     let
-      new = addPoints event.movement model.position
+      new = addPoints event.movement <| Graph.getPosition model.currentGraph
     in
     ( { model
       | hasMovedWhileMouseDown = True
-      , position = constrainBackgroundToCanvas model new
+      , currentGraph = Graph.updateGraphProperty Graph.setPosition (constrainBackgroundToCanvas model new) model.currentGraph
       }
     , cmd
     ) else (model,cmd)
@@ -220,10 +234,10 @@ checkVertexCreation event (model, cmd) =
     condition = model.hasMovedWhileMouseDown || Utils.maybeHasValue model.drawingEdge || event.button /= Primary
   in
   ( { model
-    | vertices =
+    | currentGraph =
       if condition
-      then model.vertices
-      else Dict.insert model.vertexCounter ( Vertex model.vertexCounter Nothing <| canvasPointToBackgroundPoint event.position model.position model.zoom ) model.vertices
+      then model.currentGraph
+      else Graph.updateGraphProperty (Graph.addVertex model.vertexCounter) (canvasPointToBackgroundPoint event.position (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph)) model.currentGraph
     , vertexCounter =
       if condition
       then model.vertexCounter
@@ -260,7 +274,7 @@ checkDrawing event (model, cmd) =
   ( case (event.button, model.mouseDown, model.drawingEdge) of
     (Primary, True, Just edge) ->
       { model
-      | drawingEdge = Just { edge | points = List.append edge.points [ canvasPointToBackgroundPoint event.position model.position model.zoom ] }
+      | drawingEdge = Just { edge | points = List.append edge.points [ canvasPointToBackgroundPoint event.position (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph) ] }
       }
     (_, _, _) -> model
   , cmd
@@ -274,10 +288,10 @@ checkConnectDrawing event (model, cmd) =
       if vertex /= edge.start then
       { model | drawingEdge = Nothing
       , edgeCounter = model.edgeCounter + 1
-      , edges = Dict.insert edge.id { edge | end = Just vertex, edgeType = model.activeEdgeDrawingMode } model.edges
+      , currentGraph = Graph.updateGraphProperty Graph.addEdge { edge | end = Just vertex, edgeType = model.activeEdgeDrawingMode } model.currentGraph
       } else model
     (Primary, Nothing, Just edge) ->
-      { model | drawingEdge = Just { edge | points = edge.points ++ [ canvasPointToBackgroundPoint event.position model.position model.zoom ] }
+      { model | drawingEdge = Just { edge | points = edge.points ++ [ canvasPointToBackgroundPoint event.position (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph) ] }
       }
     (_, _, _) -> model
   , cmd
@@ -289,16 +303,16 @@ checkToStartDrawing event (model, cmd) =
   case (event.button, getHoveringVertex model event, model.drawingEdge) of
     ( Primary, Just vertex, Nothing ) ->
       let edgeId = String.fromInt <| model.edgeCounter + 1 in
-      ( { model | drawingEdge = Just <| Edge (model.edgeCounter + 1) ( Just <| "Edge " ++ edgeId) vertex Nothing Unfinished []
+      ( { model | drawingEdge = Just <| Graph.Edge (model.edgeCounter + 1) ( Just <| "Edge " ++ edgeId) vertex Nothing Graph.Unfinished []
         }
       , cmd
       )
     (_, _, _) -> (model, cmd)
 
 
-getHoveringVertex : Model -> MouseEvent -> Maybe Vertex
+getHoveringVertex : Model -> MouseEvent -> Maybe Graph.Vertex
 getHoveringVertex model event =
-  List.head <| List.filter (\v -> mouseOverPoint model.position model.zoom event.position v.position ) <| Dict.values model.vertices
+  List.head <| List.filter (\v -> mouseOverPoint (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph) event.position v.position ) <| Graph.getVerticesList model.currentGraph
 
 -- SUBSCRIPTIONS
 
@@ -319,7 +333,7 @@ animator =
       .expandedPoint
       (\newPoint model -> { model | expandedPoint = newPoint })
 
-animateHoveredPoint : Animations -> Maybe Vertex -> Animations
+animateHoveredPoint : Animations -> Maybe Graph.Vertex -> Animations
 animateHoveredPoint animations newHover =
   { animations | expandedPoint = animations.expandedPoint |> Animator.go Animator.quickly newHover }
 
@@ -346,14 +360,20 @@ view model =
     ]
     [ Canvas.group
       [ Canvas.Settings.Advanced.transform
-        [ Canvas.Settings.Advanced.translate model.position.x model.position.y
-        , Canvas.Settings.Advanced.scale model.zoom model.zoom
+      (
+        let
+          pos = Graph.getPosition model.currentGraph
+          zoom = Graph.getZoom model.currentGraph
+        in
+        [ Canvas.Settings.Advanced.translate pos.x pos.y
+        , Canvas.Settings.Advanced.scale zoom zoom
         ]
+      )
       ]
       <| addBackground model.width model.height (0, 0) model.texture
       [ Canvas.group []
-        <| (List.map (edgeView model) <| Dict.values model.edges)
-        ++ (List.map (vertexView model) <| Dict.values model.vertices)
+        <| (List.map (edgeView model) <| Graph.getEdgesList model.currentGraph)
+        ++ (List.map (vertexView model) <| Graph.getVerticesList model.currentGraph)
         ++
         case model.drawingEdge of
           Nothing -> []
@@ -372,7 +392,7 @@ pointToCanvasLibPoint point =
 mouseDecoder msg =
   D.map5
     ( \offsetX offsetY movementX movementY button ->
-      msg <| MouseEvent (Point offsetX offsetY) (Point movementX movementY)
+      msg <| MouseEvent (Graph.Point offsetX offsetY) (Graph.Point movementX movementY)
       <| case button of
           0 -> Primary
           1 -> Wheel
@@ -388,7 +408,7 @@ mouseDecoder msg =
 scrollDecoder msg =
    D.map msg <| D.field "deltaY" D.float
 
-vertexView : Model -> Vertex -> Canvas.Renderable
+vertexView : Model -> Graph.Vertex -> Canvas.Renderable
 vertexView model vertex =
   Canvas.group
   []
@@ -402,7 +422,7 @@ vertexView model vertex =
           else if vertexEdgeDrawingCondition model vertex
           then 1.5 * pointSize
           else pointSize
-        ) / model.zoom
+        ) / (Graph.getZoom model.currentGraph)
       )
     ]
   , Canvas.shapes
@@ -415,67 +435,67 @@ vertexView model vertex =
          else if vertexEdgeDrawingCondition model vertex
         then pointSize
         else 0
-       ) / model.zoom
+       ) / (Graph.getZoom model.currentGraph)
       )
     ]
   ]
 
-vertexMovementAnimation : Maybe Vertex -> Animator.Movement
+vertexMovementAnimation : Maybe Graph.Vertex -> Animator.Movement
 vertexMovementAnimation state =
   Animator.at <|
   case state of
     Nothing -> pointSize
     Just _ -> 1.5 * pointSize
 
-vertexFillAnimation : Maybe Vertex -> Animator.Movement
+vertexFillAnimation : Maybe Graph.Vertex -> Animator.Movement
 vertexFillAnimation state =
   Animator.at <|
   case state of
     Nothing -> 0
     Just _ -> pointSize
 
-vertexExpansionCondition : Model -> Vertex -> Bool
+vertexExpansionCondition : Model -> Graph.Vertex -> Bool
 vertexExpansionCondition model vertex =
   (Animator.current model.animations.expandedPoint == Just vertex)
   || (Animator.arrived model.animations.expandedPoint == Just vertex)
   || (Animator.previous model.animations.expandedPoint == Just vertex)
 
 
-vertexEdgeDrawingCondition : Model -> Vertex -> Bool
+vertexEdgeDrawingCondition : Model -> Graph.Vertex -> Bool
 vertexEdgeDrawingCondition model vertex =
   ( Maybe.map .start model.drawingEdge == Just vertex)
 
 
-edgeView : Model -> Edge -> Canvas.Renderable
+edgeView : Model -> Graph.Edge -> Canvas.Renderable
 edgeView model edge =
   Canvas.shapes
-  (edgeStyle edge.edgeType model.zoom)
+  (edgeStyle edge.edgeType (Graph.getZoom model.currentGraph))
   [ Canvas.path (pointToCanvasLibPoint edge.start.position)
     <| List.map
       (Canvas.lineTo << pointToCanvasLibPoint)
       <| edge.points
       ++ [ case edge.end of
-             Nothing -> canvasPointToBackgroundPoint model.mousePosition model.position model.zoom
+             Nothing -> canvasPointToBackgroundPoint model.mousePosition (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph)
              Just vertex -> vertex.position
          ]
   ]
 
 
-edgeStyle : EdgeType -> Float -> List Canvas.Settings.Setting
+edgeStyle : Graph.EdgeType -> Float -> List Canvas.Settings.Setting
 edgeStyle edgeType zoom =
   [ Canvas.Settings.Line.lineWidth <| lineWidth / zoom
   , Canvas.Settings.Line.lineCap Canvas.Settings.Line.RoundCap
   , Canvas.Settings.Line.lineJoin Canvas.Settings.Line.RoundJoin
   ] ++
   case edgeType of
-    SkiRun skiRunType ->
+    Graph.SkiRun skiRunType ->
       case skiRunType of
-        Easy -> [ Canvas.Settings.stroke Color.blue ]
-        Medium -> [ Canvas.Settings.stroke Color.red ]
-        Difficult -> [ Canvas.Settings.stroke Color.black ]
-        SkiRoute -> [ Canvas.Settings.stroke Color.red, Canvas.Settings.Line.lineDash [10 / zoom, 15 / zoom] ]
-    Lift -> [ Canvas.Settings.stroke Color.black ]
-    Unfinished -> [ Canvas.Settings.stroke Color.green ]
+        Graph.Easy -> [ Canvas.Settings.stroke Color.blue ]
+        Graph.Medium -> [ Canvas.Settings.stroke Color.red ]
+        Graph.Difficult -> [ Canvas.Settings.stroke Color.black ]
+        Graph.SkiRoute -> [ Canvas.Settings.stroke Color.red, Canvas.Settings.Line.lineDash [10 / zoom, 15 / zoom] ]
+    Graph.Lift -> [ Canvas.Settings.stroke Color.black ]
+    Graph.Unfinished -> [ Canvas.Settings.stroke Color.green ]
 
 
 addBackground width height position texture renderables =
@@ -485,15 +505,15 @@ addBackground width height position texture renderables =
       [ Canvas.clear (0, 0) width height, Canvas.texture [] position t ] ++ renderables
 
 
-constrainBackgroundToCanvas : Model -> Point -> Point
+constrainBackgroundToCanvas : Model -> Graph.Point -> Graph.Point
 constrainBackgroundToCanvas model new =
   let
     w = Maybe.withDefault model.width <| Maybe.map (\t -> (Canvas.Texture.dimensions t).width ) model.texture
     h = Maybe.withDefault model.height <| Maybe.map (\t -> (Canvas.Texture.dimensions t).height ) model.texture
   in
-  Point
-    (min 0 <| max (0 - w * model.zoom + model.width) new.x )
-    (min 0 <| max (0 - h * model.zoom + model.height) new.y )
+  Graph.Point
+    (min 0 <| max (0 - w * (Graph.getZoom model.currentGraph) + model.width) new.x )
+    (min 0 <| max (0 - h * (Graph.getZoom model.currentGraph) + model.height) new.y )
 
 canvasPointToBackgroundPoint canvasPoint backgroundPosition zoomLevel =
   mulPoint (subPoints canvasPoint backgroundPosition) <| 1 / zoomLevel
@@ -554,11 +574,11 @@ modeSelectionButtons selected =
   [ Attr.class "fixed right-0 bottom-24 group" ]
   [ Html.div
     [ Attr.class "flex flex-col items-end mr-4 group-hover:mr-6 transition-all" ]
-    [ btn Lift
-    , btn <| SkiRun Easy
-    , btn <| SkiRun Medium
-    , btn <| SkiRun Difficult
-    , btn <| SkiRun SkiRoute
+    [ btn Graph.Lift
+    , btn <| Graph.SkiRun Graph.Easy
+    , btn <| Graph.SkiRun Graph.Medium
+    , btn <| Graph.SkiRun Graph.Difficult
+    , btn <| Graph.SkiRun Graph.SkiRoute
     ]
   , Html.div
     [ Attr.class "transition-all bg-primary text-white py-2 pl-1 mb-4 rounded-tl-md rounded-bl-md absolute h-max bottom-0 -right-full group-hover:right-0 text-xs [writing-mode:vertical-rl] [text-orientation:mixed]" ]
@@ -577,21 +597,21 @@ modeSelectionButtons selected =
     ]
   ]
 
-modeSelectionButton : EdgeType -> EdgeType -> Html.Html Msg
+modeSelectionButton : Graph.EdgeType -> Graph.EdgeType -> Html.Html Msg
 modeSelectionButton selected edgeType =
   let
     active = selected == edgeType
     icon =
       case edgeType of
-        SkiRun skiRunType ->
+        Graph.SkiRun skiRunType ->
           Icons.skiRunIcon <|
           case skiRunType of
-            Easy -> "#0000ff"
-            Medium -> "#ff0000"
-            Difficult -> "#000000"
-            SkiRoute -> "#890202"
-        Lift -> Icons.liftIcon
-        Unfinished -> Html.text ""
+            Graph.Easy -> "#0000ff"
+            Graph.Medium -> "#ff0000"
+            Graph.Difficult -> "#000000"
+            Graph.SkiRoute -> "#890202"
+        Graph.Lift -> Icons.liftIcon
+        Graph.Unfinished -> Html.text ""
 
   in
   Html.button
@@ -610,7 +630,7 @@ saveMapButtons model =
   [ Attr.class "fixed top-4 right-4" ]
   [ Html.a
     [ Attr.class "h-12 w-12 rounded-full transition-all shadow-md hover:shadow-lg bg-blue-400 hover:bg-white text-yellow-300 hover:text-primary p-3 text-center block"
-    , Attr.href <| "data:text/plain;charset=utf-8," ++ Saves.graphToJson model 2
+    , Attr.href <| "data:text/plain;charset=utf-8," ++ (Maybe.withDefault "" <| Maybe.map (Saves.graphToJson 2) model.currentGraph)
     , Attr.download "graph.json"
     , Events.onClick DownloadCurrentGraph
     ]
@@ -618,15 +638,15 @@ saveMapButtons model =
   ]
 
 
-addPoints : Point -> Point -> Point
+addPoints : Graph.Point -> Graph.Point -> Graph.Point
 addPoints a b =
-  Point (a.x + b.x) (a.y + b.y)
+  Graph.Point (a.x + b.x) (a.y + b.y)
 
-subPoints : Point -> Point -> Point
+subPoints : Graph.Point -> Graph.Point -> Graph.Point
 subPoints a b =
-  Point (a.x - b.x) (a.y - b.y)
+  Graph.Point (a.x - b.x) (a.y - b.y)
 
-mulPoint : Point -> Float -> Point
+mulPoint : Graph.Point -> Float -> Graph.Point
 mulPoint point coef =
-  Point (point.x * coef) (point.y * coef)
+  Graph.Point (point.x * coef) (point.y * coef)
 

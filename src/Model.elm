@@ -2,40 +2,13 @@ module Model exposing (..)
 
 import Animator
 import Canvas.Texture
-import Dict exposing (Dict)
+import Graph
 
-
-type alias Vertex =
-  { id : Int
-  , title : Maybe String
-  , position : Point
-  }
-
-type SkiRunType
-  = Easy
-  | Medium
-  | Difficult
-  | SkiRoute
-
-
-type EdgeType
-  = SkiRun SkiRunType
-  | Lift
-  | Unfinished
-
-type alias Edge =
-  { id : Int
-  , title : Maybe String
-  , start : Vertex
-  , end : Maybe Vertex
-  , edgeType : EdgeType
-  , points : List Point
-  }
 
 type BackgroundState = Loaded | Loading | Invalid
 
 type alias Animations =
-  { expandedPoint : Animator.Timeline (Maybe Vertex)
+  { expandedPoint : Animator.Timeline (Maybe Graph.Vertex)
   }
 
 
@@ -43,26 +16,22 @@ type alias Animations =
 
 
 type alias Model =
-  { background : String
+  { currentGraph : Maybe Graph.Graph
   , animations : Animations
   , texture :  Maybe Canvas.Texture.Texture
-  , vertices : Dict Int Vertex
-  , edges : Dict Int Edge
   , width : Float
   , height : Float
   , vertexCounter : Int
   , edgeCounter : Int
-  , position : Point
-  , mousePosition : Point
+  , mousePosition : Graph.Point
   , mouseDown : Bool
   , hasMovedWhileMouseDown : Bool
-  , mouseDownStartPosition : Point
+  , mouseDownStartPosition : Graph.Point
   , mapFieldVisible : Bool
   , mapFieldInput : String
   , mapFieldState : BackgroundState
-  , zoom : Float
-  , drawingEdge : Maybe Edge
-  , activeEdgeDrawingMode : EdgeType
+  , drawingEdge : Maybe Graph.Edge
+  , activeEdgeDrawingMode : Graph.EdgeType
   }
 
 type MouseButton
@@ -73,8 +42,8 @@ type MouseButton
 
 
 type alias MouseEvent =
-  { position : Point
-  , movement : Point
+  { position : Graph.Point
+  , movement : Graph.Point
   , button : MouseButton
   }
 
@@ -82,7 +51,6 @@ type alias ScrollEvent =
   { deltaX : Float
   }
 
-type alias Point = { x : Float, y : Float}
 type alias CanvasPoint = { x : Float, y : Float}
 
 type alias DragEvent =

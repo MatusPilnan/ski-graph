@@ -1,20 +1,21 @@
 module Saves exposing (..)
 
 import Dict
+import Graph exposing (..)
 import Json.Encode as E
 import Json.Decode as D
 import Model exposing (..)
 import Utils
 
-graphToJson : Model -> Int -> String
-graphToJson model indent =
+graphToJson : Int -> Graph -> String
+graphToJson indent graph =
   E.encode indent <|
     E.object
-      [ ("zoom", E.float model.zoom)
-      , ("background", E.string model.background)
-      , ("position", pointToJson model.position)
-      , ("vertices", E.list vertexToJson <| Dict.values model.vertices )
-      , ("edges", E.list edgeToJson <| Dict.values model.edges)
+      [ ("zoom", E.float graph.zoom)
+      , ("background", E.string graph.background)
+      , ("position", pointToJson graph.backgroundPosition)
+      , ("vertices", E.list vertexToJson <| Dict.values graph.vertices )
+      , ("edges", E.list edgeToJson <| Dict.values graph.edges)
       ]
 
 
@@ -70,23 +71,15 @@ graphFromJson jsonString model =
   case jsonString of
     Nothing -> model
     Just json ->
-      case D.decodeString (graphDecoder model) json of
-        Ok value -> value
+      case D.decodeString graphDecoder json of
+        Ok graph -> { model | currentGraph = Just graph}
         Err _ -> model
 
-graphDecoder : Model -> D.Decoder Model
-graphDecoder model =
+graphDecoder : D.Decoder Graph
+graphDecoder =
   D.map4
     ( \zoom background position (vertices, edges) ->
-      { model
-      | zoom = zoom
-      , background = background
-      , vertices = vertices
-      , edges = edges
-      , position = position
-      , vertexCounter = Maybe.withDefault 0 <| List.maximum <| List.map .id <| Dict.values vertices
-      , edgeCounter = Maybe.withDefault 0 <| List.maximum <| List.map .id <| Dict.values edges
-      }
+      Graph "" "" background vertices edges position zoom
     )
     (D.field "zoom" D.float)
     (D.field "background" D.string)
@@ -101,7 +94,7 @@ vertexDecoder =
     (D.field "position" <| pointDecoder )
 
 
-edgeDecoder : D.Decoder (Dict.Dict Int Vertex, Dict.Dict Int Edge)
+edgeDecoder : D.Decoder (Dict.Dict VertexID Vertex, Dict.Dict EdgeID Edge)
 edgeDecoder =
   D.andThen
   ( \(vertices, edgeData) ->
