@@ -7,6 +7,18 @@ import Json.Decode as D
 import Model exposing (..)
 import Utils
 
+--
+--graphIndexEntryEncoder : GraphIndexEntry -> E.Value
+--graphIndexEntryEncoder entry =
+--  E.object
+--  [ ("title", E.string entry.title)
+--  , ("path", E.string entry.path)
+--  , ("location")
+--  ]
+--
+--
+
+
 graphToJson : Int -> Graph -> String
 graphToJson indent graph =
   E.encode indent <|
@@ -16,6 +28,7 @@ graphToJson indent graph =
       , ("position", pointToJson graph.backgroundPosition)
       , ("vertices", E.list vertexToJson <| Dict.values graph.vertices )
       , ("edges", E.list edgeToJson <| Dict.values graph.edges)
+      , ("id", E.string graph.id)
       ]
 
 
@@ -77,13 +90,14 @@ graphFromJson jsonString model =
 
 graphDecoder : D.Decoder Graph
 graphDecoder =
-  D.map4
-    ( \zoom background position (vertices, edges) ->
-      Graph "" "" background vertices edges position zoom
+  D.map5
+    ( \zoom background position id (vertices, edges) ->
+      Graph "" id background vertices edges position zoom
     )
     (D.field "zoom" D.float)
     (D.field "background" D.string)
     (D.field "position" pointDecoder)
+    (D.field "id" D.string)
     (edgeDecoder)
 
 vertexDecoder : D.Decoder Vertex

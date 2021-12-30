@@ -2,6 +2,7 @@ module Model exposing (..)
 
 import Animator
 import Canvas.Texture
+import Dict exposing (Dict)
 import Graph
 
 
@@ -17,6 +18,8 @@ type alias Animations =
 
 type alias Model =
   { currentGraph : Maybe Graph.Graph
+  , graphIndex : Dict Graph.GraphID Graph.GraphIndexEntry
+  , selectedGraphIndexEntryId : Maybe Graph.GraphID
   , animations : Animations
   , texture :  Maybe Canvas.Texture.Texture
   , width : Float
@@ -32,6 +35,7 @@ type alias Model =
   , mapFieldState : BackgroundState
   , drawingEdge : Maybe Graph.Edge
   , activeEdgeDrawingMode : Graph.EdgeType
+  , baseUrl : String
   }
 
 type MouseButton
@@ -64,4 +68,5 @@ type alias Flags =
   , height : Float
   , savedBackground : String
   , graphJson : Maybe String
+  , baseUrl : String
   }

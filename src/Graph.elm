@@ -3,6 +3,7 @@ module Graph exposing (..)
 import Dict exposing (Dict)
 type alias VertexID = Int
 type alias EdgeID = Int
+type alias GraphID = String
 type alias Point = { x : Float, y : Float}
 
 type alias Vertex =
@@ -34,13 +35,28 @@ type alias Edge =
 
 type alias Graph =
   { title : String
-  , id : String
+  , id : GraphID
   , background : String
   , vertices : Dict VertexID Vertex
   , edges : Dict EdgeID Edge
   , backgroundPosition : Point
   , zoom : Float
   }
+
+type GraphLocation = Local | Remote
+
+
+type alias GraphIndexEntry =
+  { title : String
+  , path : String
+  , id : GraphID
+  , location : GraphLocation
+  }
+
+
+init =
+  Graph "New graph" "graph-id" "" Dict.empty Dict.empty zeroPoint 1
+
 
 updateGraphProperty : (a -> Graph -> Graph) -> a -> Maybe Graph -> Maybe Graph
 updateGraphProperty func new graph =

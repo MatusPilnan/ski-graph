@@ -7,6 +7,7 @@ import Canvas.Settings.Advanced
 import Canvas.Settings.Line
 import Canvas.Texture
 import Color
+import Dict
 import Graph
 import Html
 import Html.Attributes as Attr
@@ -15,9 +16,10 @@ import Canvas
 import Icons
 import Json.Decode as D
 import Loading exposing (defaultConfig)
+import Messages exposing (Msg(..))
 import Model exposing (..)
+import Requests
 import Saves
-import Time
 import Utils
 
 
@@ -54,29 +56,16 @@ init flags =
     , mapFieldState = Loading
     , drawingEdge = Nothing
     , activeEdgeDrawingMode = Graph.Lift
+    , graphIndex = Dict.empty
+    , selectedGraphIndexEntryId = Nothing
+    , baseUrl = flags.baseUrl
     } |> Saves.graphFromJson flags.graphJson
-  , Cmd.none
+  , Requests.fetchGraphIndex flags.baseUrl
   )
 
 
 
 -- UPDATE
-
-
-type Msg
-  = Noop
-  | TextureLoaded (Maybe Canvas.Texture.Texture)
-  | MouseDown MouseEvent
-  | MouseUp MouseEvent
-  | MouseMove MouseEvent
-  | MouseLeave
-  | SetMapFieldVisible Bool
-  | TrySettingBackground String
-  | DimensionsChanged (Float, Float)
-  | ZoomChanged Float
-  | AnimationFrame Time.Posix
-  | SetActiveEdgeType Graph.EdgeType
-  | DownloadCurrentGraph
 
 port saveToLocalStorage : (String, String) -> Cmd msg
 port dimensionsChanged : ((Float, Float) -> msg) -> Sub msg
@@ -193,9 +182,44 @@ update msg model =
         ]
       )
 
+    CreateNewGraph ->
+      ( { model | currentGraph = Just Graph.init }
+      , Cmd.batch
+        [ saveToCmd "old-graph" model
+        ]
+      )
+
+    LoadExistingGraph ->
+      ( model
+      , case Debug.log "" <| Maybe.andThen (\id -> Dict.get id model.graphIndex) <| model.selectedGraphIndexEntryId  of
+          Nothing -> Cmd.none
+          Just indexEntry ->
+            case indexEntry.location of
+              Graph.Remote -> Requests.fetchGraph model.baseUrl indexEntry.path
+              Graph.Local -> Cmd.none
+      )
+
+    SelectGraphFromIndex selection ->
+      ( { model | selectedGraphIndexEntryId = selection }, Cmd.none)
+
+    LoadGraphIndex maybeResult ->
+      case maybeResult of
+        Nothing -> (model, Cmd.none)
+        Just (Result.Ok index) -> ({ model | graphIndex = index }, Cmd.none)
+        Just (Err _) -> (model, Cmd.none)
+
+    SetCurrentGraph graph ->
+      ({ model | currentGraph = Just graph }, saveToCmd "old-graph" model)
+
+
 saveCmd : Model -> Cmd msg
 saveCmd model =
-  Maybe.withDefault Cmd.none <| Maybe.map saveToLocalStorage <| Maybe.map (\g -> ("graph", Saves.graphToJson 0 g)) model.currentGraph
+  saveToCmd "graph" model
+
+
+saveToCmd : String -> Model -> Cmd msg
+saveToCmd key model =
+  Maybe.withDefault Cmd.none <| Maybe.map saveToLocalStorage <| Maybe.map (\g -> (key, Saves.graphToJson 0 g)) model.currentGraph
 
 
 saveModel : (Model, Cmd Msg) -> (Model, Cmd Msg)
@@ -346,6 +370,45 @@ view : Model -> Html.Html Msg
 view model =
   Html.main_
   [ Attr.class "h-screen w-screen overflow-hidden" ]
+  <| case model.currentGraph of
+      Nothing ->
+        [ Html.div
+          [ Attr.class "h-full w-full flex flex-col justify-center items-center" ]
+          [ Html.button
+            [ Attr.class "transition-colors shadow-md rounded-md bg-primary text-secondary px-4 py-2 hover:bg-secondary hover:text-primary font-bold uppercase mb-8"
+            , Events.onClick CreateNewGraph
+            ]
+            [ Html.text "Create a new graph" ]
+          , Html.p [ Attr.class "text-center my-8" ] [ Html.text "or select one of existing graphs:" ]
+          , Html.div
+            [ Attr.class "flex" ]
+            [ Html.select
+              [ Attr.class "transition-all border-2 border-primary rounded-md min-w-[15rem]"
+              , Events.on "change" <| D.map (\s -> SelectGraphFromIndex <| if String.isEmpty s then Nothing else Just s ) <| D.at ["target", "value"] D.string
+              ]
+              <| Html.option [ Attr.value "" ] [ Html.text "No graph selected..." ]
+              :: (List.map (\e -> Html.option [  Attr.value e.id ] [ Html.text e.title ])  <| Dict.values model.graphIndex)
+            , ( let disabled = not <| Utils.maybeHasValue model.selectedGraphIndexEntryId in
+                Html.button
+                [ Attr.class "transition-colors rounded-md font-bold uppercase ml-2 px-4 py-2"
+                , Attr.classList
+                  [ ("bg-gray-200 text-gray-400", disabled)
+                  , ("bg-primary text-secondary hover:bg-secondary hover:text-primary shadow-md", not disabled)
+                  ]
+                , Events.onClick <| if disabled then Noop else LoadExistingGraph
+                , Attr.disabled disabled
+                ]
+                [ Html.text "Load" ]
+              )
+            ]
+          ]
+        ]
+      Just _ ->
+        canvasView model
+
+
+
+canvasView model =
   [ Canvas.toHtmlWith
     { width = ceiling model.width
     , height = ceiling model.height
