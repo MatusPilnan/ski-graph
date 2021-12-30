@@ -191,7 +191,7 @@ update msg model =
 
     LoadExistingGraph ->
       ( model
-      , case Debug.log "" <| Maybe.andThen (\id -> Dict.get id model.graphIndex) <| model.selectedGraphIndexEntryId  of
+      , case Maybe.andThen (\id -> Dict.get id model.graphIndex) <| model.selectedGraphIndexEntryId  of
           Nothing -> Cmd.none
           Just indexEntry ->
             case indexEntry.location of
