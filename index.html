@@ -10,19 +10,26 @@
 <body style="margin: 0">
     <main id="app"></main>
     <script>
+      const selected = localStorage.getItem("selected")
         const app = Elm.Main.init({
           node: document.getElementById("app"),
           flags: {
             width: Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0),
             height: Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0),
             savedBackground: localStorage.getItem("background") || "",
-            graphJson: localStorage.getItem("graph"),
-            baseUrl: "https://matuspilnan.github.io/ski-graph"
+            graphJson: localStorage.getItem(selected),
+            baseUrl: "https://matuspilnan.github.io/ski-graph",
+            selectedGraphID: selected,
+            localGraphIndex: localStorage.getItem('graph-index')
           }
         })
 
         app.ports.saveToLocalStorage.subscribe(([key, value]) => {
           localStorage.setItem(key, value)
+        })
+
+        app.ports.loadLocalGraph.subscribe((graphId) => {
+          app.ports.importLocalGraph.send(localStorage.getItem(graphId) || "")
         })
 
         window.addEventListener("resize", () => {
