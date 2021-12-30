@@ -1,6 +1,7 @@
 import json
 import os
 import argparse
+import uuid
 
 
 def generate_graph_files_index(graphs_dir="public/graphs", graphs_base_url="/graphs", index_file="index.json"):
@@ -18,6 +19,11 @@ def generate_graph_files_index(graphs_dir="public/graphs", graphs_base_url="/gra
             entry['title'] = graph['title']
         except KeyError:
             print(f'File "{file}" has no graph title specified.')
+
+        try:
+            entry['id'] = graph['id']
+        except KeyError:
+            entry['id'] = str(uuid.uuid4())
         index.append(entry)
 
     with open(os.path.join(graphs_dir, index_file), "w", encoding='utf-8') as f:
