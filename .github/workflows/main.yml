@@ -30,11 +30,14 @@ jobs:
 
       - name: Setup Elm environment
         uses: JorelAli/setup-elm@v3
-        
+
       - name: Build Elm app and Styles
         run: |
           chmod 777 build-prod.sh
           npm run build
+
+      - name: Set base URL in index.html
+        run: python replace-base-url.py https://matuspilnan.github.io/ski-graph/
         
       - uses: actions/upload-artifact@v2.3.1
         with:
