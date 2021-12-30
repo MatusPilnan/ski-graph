@@ -18,8 +18,10 @@ import Json.Decode as D
 import Loading exposing (defaultConfig)
 import Messages exposing (Msg(..))
 import Model exposing (..)
+import Random
 import Requests
 import Saves
+import UUID
 import Utils
 
 
@@ -56,10 +58,10 @@ init flags =
     , mapFieldState = Loading
     , drawingEdge = Nothing
     , activeEdgeDrawingMode = Graph.Lift
-    , graphIndex = Dict.empty
-    , selectedGraphIndexEntryId = Nothing
+    , graphIndex = Saves.graphIndexFromJson Graph.Local flags.localGraphIndex
+    , selectedGraphIndexEntryId = flags.selectedGraphID
     , baseUrl = flags.baseUrl
-    } |> Saves.graphFromJson flags.graphJson
+    } |> Saves.loadGraphFromJsonToModel flags.graphJson
   , Requests.fetchGraphIndex flags.baseUrl
   )
 
@@ -69,6 +71,8 @@ init flags =
 
 port saveToLocalStorage : (String, String) -> Cmd msg
 port dimensionsChanged : ((Float, Float) -> msg) -> Sub msg
+port loadLocalGraph : String -> Cmd msg
+port importLocalGraph : (String -> msg) -> Sub msg
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -161,10 +165,6 @@ update msg model =
                 <| mulPoint (canvasPointToBackgroundPoint model.mousePosition (Graph.getPosition model.currentGraph) zoomBefore) zoomAfter
             ) << Graph.setZoom zoomAfter
           ) model.currentGraph
-        --zoomAfter
-        --, position = constrainBackgroundToCanvas { model | zoom = zoomAfter}
-        --  <| subPoints model.mousePosition
-        --  <| mulPoint (canvasPointToBackgroundPoint model.mousePosition model.position zoomBefore) zoomAfter
         }
       , Cmd.none
       ) |> saveModel
@@ -178,16 +178,32 @@ update msg model =
     DownloadCurrentGraph ->
       ( model
       , Cmd.batch
-        [ saveCmd model
+        [ saveGraphAndIndex model
         ]
       )
 
-    CreateNewGraph ->
-      ( { model | currentGraph = Just Graph.init }
-      , Cmd.batch
-        [ saveToCmd "old-graph" model
-        ]
-      )
+    CreateNewGraph uuid ->
+      case uuid of
+        Nothing ->
+          ( model
+          , Random.generate (CreateNewGraph << Just << UUID.toString) UUID.generator
+          )
+
+        Just string ->
+          let
+            newGraph = (let g = Graph.init in { g | id = string } )
+            newIndex = Dict.insert string (Graph.GraphIndexEntry newGraph.title string string Graph.Local) model.graphIndex
+          in
+          ( { model | currentGraph = Just newGraph
+            , graphIndex = newIndex
+            }
+          , Cmd.batch
+            [ saveGraph model.currentGraph
+            , saveGraph <| Just newGraph
+            , saveGraphIndex newIndex
+            ]
+          )
+
 
     LoadExistingGraph ->
       ( model
@@ -196,36 +212,41 @@ update msg model =
           Just indexEntry ->
             case indexEntry.location of
               Graph.Remote -> Requests.fetchGraph model.baseUrl indexEntry.path
-              Graph.Local -> Cmd.none
+              Graph.Local -> loadLocalGraph indexEntry.id
       )
 
     SelectGraphFromIndex selection ->
-      ( { model | selectedGraphIndexEntryId = selection }, Cmd.none)
+      ( { model | selectedGraphIndexEntryId = selection }, (saveToLocalStorage ("selected", Maybe.withDefault "" selection)))
 
     LoadGraphIndex maybeResult ->
       case maybeResult of
         Nothing -> (model, Cmd.none)
-        Just (Result.Ok index) -> ({ model | graphIndex = index }, Cmd.none)
+        Just (Result.Ok index) -> ({ model | graphIndex = Dict.union model.graphIndex index }, Cmd.none)
         Just (Err _) -> (model, Cmd.none)
 
     SetCurrentGraph graph ->
-      ({ model | currentGraph = Just graph }, saveToCmd "old-graph" model)
+      ({ model | currentGraph = Just graph }, saveGraph model.currentGraph)
 
 
-saveCmd : Model -> Cmd msg
-saveCmd model =
-  saveToCmd "graph" model
-
-
-saveToCmd : String -> Model -> Cmd msg
-saveToCmd key model =
-  Maybe.withDefault Cmd.none <| Maybe.map saveToLocalStorage <| Maybe.map (\g -> (key, Saves.graphToJson 0 g)) model.currentGraph
+saveGraphAndIndex : Model -> Cmd Msg
+saveGraphAndIndex model =
+  Cmd.batch [ saveGraph model.currentGraph, saveGraphIndex model.graphIndex ]
 
 
 saveModel : (Model, Cmd Msg) -> (Model, Cmd Msg)
 saveModel (model, cmd) =
-  (model, Cmd.batch [ cmd, saveCmd model ])
+  (model, Cmd.batch [ cmd, saveGraphAndIndex model ])
 
+saveGraph : Maybe Graph.Graph -> Cmd Msg
+saveGraph graph =
+  case graph of
+    Nothing -> Cmd.none
+    Just g ->
+      saveToLocalStorage (g.id, Saves.graphToJson 0 g)
+
+
+saveGraphIndex graphIndex =
+  saveToLocalStorage ("graph-index", Saves.graphIndexToJson graphIndex)
 
 
 checkMouseEventForPointHover : MouseEvent -> (Model, Cmd Msg) -> (Model, Cmd Msg)
@@ -345,6 +366,7 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
   Sub.batch
     [ dimensionsChanged DimensionsChanged
+    , importLocalGraph (\json -> Maybe.withDefault Noop <| Maybe.map SetCurrentGraph <| Saves.graphFromJson <| Just json)
     , Animator.toSubscription AnimationFrame model.animations animator
     ]
 
@@ -376,7 +398,7 @@ view model =
           [ Attr.class "h-full w-full flex flex-col justify-center items-center" ]
           [ Html.button
             [ Attr.class "transition-colors shadow-md rounded-md bg-primary text-secondary px-4 py-2 hover:bg-secondary hover:text-primary font-bold uppercase mb-8"
-            , Events.onClick CreateNewGraph
+            , Events.onClick <| CreateNewGraph Nothing
             ]
             [ Html.text "Create a new graph" ]
           , Html.p [ Attr.class "text-center my-8" ] [ Html.text "or select one of existing graphs:" ]
@@ -387,7 +409,7 @@ view model =
               , Events.on "change" <| D.map (\s -> SelectGraphFromIndex <| if String.isEmpty s then Nothing else Just s ) <| D.at ["target", "value"] D.string
               ]
               <| Html.option [ Attr.value "" ] [ Html.text "No graph selected..." ]
-              :: (List.map (\e -> Html.option [  Attr.value e.id ] [ Html.text e.title ])  <| Dict.values model.graphIndex)
+              :: (List.map (\e -> Html.option [  Attr.value e.id ] [ Html.text <| e.title ++ if e.location == Graph.Local then " (Local)" else " (Remote)" ])  <| Dict.values model.graphIndex)
             , ( let disabled = not <| Utils.maybeHasValue model.selectedGraphIndexEntryId in
                 Html.button
                 [ Attr.class "transition-colors rounded-md font-bold uppercase ml-2 px-4 py-2"

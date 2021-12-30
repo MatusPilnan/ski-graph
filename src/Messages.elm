@@ -20,7 +20,7 @@ type Msg
   | AnimationFrame Time.Posix
   | SetActiveEdgeType Graph.EdgeType
   | DownloadCurrentGraph
-  | CreateNewGraph
+  | CreateNewGraph (Maybe Graph.GraphID)
   | SetCurrentGraph Graph.Graph
   | LoadExistingGraph
   | LoadGraphIndex (Maybe (Result String (Dict Graph.GraphID Graph.GraphIndexEntry)))

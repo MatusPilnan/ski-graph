@@ -1,22 +1,68 @@
 module Saves exposing (..)
 
-import Dict
+import Dict exposing (Dict)
 import Graph exposing (..)
 import Json.Encode as E
 import Json.Decode as D
 import Model exposing (..)
 import Utils
 
---
---graphIndexEntryEncoder : GraphIndexEntry -> E.Value
---graphIndexEntryEncoder entry =
---  E.object
---  [ ("title", E.string entry.title)
---  , ("path", E.string entry.path)
---  , ("location")
---  ]
---
---
+
+graphIndexEntryLocationEncoder : GraphLocation -> E.Value
+graphIndexEntryLocationEncoder loc =
+  E.string <|
+    case loc of
+      Local -> "local"
+      Remote -> "remote"
+
+
+
+graphIndexEntryEncoder : GraphIndexEntry -> E.Value
+graphIndexEntryEncoder entry =
+  E.object
+  [ ("title", E.string entry.title)
+  , ("path", E.string entry.path)
+  , ("id", E.string entry.id)
+  ]
+
+graphIndexEncoder : Dict GraphID GraphIndexEntry -> E.Value
+graphIndexEncoder index =
+  E.list graphIndexEntryEncoder (Dict.values index)
+
+
+graphIndexEntryLocationDecoder : D.Decoder GraphLocation
+graphIndexEntryLocationDecoder =
+  D.string
+    |> D.andThen
+      ( \loc ->
+        case loc of
+          "local" -> D.succeed Local
+          "remote" -> D.succeed Remote
+          other -> D.fail <| "Unrecognized location type: " ++ other
+      )
+
+
+graphIndexDecoder : Graph.GraphLocation -> D.Decoder (Dict Graph.GraphID Graph.GraphIndexEntry)
+graphIndexDecoder location =
+  D.map Dict.fromList <|
+  D.list <|
+  D.map3 (\title path id -> (id, Graph.GraphIndexEntry title path id location))
+    (D.field "title" D.string)
+    (D.field "path" D.string)
+    (D.field "id" D.string)
+
+graphIndexToJson : Dict GraphID GraphIndexEntry -> String
+graphIndexToJson graphIndex =
+  E.encode 0 <| graphIndexEncoder graphIndex
+
+
+graphIndexFromJson : GraphLocation -> Maybe String -> Dict GraphID GraphIndexEntry
+graphIndexFromJson loc graphIndexJson =
+  case graphIndexJson of
+    Nothing -> Dict.empty
+    Just string ->
+      Maybe.withDefault Dict.empty <| Result.toMaybe <| D.decodeString (graphIndexDecoder loc) string
+
 
 
 graphToJson : Int -> Graph -> String
@@ -78,9 +124,12 @@ encodeMaybe enc m =
     Nothing -> E.null
 
 
+graphFromJson : Maybe String -> Maybe Graph
+graphFromJson json =
+  Maybe.andThen ( Result.toMaybe << D.decodeString graphDecoder) json
 
-graphFromJson : Maybe String -> Model -> Model
-graphFromJson jsonString model =
+loadGraphFromJsonToModel : Maybe String -> Model -> Model
+loadGraphFromJsonToModel jsonString model =
   case jsonString of
     Nothing -> model
     Just json ->

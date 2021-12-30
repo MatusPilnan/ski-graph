@@ -68,5 +68,7 @@ type alias Flags =
   , height : Float
   , savedBackground : String
   , graphJson : Maybe String
+  , selectedGraphID : Maybe String
   , baseUrl : String
+  , localGraphIndex : Maybe String
   }
