@@ -8,6 +8,7 @@ import Canvas.Settings.Line
 import Canvas.Texture
 import Color
 import Dict
+import Geometry as Geom
 import Graph
 import Html
 import Html.Attributes as Attr
@@ -142,7 +143,7 @@ update msg model =
       ( { newModel
         | currentGraph = Maybe.map
           ( Graph.setPosition
-            ( constrainBackgroundToCanvas newModel
+            ( Geom.constrainBackgroundToCanvas newModel
               <| Graph.getPosition model.currentGraph
             ) << Graph.setZoom zoomAfter
           ) model.currentGraph
@@ -160,9 +161,9 @@ update msg model =
       ( { model
         | currentGraph = Maybe.map
           ( Graph.setPosition
-            ( constrainBackgroundToCanvas { model | currentGraph = Maybe.map (Graph.setZoom zoomAfter) model.currentGraph }
-                <| subPoints model.mousePosition
-                <| mulPoint (canvasPointToBackgroundPoint model.mousePosition (Graph.getPosition model.currentGraph) zoomBefore) zoomAfter
+            ( Geom.constrainBackgroundToCanvas { model | currentGraph = Maybe.map (Graph.setZoom zoomAfter) model.currentGraph }
+                <| Geom.subPoints model.mousePosition
+                <| Geom.mulPoint (Geom.canvasPointToBackgroundPoint model.mousePosition (Graph.getPosition model.currentGraph) zoomBefore) zoomAfter
             ) << Graph.setZoom zoomAfter
           ) model.currentGraph
         }
@@ -266,11 +267,11 @@ checkModelDragging : MouseEvent -> (Model, Cmd Msg) -> (Model, Cmd Msg)
 checkModelDragging event (model, cmd) =
   if model.mouseDown && (not <| Utils.maybeHasValue model.drawingEdge) then
     let
-      new = addPoints event.movement <| Graph.getPosition model.currentGraph
+      new = Geom.addPoints event.movement <| Graph.getPosition model.currentGraph
     in
     ( { model
       | hasMovedWhileMouseDown = True
-      , currentGraph = Graph.updateGraphProperty Graph.setPosition (constrainBackgroundToCanvas model new) model.currentGraph
+      , currentGraph = Graph.updateGraphProperty Graph.setPosition (Geom.constrainBackgroundToCanvas model new) model.currentGraph
       }
     , cmd
     ) else (model,cmd)
@@ -284,7 +285,7 @@ checkVertexCreation event (model, cmd) =
     | currentGraph =
       if condition
       then model.currentGraph
-      else Graph.updateGraphProperty (Graph.addVertex model.vertexCounter) (canvasPointToBackgroundPoint event.position (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph)) model.currentGraph
+      else Graph.updateGraphProperty (Graph.addVertex model.vertexCounter) (Geom.canvasPointToBackgroundPoint event.position (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph)) model.currentGraph
     , vertexCounter =
       if condition
       then model.vertexCounter
@@ -321,7 +322,7 @@ checkDrawing event (model, cmd) =
   ( case (event.button, model.mouseDown, model.drawingEdge) of
     (Primary, True, Just edge) ->
       { model
-      | drawingEdge = Just { edge | points = List.append edge.points [ canvasPointToBackgroundPoint event.position (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph) ] }
+      | drawingEdge = Just { edge | points = List.append edge.points [ Geom.canvasPointToBackgroundPoint event.position (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph) ] }
       }
     (_, _, _) -> model
   , cmd
@@ -335,10 +336,14 @@ checkConnectDrawing event (model, cmd) =
       if vertex /= edge.start then
       { model | drawingEdge = Nothing
       , edgeCounter = model.edgeCounter + 1
-      , currentGraph = Graph.updateGraphProperty Graph.addEdge { edge | end = Just vertex, edgeType = model.activeEdgeDrawingMode } model.currentGraph
+      , currentGraph = Graph.updateGraphProperty Graph.addEdge
+        ( Graph.calculateEdgeBoundingBox
+        { edge | end = Just vertex
+        , edgeType = model.activeEdgeDrawingMode
+        } ) model.currentGraph
       } else model
     (Primary, Nothing, Just edge) ->
-      { model | drawingEdge = Just { edge | points = edge.points ++ [ canvasPointToBackgroundPoint event.position (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph) ] }
+      { model | drawingEdge = Just { edge | points = edge.points ++ [ Geom.canvasPointToBackgroundPoint event.position (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph) ] }
       }
     (_, _, _) -> model
   , cmd
@@ -350,7 +355,7 @@ checkToStartDrawing event (model, cmd) =
   case (event.button, getHoveringVertex model event, model.drawingEdge) of
     ( Primary, Just vertex, Nothing ) ->
       let edgeId = String.fromInt <| model.edgeCounter + 1 in
-      ( { model | drawingEdge = Just <| Graph.Edge (model.edgeCounter + 1) ( Just <| "Edge " ++ edgeId) vertex Nothing Graph.Unfinished []
+      ( { model | drawingEdge = Just <| Graph.Edge (model.edgeCounter + 1) ( Just <| "Edge " ++ edgeId) vertex Nothing Graph.Unfinished vertex.position vertex.position []
         }
       , cmd
       )
@@ -359,7 +364,7 @@ checkToStartDrawing event (model, cmd) =
 
 getHoveringVertex : Model -> MouseEvent -> Maybe Graph.Vertex
 getHoveringVertex model event =
-  List.head <| List.filter (\v -> mouseOverPoint (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph) event.position v.position ) <| Graph.getVerticesList model.currentGraph
+  List.head <| List.filter (\v -> Geom.mouseOverPoint (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph) event.position v.position ) <| Graph.getVerticesList model.currentGraph
 
 -- SUBSCRIPTIONS
 
@@ -507,8 +512,8 @@ vertexView model vertex =
         ( if vertexExpansionCondition model vertex
           then Animator.move model.animations.expandedPoint vertexMovementAnimation
           else if vertexEdgeDrawingCondition model vertex
-          then 1.5 * pointSize
-          else pointSize
+          then 1.5 * Geom.pointSize
+          else Geom.pointSize
         ) / (Graph.getZoom model.currentGraph)
       )
     ]
@@ -520,7 +525,7 @@ vertexView model vertex =
        ( if vertexExpansionCondition model vertex
          then Animator.linear model.animations.expandedPoint vertexFillAnimation
          else if vertexEdgeDrawingCondition model vertex
-        then pointSize
+        then Geom.pointSize
         else 0
        ) / (Graph.getZoom model.currentGraph)
       )
@@ -531,15 +536,15 @@ vertexMovementAnimation : Maybe Graph.Vertex -> Animator.Movement
 vertexMovementAnimation state =
   Animator.at <|
   case state of
-    Nothing -> pointSize
-    Just _ -> 1.5 * pointSize
+    Nothing -> Geom.pointSize
+    Just _ -> 1.5 * Geom.pointSize
 
 vertexFillAnimation : Maybe Graph.Vertex -> Animator.Movement
 vertexFillAnimation state =
   Animator.at <|
   case state of
     Nothing -> 0
-    Just _ -> pointSize
+    Just _ -> Geom.pointSize
 
 vertexExpansionCondition : Model -> Graph.Vertex -> Bool
 vertexExpansionCondition model vertex =
@@ -562,15 +567,16 @@ edgeView model edge =
       (Canvas.lineTo << pointToCanvasLibPoint)
       <| edge.points
       ++ [ case edge.end of
-             Nothing -> canvasPointToBackgroundPoint model.mousePosition (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph)
+             Nothing -> Geom.canvasPointToBackgroundPoint model.mousePosition (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph)
              Just vertex -> vertex.position
          ]
+  , Canvas.rect (pointToCanvasLibPoint edge.boundBoxTopLeft) (edge.boundBoxBottomRight.x - edge.boundBoxTopLeft.x) (edge.boundBoxBottomRight.y - edge.boundBoxTopLeft.y)
   ]
 
 
 edgeStyle : Graph.EdgeType -> Float -> List Canvas.Settings.Setting
 edgeStyle edgeType zoom =
-  [ Canvas.Settings.Line.lineWidth <| lineWidth / zoom
+  [ Canvas.Settings.Line.lineWidth <| Geom.lineWidth / zoom
   , Canvas.Settings.Line.lineCap Canvas.Settings.Line.RoundCap
   , Canvas.Settings.Line.lineJoin Canvas.Settings.Line.RoundJoin
   ] ++
@@ -591,32 +597,6 @@ addBackground width height position texture renderables =
     Just t ->
       [ Canvas.clear (0, 0) width height, Canvas.texture [] position t ] ++ renderables
 
-
-constrainBackgroundToCanvas : Model -> Graph.Point -> Graph.Point
-constrainBackgroundToCanvas model new =
-  let
-    w = Maybe.withDefault model.width <| Maybe.map (\t -> (Canvas.Texture.dimensions t).width ) model.texture
-    h = Maybe.withDefault model.height <| Maybe.map (\t -> (Canvas.Texture.dimensions t).height ) model.texture
-  in
-  Graph.Point
-    (min 0 <| max (0 - w * (Graph.getZoom model.currentGraph) + model.width) new.x )
-    (min 0 <| max (0 - h * (Graph.getZoom model.currentGraph) + model.height) new.y )
-
-canvasPointToBackgroundPoint canvasPoint backgroundPosition zoomLevel =
-  mulPoint (subPoints canvasPoint backgroundPosition) <| 1 / zoomLevel
-
-backgroundPointToCanvasPoint backgroundPoint backgroundPosition zoomLevel =
-  addPoints backgroundPosition <| mulPoint backgroundPoint zoomLevel
-
-pointSize = 10
-lineWidth = 5
-
-mouseOverPoint backgroundPosition zoomLevel mousePosition point =
-  let a = backgroundPointToCanvasPoint point backgroundPosition zoomLevel in
-    pointSize >= (pointToLength <| subPoints a mousePosition)
-
-pointToLength point =
-   sqrt <| point.x^2 + point.y^2
 
 
 mapField model =
@@ -724,16 +704,4 @@ saveMapButtons model =
     [ Icons.saveIcon ]
   ]
 
-
-addPoints : Graph.Point -> Graph.Point -> Graph.Point
-addPoints a b =
-  Graph.Point (a.x + b.x) (a.y + b.y)
-
-subPoints : Graph.Point -> Graph.Point -> Graph.Point
-subPoints a b =
-  Graph.Point (a.x - b.x) (a.y - b.y)
-
-mulPoint : Graph.Point -> Float -> Graph.Point
-mulPoint point coef =
-  Graph.Point (point.x * coef) (point.y * coef)
 

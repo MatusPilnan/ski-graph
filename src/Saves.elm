@@ -176,7 +176,7 @@ edgeDecoder =
         , Dict.fromList
           <| List.map2
             ( \start ((id, title, _), (endId, edgeType, points)) ->
-              (id, Edge id title start (Dict.get endId verts) edgeType points)
+              (id, Graph.calculateEdgeBoundingBox <| Edge id title start (Dict.get endId verts) edgeType start.position start.position points)
             ) (List.filterMap identity starts) edgeData
         )
     else

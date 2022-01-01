@@ -26,10 +26,10 @@ type alias Model =
   , height : Float
   , vertexCounter : Int
   , edgeCounter : Int
-  , mousePosition : Graph.Point
+  , mousePosition : ViewportPoint
   , mouseDown : Bool
   , hasMovedWhileMouseDown : Bool
-  , mouseDownStartPosition : Graph.Point
+  , mouseDownStartPosition : ViewportPoint
   , mapFieldVisible : Bool
   , mapFieldInput : String
   , mapFieldState : BackgroundState
@@ -46,8 +46,8 @@ type MouseButton
 
 
 type alias MouseEvent =
-  { position : Graph.Point
-  , movement : Graph.Point
+  { position : ViewportPoint
+  , movement : ViewportPoint
   , button : MouseButton
   }
 
@@ -55,7 +55,7 @@ type alias ScrollEvent =
   { deltaX : Float
   }
 
-type alias CanvasPoint = { x : Float, y : Float}
+type alias ViewportPoint = { x : Float, y : Float}
 
 type alias DragEvent =
   { movementX : Float
