@@ -337,7 +337,7 @@ checkConnectDrawing event (model, cmd) =
       { model | drawingEdge = Nothing
       , edgeCounter = model.edgeCounter + 1
       , currentGraph = Graph.updateGraphProperty Graph.addEdge
-        ( Graph.calculateEdgeBoundingBox
+        ( Geom.calculateEdgeBoundingBox
         { edge | end = Just vertex
         , edgeType = model.activeEdgeDrawingMode
         } ) model.currentGraph
@@ -437,6 +437,7 @@ view model =
 
 
 
+canvasView : Model -> List (Html.Html Msg)
 canvasView model =
   [ Canvas.toHtmlWith
     { width = ceiling model.width
@@ -561,7 +562,7 @@ vertexEdgeDrawingCondition model vertex =
 edgeView : Model -> Graph.Edge -> Canvas.Renderable
 edgeView model edge =
   Canvas.shapes
-  (edgeStyle edge.edgeType (Graph.getZoom model.currentGraph))
+  (edgeStyle edge.edgeType (Graph.getZoom model.currentGraph)) <|
   [ Canvas.path (pointToCanvasLibPoint edge.start.position)
     <| List.map
       (Canvas.lineTo << pointToCanvasLibPoint)
@@ -570,8 +571,12 @@ edgeView model edge =
              Nothing -> Geom.canvasPointToBackgroundPoint model.mousePosition (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph)
              Just vertex -> vertex.position
          ]
-  , Canvas.rect (pointToCanvasLibPoint edge.boundBoxTopLeft) (edge.boundBoxBottomRight.x - edge.boundBoxTopLeft.x) (edge.boundBoxBottomRight.y - edge.boundBoxTopLeft.y)
-  ]
+  ] ++ (
+    case (model.activeEdgeDrawingMode, edge.edgeType, Geom.mouseOverEdge model edge) of
+      (Graph.SkiRun _, Graph.SkiRun _, Just point) ->
+        [ Canvas.circle (pointToCanvasLibPoint point) (5 / Graph.getZoom model.currentGraph) ]
+      (_, _, _) -> []
+  )
 
 
 edgeStyle : Graph.EdgeType -> Float -> List Canvas.Settings.Setting

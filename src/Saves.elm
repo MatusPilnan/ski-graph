@@ -1,6 +1,7 @@
 module Saves exposing (..)
 
 import Dict exposing (Dict)
+import Geometry
 import Graph exposing (..)
 import Json.Encode as E
 import Json.Decode as D
@@ -176,7 +177,7 @@ edgeDecoder =
         , Dict.fromList
           <| List.map2
             ( \start ((id, title, _), (endId, edgeType, points)) ->
-              (id, Graph.calculateEdgeBoundingBox <| Edge id title start (Dict.get endId verts) edgeType start.position start.position points)
+              (id, Geometry.calculateEdgeBoundingBox <| Edge id title start (Dict.get endId verts) edgeType start.position start.position points)
             ) (List.filterMap identity starts) edgeData
         )
     else

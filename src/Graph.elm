@@ -126,37 +126,6 @@ getNextEdgeId : Graph -> Int
 getNextEdgeId graph =
   Maybe.withDefault 0 <| Maybe.map (\x -> x + 1) <| List.maximum <| Dict.keys graph.edges
 
-calculateEdgeBoundingBox : Edge -> Edge
-calculateEdgeBoundingBox edge =
-  let
-    (topLeft, bottomRight) =
-      Maybe.withDefault (edge.start.position, edge.start.position)
-      <| findExtremePoints
-      <| edge.points
-        ++ [ edge.start.position ]
-        ++
-        ( Maybe.withDefault []
-          <| Maybe.map List.singleton
-          <| Maybe.map .position edge.end
-        )
-  in
-  { edge
-  | boundBoxTopLeft = topLeft
-  , boundBoxBottomRight = bottomRight
-  }
-
-
-findExtremePoints : List Point -> Maybe (Point, Point)
-findExtremePoints points =
-  List.foldl
-  ( \point extremes ->
-    case extremes of
-      Nothing -> Just (point, point)
-      Just (topLeft, bottomRight) ->
-        Just <| (Point (min topLeft.x point.x ) (max topLeft.y point.y), Point (max bottomRight.x point.x) (min bottomRight.y point.y) )
-  ) Nothing points
-
-
 
 zeroPoint : Point
 zeroPoint = Point 0 0
