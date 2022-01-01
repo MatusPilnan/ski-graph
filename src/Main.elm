@@ -195,6 +195,8 @@ update msg model =
             newIndex = Dict.insert string (Graph.GraphIndexEntry newGraph.title string string Graph.Local) model.graphIndex
           in
           ( { model | currentGraph = Just newGraph
+            , vertexCounter = 0
+            , edgeCounter = 0
             , graphIndex = newIndex
             }
           , Cmd.batch
@@ -225,7 +227,7 @@ update msg model =
         Just (Err _) -> (model, Cmd.none)
 
     SetCurrentGraph graph ->
-      ({ model | currentGraph = Just graph }, saveGraph model.currentGraph)
+      ({ model | currentGraph = Just graph, vertexCounter = Graph.getNextVertexId graph, edgeCounter = Graph.getNextEdgeId graph }, saveGraph model.currentGraph)
 
 
 saveGraphAndIndex : Model -> Cmd Msg

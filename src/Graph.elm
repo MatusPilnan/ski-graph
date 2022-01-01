@@ -116,6 +116,14 @@ getProperty : (Graph -> b) -> b -> Maybe Graph -> b
 getProperty property default graph =
   Maybe.withDefault default <| Maybe.map property graph
 
+getNextVertexId : Graph -> Int
+getNextVertexId graph =
+  Maybe.withDefault 0 <| Maybe.map (\x -> x + 1) <| List.maximum <| Dict.keys graph.vertices
+
+getNextEdgeId : Graph -> Int
+getNextEdgeId graph =
+  Maybe.withDefault 0 <| Maybe.map (\x -> x + 1) <| List.maximum <| Dict.keys graph.edges
+
 
 zeroPoint : Point
 zeroPoint = Point 0 0

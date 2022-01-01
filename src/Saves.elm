@@ -8,12 +8,12 @@ import Model exposing (..)
 import Utils
 
 
-graphIndexEntryLocationEncoder : GraphLocation -> E.Value
-graphIndexEntryLocationEncoder loc =
-  E.string <|
-    case loc of
-      Local -> "local"
-      Remote -> "remote"
+--graphIndexEntryLocationEncoder : GraphLocation -> E.Value
+--graphIndexEntryLocationEncoder loc =
+--  E.string <|
+--    case loc of
+--      Local -> "local"
+--      Remote -> "remote"
 
 
 
@@ -30,16 +30,16 @@ graphIndexEncoder index =
   E.list graphIndexEntryEncoder (Dict.values index)
 
 
-graphIndexEntryLocationDecoder : D.Decoder GraphLocation
-graphIndexEntryLocationDecoder =
-  D.string
-    |> D.andThen
-      ( \loc ->
-        case loc of
-          "local" -> D.succeed Local
-          "remote" -> D.succeed Remote
-          other -> D.fail <| "Unrecognized location type: " ++ other
-      )
+--graphIndexEntryLocationDecoder : D.Decoder GraphLocation
+--graphIndexEntryLocationDecoder =
+--  D.string
+--    |> D.andThen
+--      ( \loc ->
+--        case loc of
+--          "local" -> D.succeed Local
+--          "remote" -> D.succeed Remote
+--          other -> D.fail <| "Unrecognized location type: " ++ other
+--      )
 
 
 graphIndexDecoder : Graph.GraphLocation -> D.Decoder (Dict Graph.GraphID Graph.GraphIndexEntry)
@@ -134,7 +134,7 @@ loadGraphFromJsonToModel jsonString model =
     Nothing -> model
     Just json ->
       case D.decodeString graphDecoder json of
-        Ok graph -> { model | currentGraph = Just graph}
+        Ok graph -> { model | currentGraph = Just graph, vertexCounter = Graph.getNextVertexId graph, edgeCounter = Graph.getNextEdgeId graph }
         Err _ -> model
 
 graphDecoder : D.Decoder Graph
