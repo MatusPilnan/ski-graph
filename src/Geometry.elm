@@ -40,14 +40,14 @@ backgroundPointToCanvasPoint : Graph.Point -> ViewportPoint -> Float -> Viewport
 backgroundPointToCanvasPoint backgroundPoint backgroundPosition zoomLevel =
   addPoints backgroundPosition <| mulPoint backgroundPoint zoomLevel
 
-pointSize = 10
-skiRunConnectionPointSize = 5
+liftStationPointSize = 10
+skiRunConnectionPointSize = 8
 lineWidth = 5
 
 mouseOverPoint : ViewportPoint -> Float -> ViewportPoint -> Graph.Point -> Bool
 mouseOverPoint backgroundPosition zoomLevel mousePosition point =
   let a = backgroundPointToCanvasPoint point backgroundPosition zoomLevel in
-    pointSize >= (pointToLength <| subPoints a mousePosition)
+    liftStationPointSize >= (pointToLength <| subPoints a mousePosition)
 
 pointToLength point =
    sqrt <| point.x^2 + point.y^2
@@ -117,7 +117,7 @@ pointOverEdge target zoom edge =
 splitEdge : Graph.Edge -> Graph.Point -> Graph.EdgeID -> Graph.VertexID -> Graph.Graph -> Graph.Graph
 splitEdge edge point newEdgeId newVertexId graph =
   let
-    newVertex = Graph.Vertex newVertexId Nothing point
+    newVertex = Graph.Vertex newVertexId Nothing (Graph.SkiRunFork <| Graph.calculateForkPercentages [ edge.edgeType, edge.edgeType ]) point
     (pointsBeforeSplit, pointsAfterSplit) = splitEdgeSegments edge point graph.zoom
   in
   { graph
@@ -138,7 +138,7 @@ splitEdgeSegments edge splitPoint zoom =
     else
       ((before ++ [ point ], after), point, False)
   ) (([], []), edge.start.position, False) edge.points
-  |> (\(result, _, _) -> Debug.log "" result)
+  |> (\(result, _, _) -> result)
 
 
 findExtremePoints : List Graph.Point -> Maybe (Graph.Point, Graph.Point)

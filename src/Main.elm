@@ -333,62 +333,16 @@ checkConnectDrawing event (model, cmd) =
   let maybeVertex = getHoveringVertex model event in
   ( case (event.button, maybeVertex, model.drawingEdge) of
     (Primary, Just vertex, Just edge) ->
-      if vertex /= edge.start then
-      { model | drawingEdge = Nothing
-      , edgeCounter = if edge.start.id == -1 then model.edgeCounter + 2 else model.edgeCounter + 1
-      , vertexCounter = if edge.start.id == -1 then model.vertexCounter + 1 else model.vertexCounter
-      , currentGraph = Graph.updateGraphProperty
-        ( \newEdge ->
-          ( if newEdge.start.id == -1
-            then
-              Geom.splitEdge
-              (Maybe.withDefault newEdge <| Maybe.map Tuple.first <| getEdgeOnPosition model newEdge.start.position)
-              newEdge.start.position (model.edgeCounter + 2) (model.vertexCounter)
-            else identity
-          ) >>
-          Graph.addEdge (Geom.calculateEdgeBoundingBox { newEdge | start = (let s = newEdge.start in { s | id = if s.id == -1 then model.vertexCounter else s.id}) })
-        )
-        ( Geom.calculateEdgeBoundingBox
-          { edge | end = Just vertex
-          , edgeType = model.activeEdgeDrawingMode
-          }
-        ) model.currentGraph
-      } else model
+      if vertex /= edge.start
+      then connectEdgeToVertex model edge vertex
+      else model
     (Primary, Nothing, Just edge) ->
       case getHoveringEdge model event of
         Nothing ->
           { model | drawingEdge = Just { edge | points = edge.points ++ [ Geom.canvasPointToBackgroundPoint event.position (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph) ] }
           }
         Just (targetEdge, point) ->
-          if point == edge.start.position then model else
-          { model | drawingEdge = Nothing
-          , edgeCounter = if edge.start.id == -1 then model.edgeCounter + 3 else model.edgeCounter + 2
-          , vertexCounter = if edge.start.id == -1 then model.vertexCounter + 2 else model.vertexCounter + 1
-          , currentGraph = Graph.updateGraphProperty
-            ( \newEdge graph ->
-              ( \updatedGraph ->
-                let
-                  decision =
-                    ( (Debug.log "" newEdge.start.id) == -1
-                    , Maybe.andThen (\e -> Maybe.map (\p -> (e, p)) (Geom.mouseOverEdge graph.backgroundPosition graph.zoom edge.start.position e)) <| Dict.get targetEdge.id updatedGraph.edges
-                    , Maybe.andThen (\e -> Maybe.map (\p -> (e, p)) (Geom.mouseOverEdge graph.backgroundPosition graph.zoom edge.start.position e)) <| Dict.get (model.edgeCounter + 2) updatedGraph.edges
-                    )
-                in
-                ( case decision of
-                    (True, Just (splitEdge, splitPoint), _) ->
-                      Geom.splitEdge splitEdge splitPoint (model.edgeCounter + 3) (model.vertexCounter + 2) updatedGraph
-                    (True, Nothing, Just (splitEdge, splitPoint)) ->
-                      Geom.splitEdge splitEdge splitPoint (model.edgeCounter + 3) (model.vertexCounter + 2) updatedGraph
-                    (_, _, _) ->
-                      identity updatedGraph
-                )
-              )
-              <| Geom.splitEdge targetEdge point (model.edgeCounter + 2) (model.vertexCounter + 1)
-              <| Graph.addEdge newEdge graph
-            )
-            ({ edge | end = Just <| Graph.Vertex (model.vertexCounter + 1) Nothing point, edgeType = model.activeEdgeDrawingMode })
-            model.currentGraph
-          }
+          connectEdgeToEdge model edge targetEdge point
     (_, _, _) -> model
   , cmd
   )
@@ -411,7 +365,7 @@ checkToStartDrawing event (model, cmd) =
               (Graph.SkiRun _, Graph.SkiRun _) ->
                 let
                   edgeId = String.fromInt <| model.edgeCounter + 1
-                  vertex = Graph.Vertex -1 Nothing point
+                  vertex = Graph.Vertex -1 Nothing Graph.LiftStation point
                 in
                 ( { model | drawingEdge = Just <| Graph.Edge (model.edgeCounter + 1) ( Just <| "Edge " ++ edgeId) vertex Nothing Graph.Unfinished vertex.position vertex.position []
                   }
@@ -432,6 +386,63 @@ getHoveringEdge model event =
 
 getEdgeOnPosition model position =
   List.head <| List.filterMap (\edge -> Maybe.map (\point -> (edge, point)) <| Geom.pointOverEdge position (Graph.getZoom model.currentGraph) edge) <| Graph.getEdgesList model.currentGraph
+
+connectEdgeToVertex : Model -> Graph.Edge -> Graph.Vertex -> Model
+connectEdgeToVertex model edge vertex =
+  { model | drawingEdge = Nothing
+  , edgeCounter = if edge.start.id == -1 then model.edgeCounter + 2 else model.edgeCounter + 1
+  , vertexCounter = if edge.start.id == -1 then model.vertexCounter + 1 else model.vertexCounter
+  , currentGraph = Graph.updateGraphProperty
+    ( \newEdge ->
+      ( if newEdge.start.id == -1
+        then
+          Geom.splitEdge
+          (Maybe.withDefault newEdge <| Maybe.map Tuple.first <| getEdgeOnPosition model newEdge.start.position)
+          newEdge.start.position (model.edgeCounter + 2) (model.vertexCounter)
+        else identity
+      ) >>
+      Graph.addEdge (Geom.calculateEdgeBoundingBox { newEdge | start = (let s = newEdge.start in { s | id = if s.id == -1 then model.vertexCounter else s.id}) })
+      >> Graph.calculateVertexTypes
+    )
+    ( Geom.calculateEdgeBoundingBox
+      { edge | end = Just vertex
+      , edgeType = model.activeEdgeDrawingMode
+      }
+    ) model.currentGraph
+  }
+
+connectEdgeToEdge : Model -> Graph.Edge -> Graph.Edge -> Graph.Point -> Model
+connectEdgeToEdge model edge targetEdge point =
+  if point == edge.start.position then model else
+  { model | drawingEdge = Nothing
+  , edgeCounter = if edge.start.id == -1 then model.edgeCounter + 3 else model.edgeCounter + 2
+  , vertexCounter = if edge.start.id == -1 then model.vertexCounter + 2 else model.vertexCounter + 1
+  , currentGraph = Graph.updateGraphProperty
+    ( \newEdge graph ->
+      Graph.calculateVertexTypes
+      <| ( \updatedGraph ->
+        let
+          decision =
+            ( (newEdge.start.id) == -1
+            , Maybe.andThen (\e -> Maybe.map (\p -> (e, p)) (Geom.mouseOverEdge graph.backgroundPosition graph.zoom edge.start.position e)) <| Dict.get targetEdge.id updatedGraph.edges
+            , Maybe.andThen (\e -> Maybe.map (\p -> (e, p)) (Geom.mouseOverEdge graph.backgroundPosition graph.zoom edge.start.position e)) <| Dict.get (model.edgeCounter + 2) updatedGraph.edges
+            )
+        in
+        ( case decision of
+            (True, Just (splitEdge, splitPoint), _) ->
+              Geom.splitEdge splitEdge splitPoint (model.edgeCounter + 3) (model.vertexCounter + 2) updatedGraph
+            (True, Nothing, Just (splitEdge, splitPoint)) ->
+              Geom.splitEdge splitEdge splitPoint (model.edgeCounter + 3) (model.vertexCounter + 2) updatedGraph
+            (_, _, _) ->
+              identity updatedGraph
+        )
+      )
+      <| Geom.splitEdge targetEdge point (model.edgeCounter + 2) (model.vertexCounter + 1)
+      <| Graph.addEdge (Geom.calculateEdgeBoundingBox newEdge) graph
+    )
+    ({ edge | end = Just <| Graph.Vertex (model.vertexCounter + 1) Nothing Graph.LiftStation point, edgeType = model.activeEdgeDrawingMode })
+    model.currentGraph
+  }
 
 
 -- SUBSCRIPTIONS
@@ -573,47 +584,59 @@ vertexView : Model -> Graph.Vertex -> Canvas.Renderable
 vertexView model vertex =
   Canvas.group
   []
-  [ Canvas.shapes
-    []
-    [ Canvas.circle
-      ( vertex.position.x, vertex.position.y)
-      (
-        ( if vertexExpansionCondition model vertex
-          then Animator.move model.animations.expandedPoint vertexMovementAnimation
-          else if vertexEdgeDrawingCondition model vertex
-          then 1.5 * Geom.pointSize
-          else Geom.pointSize
-        ) / (Graph.getZoom model.currentGraph)
-      )
-    ]
+  [ ( case vertex.vertexType of
+      Graph.LiftStation ->
+        Canvas.shapes
+        []
+        [ Canvas.circle
+          ( vertex.position.x, vertex.position.y)
+          ( vertexPointSize model vertex Geom.liftStationPointSize 1 1.5 )
+        ]
+      Graph.SkiRunFork percentages ->
+        Canvas.group
+        []
+        <| Tuple.first
+        <| List.foldl
+          ( \(skiRunType, percentage) (renderables, start) ->
+            ( renderables ++
+              [ renderPieSlice
+                ( skiRunColor <| Graph.skiRunTypeFromString skiRunType )
+                vertex.position
+                ( vertexPointSize model vertex Geom.skiRunConnectionPointSize 1 1.5 )
+                (degrees <| 360 * (min 1 start))
+                (degrees <| 360 * (min 1 <| start + percentage))
+              ]
+            , start + percentage
+            )
+          ) ([], 0)
+        <| Dict.toList percentages
+    )
   , Canvas.shapes
     [ Canvas.Settings.fill <| if vertexEdgeDrawingCondition model vertex then Color.green else Color.white ]
     [ Canvas.circle
       ( vertex.position.x, vertex.position.y)
-      (
-       ( if vertexExpansionCondition model vertex
-         then Animator.linear model.animations.expandedPoint vertexFillAnimation
-         else if vertexEdgeDrawingCondition model vertex
-        then Geom.pointSize
-        else 0
-       ) / (Graph.getZoom model.currentGraph)
-      )
+      ( vertexPointSize model vertex (if (vertex.vertexType) == Graph.LiftStation then Geom.liftStationPointSize else Geom.skiRunConnectionPointSize) 0 1 )
     ]
   ]
 
-vertexMovementAnimation : Maybe Graph.Vertex -> Animator.Movement
-vertexMovementAnimation state =
-  Animator.at <|
-  case state of
-    Nothing -> Geom.pointSize
-    Just _ -> 1.5 * Geom.pointSize
+vertexPointSize : Model -> Graph.Vertex -> Float -> Float -> Float -> Float
+vertexPointSize model vertex baseRadius baseMultiplier hoverMultiplier =
+  ( max 0
+    ( if vertexExpansionCondition model vertex
+      then Animator.move model.animations.expandedPoint <| vertexAnimation baseRadius baseMultiplier hoverMultiplier
+      else if vertexEdgeDrawingCondition model vertex
+      then hoverMultiplier * baseRadius
+      else baseMultiplier * baseRadius
+    ) / (Graph.getZoom model.currentGraph)
+  )
 
-vertexFillAnimation : Maybe Graph.Vertex -> Animator.Movement
-vertexFillAnimation state =
+
+vertexAnimation baseRadius baseMultiplier hoverMultiplier state =
   Animator.at <|
   case state of
-    Nothing -> 0
-    Just _ -> Geom.pointSize
+    Nothing -> baseMultiplier * baseRadius
+    Just _ -> hoverMultiplier * baseRadius
+
 
 vertexExpansionCondition : Model -> Graph.Vertex -> Bool
 vertexExpansionCondition model vertex =
@@ -658,12 +681,17 @@ edgeStyle edgeType zoom =
   case edgeType of
     Graph.SkiRun skiRunType ->
       case skiRunType of
-        Graph.Easy -> [ Canvas.Settings.stroke Color.blue ]
-        Graph.Medium -> [ Canvas.Settings.stroke Color.red ]
-        Graph.Difficult -> [ Canvas.Settings.stroke Color.black ]
-        Graph.SkiRoute -> [ Canvas.Settings.stroke Color.red, Canvas.Settings.Line.lineDash [10 / zoom, 15 / zoom] ]
+        Graph.SkiRoute -> [ Canvas.Settings.stroke (skiRunColor skiRunType), Canvas.Settings.Line.lineDash [10 / zoom, 15 / zoom] ]
+        _ -> [ Canvas.Settings.stroke (skiRunColor skiRunType) ]
     Graph.Lift -> [ Canvas.Settings.stroke Color.black ]
     Graph.Unfinished -> [ Canvas.Settings.stroke Color.green ]
+
+skiRunColor skiRunType =
+  case skiRunType of
+    Graph.Easy -> Color.blue
+    Graph.Medium -> Color.red
+    Graph.Difficult -> Color.black
+    Graph.SkiRoute -> Color.red
 
 
 addBackground width height position texture renderables =
@@ -779,4 +807,21 @@ saveMapButtons model =
     [ Icons.saveIcon ]
   ]
 
+
+renderPieSlice : Color.Color -> Graph.Point -> Float -> Float -> Float -> Canvas.Renderable
+renderPieSlice color center radius startAngle endAngle =
+  Canvas.shapes [ Canvas.Settings.fill color ]
+    [ Canvas.path (pointToCanvasLibPoint center)
+      [ Canvas.lineTo ( center.x + radius * cos startAngle, center.y + radius * sin startAngle )
+      , Canvas.lineTo ( center.x + radius * cos endAngle, center.y + radius * sin endAngle )
+      , Canvas.lineTo (pointToCanvasLibPoint center)
+      ]
+    , Canvas.arc
+      (pointToCanvasLibPoint center)
+      radius
+      { startAngle = startAngle
+      , endAngle = endAngle
+      , clockwise = True
+      }
+    ]
 

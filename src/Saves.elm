@@ -99,21 +99,6 @@ edgeToJson edge =
     , ("type", E.string <| edgeTypeToString edge.edgeType)
     ]
 
-edgeTypeToString : EdgeType -> String
-edgeTypeToString edgeType =
-  case edgeType of
-    SkiRun skiRunType ->
-      String.append "skirun." <|
-      case skiRunType of
-        Easy -> "easy"
-        Medium -> "medium"
-        Difficult -> "difficult"
-        SkiRoute -> "ski-route"
-    Lift -> "lift"
-    Unfinished -> "unfinished"
-
-
-
 pointToJson : Point -> E.Value
 pointToJson point =
   E.list E.float [point.x, point.y]
@@ -135,8 +120,13 @@ loadGraphFromJsonToModel jsonString model =
     Nothing -> model
     Just json ->
       case D.decodeString graphDecoder json of
-        Ok graph -> { model | currentGraph = Just graph, vertexCounter = Graph.getNextVertexId graph, edgeCounter = Graph.getNextEdgeId graph }
-        Err e -> let _ = Debug.log "" e in model
+        Ok graph ->
+          { model
+          | currentGraph = Just <| Graph.calculateVertexTypes graph
+          , vertexCounter = Graph.getNextVertexId graph
+          , edgeCounter = Graph.getNextEdgeId graph
+          }
+        Err _ -> model
 
 graphDecoder : D.Decoder Graph
 graphDecoder =
@@ -152,7 +142,7 @@ graphDecoder =
 
 vertexDecoder : D.Decoder Vertex
 vertexDecoder =
-  D.map3 Vertex
+  D.map3 (\id title position -> Vertex id title Graph.LiftStation position)
     (D.field "id" D.int)
     (D.field "title" <| D.nullable D.string)
     (D.field "position" <| pointDecoder )
