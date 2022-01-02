@@ -1,8 +1,10 @@
 module Geometry exposing (..)
 
 import Canvas.Texture
+import Dict
 import Graph
 import Model exposing (..)
+import Utils
 
 type alias Line =
   { a : Float
@@ -39,8 +41,10 @@ backgroundPointToCanvasPoint backgroundPoint backgroundPosition zoomLevel =
   addPoints backgroundPosition <| mulPoint backgroundPoint zoomLevel
 
 pointSize = 10
+skiRunConnectionPointSize = 5
 lineWidth = 5
 
+mouseOverPoint : ViewportPoint -> Float -> ViewportPoint -> Graph.Point -> Bool
 mouseOverPoint backgroundPosition zoomLevel mousePosition point =
   let a = backgroundPointToCanvasPoint point backgroundPosition zoomLevel in
     pointSize >= (pointToLength <| subPoints a mousePosition)
@@ -69,23 +73,28 @@ calculateEdgeBoundingBox edge =
   }
 
 
-mouseOverEdge : Model -> Graph.Edge -> Maybe Graph.Point
-mouseOverEdge model edge =
+mouseOverEdge : ViewportPoint -> Float -> ViewportPoint -> Graph.Edge -> Maybe Graph.Point
+mouseOverEdge backgroundPosition zoom mousePosition edge =
   let
     mousePos =
       canvasPointToBackgroundPoint
-        model.mousePosition
-        (Graph.getPosition model.currentGraph)
-        (Graph.getZoom model.currentGraph)
+        mousePosition
+        backgroundPosition
+        zoom
   in
-  if isPointInRect mousePos edge.boundBoxTopLeft edge.boundBoxBottomRight
+    pointOverEdge mousePos zoom edge
+
+
+pointOverEdge : Graph.Point -> Float -> Graph.Edge -> Maybe Graph.Point
+pointOverEdge target zoom edge =
+  if isPointInRect target edge.boundBoxTopLeft edge.boundBoxBottomRight
   then
     List.foldl
     ( \point (result, previousPoint) ->
       let
         (topLeft, bottomRight) = Maybe.withDefault (point, point) <| findExtremePoints [previousPoint, point]
       in
-      ( if isPointInRect mousePos topLeft bottomRight then result ++ [ (previousPoint, point) ] else result
+      ( if isPointInRect target topLeft bottomRight then result ++ [ (previousPoint, point) ] else result
       , point
       )
     )
@@ -99,13 +108,37 @@ mouseOverEdge model edge =
     |> Tuple.first
     |> List.filterMap
       ( \(segmentStart, segmentEnd) ->
-        isPointOnLine (lineFromPoints segmentStart segmentEnd) (lineWidth / (Graph.getZoom model.currentGraph)) mousePos
+        isPointOnLine (lineFromPoints segmentStart segmentEnd) (lineWidth / zoom) target
       )
     |> List.head
-
   else Nothing
 
 
+splitEdge : Graph.Edge -> Graph.Point -> Graph.EdgeID -> Graph.VertexID -> Graph.Graph -> Graph.Graph
+splitEdge edge point newEdgeId newVertexId graph =
+  let
+    newVertex = Graph.Vertex newVertexId Nothing point
+    (pointsBeforeSplit, pointsAfterSplit) = splitEdgeSegments edge point graph.zoom
+  in
+  { graph
+  | edges =
+    Dict.insert edge.id ( calculateEdgeBoundingBox { edge | end = Just newVertex, points = pointsBeforeSplit} ) graph.edges
+    |> Dict.insert newEdgeId ( calculateEdgeBoundingBox { edge | start = newVertex, points = pointsAfterSplit, id = newEdgeId })
+  , vertices = Dict.insert newVertex.id newVertex graph.vertices
+  }
+
+
+splitEdgeSegments : Graph.Edge -> Graph.Point -> Float -> (List Graph.Point, List Graph.Point)
+splitEdgeSegments edge splitPoint zoom =
+  List.foldl
+  ( \point ((before, after), previousPoint, found) ->
+    if found || (Utils.maybeHasValue <| isPointOnLine (lineFromPoints previousPoint point) (lineWidth / zoom) splitPoint)
+    then
+      ((before, after ++ [ point ]), point, True)
+    else
+      ((before ++ [ point ], after), point, False)
+  ) (([], []), edge.start.position, False) edge.points
+  |> (\(result, _, _) -> Debug.log "" result)
 
 
 findExtremePoints : List Graph.Point -> Maybe (Graph.Point, Graph.Point)

@@ -335,16 +335,60 @@ checkConnectDrawing event (model, cmd) =
     (Primary, Just vertex, Just edge) ->
       if vertex /= edge.start then
       { model | drawingEdge = Nothing
-      , edgeCounter = model.edgeCounter + 1
-      , currentGraph = Graph.updateGraphProperty Graph.addEdge
+      , edgeCounter = if edge.start.id == -1 then model.edgeCounter + 2 else model.edgeCounter + 1
+      , vertexCounter = if edge.start.id == -1 then model.vertexCounter + 1 else model.vertexCounter
+      , currentGraph = Graph.updateGraphProperty
+        ( \newEdge ->
+          ( if newEdge.start.id == -1
+            then
+              Geom.splitEdge
+              (Maybe.withDefault newEdge <| Maybe.map Tuple.first <| getEdgeOnPosition model newEdge.start.position)
+              newEdge.start.position (model.edgeCounter + 2) (model.vertexCounter)
+            else identity
+          ) >>
+          Graph.addEdge (Geom.calculateEdgeBoundingBox { newEdge | start = (let s = newEdge.start in { s | id = if s.id == -1 then model.vertexCounter else s.id}) })
+        )
         ( Geom.calculateEdgeBoundingBox
-        { edge | end = Just vertex
-        , edgeType = model.activeEdgeDrawingMode
-        } ) model.currentGraph
+          { edge | end = Just vertex
+          , edgeType = model.activeEdgeDrawingMode
+          }
+        ) model.currentGraph
       } else model
     (Primary, Nothing, Just edge) ->
-      { model | drawingEdge = Just { edge | points = edge.points ++ [ Geom.canvasPointToBackgroundPoint event.position (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph) ] }
-      }
+      case getHoveringEdge model event of
+        Nothing ->
+          { model | drawingEdge = Just { edge | points = edge.points ++ [ Geom.canvasPointToBackgroundPoint event.position (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph) ] }
+          }
+        Just (targetEdge, point) ->
+          if point == edge.start.position then model else
+          { model | drawingEdge = Nothing
+          , edgeCounter = if edge.start.id == -1 then model.edgeCounter + 3 else model.edgeCounter + 2
+          , vertexCounter = if edge.start.id == -1 then model.vertexCounter + 2 else model.vertexCounter + 1
+          , currentGraph = Graph.updateGraphProperty
+            ( \newEdge graph ->
+              ( \updatedGraph ->
+                let
+                  decision =
+                    ( (Debug.log "" newEdge.start.id) == -1
+                    , Maybe.andThen (\e -> Maybe.map (\p -> (e, p)) (Geom.mouseOverEdge graph.backgroundPosition graph.zoom edge.start.position e)) <| Dict.get targetEdge.id updatedGraph.edges
+                    , Maybe.andThen (\e -> Maybe.map (\p -> (e, p)) (Geom.mouseOverEdge graph.backgroundPosition graph.zoom edge.start.position e)) <| Dict.get (model.edgeCounter + 2) updatedGraph.edges
+                    )
+                in
+                ( case decision of
+                    (True, Just (splitEdge, splitPoint), _) ->
+                      Geom.splitEdge splitEdge splitPoint (model.edgeCounter + 3) (model.vertexCounter + 2) updatedGraph
+                    (True, Nothing, Just (splitEdge, splitPoint)) ->
+                      Geom.splitEdge splitEdge splitPoint (model.edgeCounter + 3) (model.vertexCounter + 2) updatedGraph
+                    (_, _, _) ->
+                      identity updatedGraph
+                )
+              )
+              <| Geom.splitEdge targetEdge point (model.edgeCounter + 2) (model.vertexCounter + 1)
+              <| Graph.addEdge newEdge graph
+            )
+            ({ edge | end = Just <| Graph.Vertex (model.vertexCounter + 1) Nothing point, edgeType = model.activeEdgeDrawingMode })
+            model.currentGraph
+          }
     (_, _, _) -> model
   , cmd
   )
@@ -359,12 +403,36 @@ checkToStartDrawing event (model, cmd) =
         }
       , cmd
       )
+    (Primary, Nothing, Nothing) ->
+        case getHoveringEdge model event of
+          Nothing -> (model, cmd)
+          Just (edge, point) ->
+            case (model.activeEdgeDrawingMode, edge.edgeType) of
+              (Graph.SkiRun _, Graph.SkiRun _) ->
+                let
+                  edgeId = String.fromInt <| model.edgeCounter + 1
+                  vertex = Graph.Vertex -1 Nothing point
+                in
+                ( { model | drawingEdge = Just <| Graph.Edge (model.edgeCounter + 1) ( Just <| "Edge " ++ edgeId) vertex Nothing Graph.Unfinished vertex.position vertex.position []
+                  }
+                , cmd
+                )
+              (_, _) -> (model, cmd)
     (_, _, _) -> (model, cmd)
 
 
 getHoveringVertex : Model -> MouseEvent -> Maybe Graph.Vertex
 getHoveringVertex model event =
   List.head <| List.filter (\v -> Geom.mouseOverPoint (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph) event.position v.position ) <| Graph.getVerticesList model.currentGraph
+
+
+getHoveringEdge : Model -> MouseEvent -> Maybe (Graph.Edge, Graph.Point)
+getHoveringEdge model event =
+  List.head <| List.filterMap (\edge -> Maybe.map (\point -> (edge, point)) <| Geom.mouseOverEdge (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph) event.position edge) <| Graph.getEdgesList model.currentGraph
+
+getEdgeOnPosition model position =
+  List.head <| List.filterMap (\edge -> Maybe.map (\point -> (edge, point)) <| Geom.pointOverEdge position (Graph.getZoom model.currentGraph) edge) <| Graph.getEdgesList model.currentGraph
+
 
 -- SUBSCRIPTIONS
 
@@ -572,10 +640,12 @@ edgeView model edge =
              Just vertex -> vertex.position
          ]
   ] ++ (
-    case (model.activeEdgeDrawingMode, edge.edgeType, Geom.mouseOverEdge model edge) of
+    let tempVertex point = Canvas.circle (pointToCanvasLibPoint point) (Geom.skiRunConnectionPointSize / Graph.getZoom model.currentGraph) in
+    case (model.activeEdgeDrawingMode, edge.edgeType, Geom.mouseOverEdge (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph) model.mousePosition edge) of
       (Graph.SkiRun _, Graph.SkiRun _, Just point) ->
-        [ Canvas.circle (pointToCanvasLibPoint point) (5 / Graph.getZoom model.currentGraph) ]
-      (_, _, _) -> []
+        [ tempVertex point ]
+      (_, _, _) ->
+        if edge.start.id == -1 then [ tempVertex edge.start.position ] else []
   )
 
 

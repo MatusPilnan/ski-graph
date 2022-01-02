@@ -85,6 +85,7 @@ addEdge : Edge -> Graph -> Graph
 addEdge edge graph =
   { graph | edges = Dict.insert edge.id edge graph.edges }
 
+
 getBackground : Maybe Graph -> String
 getBackground graph =
   getProperty .background "" graph

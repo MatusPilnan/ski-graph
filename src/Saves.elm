@@ -136,7 +136,7 @@ loadGraphFromJsonToModel jsonString model =
     Just json ->
       case D.decodeString graphDecoder json of
         Ok graph -> { model | currentGraph = Just graph, vertexCounter = Graph.getNextVertexId graph, edgeCounter = Graph.getNextEdgeId graph }
-        Err _ -> model
+        Err e -> let _ = Debug.log "" e in model
 
 graphDecoder : D.Decoder Graph
 graphDecoder =
