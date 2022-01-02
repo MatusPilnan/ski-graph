@@ -400,8 +400,8 @@ connectEdgeToVertex model edge vertex =
           (Maybe.withDefault newEdge <| Maybe.map Tuple.first <| getEdgeOnPosition model newEdge.start.position)
           newEdge.start.position (model.edgeCounter + 2) (model.vertexCounter)
         else identity
-      ) >>
-      Graph.addEdge (Geom.calculateEdgeBoundingBox { newEdge | start = (let s = newEdge.start in { s | id = if s.id == -1 then model.vertexCounter else s.id}) })
+      )
+      >> Graph.addEdge (Geom.calculateEdgeBoundingBox { newEdge | start = (let s = newEdge.start in { s | id = if s.id == -1 then model.vertexCounter else s.id}) })
       >> Graph.calculateVertexTypes
     )
     ( Geom.calculateEdgeBoundingBox
@@ -424,17 +424,20 @@ connectEdgeToEdge model edge targetEdge point =
         let
           decision =
             ( (newEdge.start.id) == -1
-            , Maybe.andThen (\e -> Maybe.map (\p -> (e, p)) (Geom.mouseOverEdge graph.backgroundPosition graph.zoom edge.start.position e)) <| Dict.get targetEdge.id updatedGraph.edges
-            , Maybe.andThen (\e -> Maybe.map (\p -> (e, p)) (Geom.mouseOverEdge graph.backgroundPosition graph.zoom edge.start.position e)) <| Dict.get (model.edgeCounter + 2) updatedGraph.edges
+            , Maybe.andThen (\e -> Maybe.map (\p -> (e, p)) (Geom.pointOverEdge edge.start.position graph.zoom e)) <| Dict.get targetEdge.id updatedGraph.edges
+            , Maybe.andThen (\e -> Maybe.map (\p -> (e, p)) (Geom.pointOverEdge edge.start.position graph.zoom e)) <| Dict.get (model.edgeCounter + 2) updatedGraph.edges
             )
+          action splitEdge splitPoint =
+            Geom.splitEdge splitEdge splitPoint (model.edgeCounter + 3) (model.vertexCounter + 2) updatedGraph
+            |> Graph.addEdge (Geom.calculateEdgeBoundingBox { newEdge | start = (let s = newEdge.start in { s | id = if s.id == -1 then model.vertexCounter + 2 else s.id}) })
         in
         ( case decision of
             (True, Just (splitEdge, splitPoint), _) ->
-              Geom.splitEdge splitEdge splitPoint (model.edgeCounter + 3) (model.vertexCounter + 2) updatedGraph
-            (True, Nothing, Just (splitEdge, splitPoint)) ->
-              Geom.splitEdge splitEdge splitPoint (model.edgeCounter + 3) (model.vertexCounter + 2) updatedGraph
+              action splitEdge splitPoint
+            (True, _, Just (splitEdge, splitPoint)) ->
+              action splitEdge splitPoint
             (_, _, _) ->
-              identity updatedGraph
+              updatedGraph
         )
       )
       <| Geom.splitEdge targetEdge point (model.edgeCounter + 2) (model.vertexCounter + 1)
