@@ -36,6 +36,8 @@ type alias Model =
   , drawingEdge : Maybe Graph.Edge
   , activeEdgeDrawingMode : Graph.EdgeType
   , baseUrl : String
+  , menuShown : Bool
+  , backgroundOpacity : Float
   }
 
 type MouseButton

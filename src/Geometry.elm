@@ -29,7 +29,7 @@ constrainBackgroundToCanvas model new =
     h = Maybe.withDefault model.height <| Maybe.map (\t -> (Canvas.Texture.dimensions t).height ) model.texture
   in
   Graph.Point
-    (min 0 <| max (0 - w * (Graph.getZoom model.currentGraph) + model.width) new.x )
+    (min (if model.menuShown then 384 else 0) <| max (0 - w * (Graph.getZoom model.currentGraph) + model.width) new.x )
     (min 0 <| max (0 - h * (Graph.getZoom model.currentGraph) + model.height) new.y )
 
 canvasPointToBackgroundPoint : ViewportPoint -> ViewportPoint -> Float -> Graph.Point

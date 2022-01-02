@@ -70,8 +70,9 @@ graphToJson : Int -> Graph -> String
 graphToJson indent graph =
   E.encode indent <|
     E.object
-      [ ("zoom", E.float graph.zoom)
+      [ ("title", E.string graph.title)
       , ("background", E.string graph.background)
+      , ("zoom", E.float graph.zoom)
       , ("position", pointToJson graph.backgroundPosition)
       , ("vertices", E.list vertexToJson <| Dict.values graph.vertices )
       , ("edges", E.list edgeToJson <| Dict.values graph.edges)
@@ -130,10 +131,11 @@ loadGraphFromJsonToModel jsonString model =
 
 graphDecoder : D.Decoder Graph
 graphDecoder =
-  D.map5
-    ( \zoom background position id (vertices, edges) ->
-      Graph "" id background vertices edges position zoom
+  D.map6
+    ( \title zoom background position id (vertices, edges) ->
+      Graph title id background vertices edges position zoom
     )
+    (D.field "title" D.string)
     (D.field "zoom" D.float)
     (D.field "background" D.string)
     (D.field "position" pointDecoder)

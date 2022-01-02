@@ -25,3 +25,5 @@ type Msg
   | LoadExistingGraph
   | LoadGraphIndex (Maybe (Result String (Dict Graph.GraphID Graph.GraphIndexEntry)))
   | SelectGraphFromIndex (Maybe Graph.GraphID)
+  | SetMenuShown Bool
+  | SetBackgroundOpacity Float

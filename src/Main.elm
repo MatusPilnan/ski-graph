@@ -62,6 +62,8 @@ init flags =
     , graphIndex = Saves.graphIndexFromJson Graph.Local flags.localGraphIndex
     , selectedGraphIndexEntryId = flags.selectedGraphID
     , baseUrl = flags.baseUrl
+    , menuShown = True
+    , backgroundOpacity = 1
     } |> Saves.loadGraphFromJsonToModel flags.graphJson
   , Requests.fetchGraphIndex flags.baseUrl
   )
@@ -134,22 +136,8 @@ update msg model =
       ( { model | mapFieldInput = string, mapFieldState = Loading}, Cmd.none)
 
     DimensionsChanged (width, height) ->
-      let
-        w = Maybe.withDefault width <| Maybe.map (\t -> (Canvas.Texture.dimensions t).width ) model.texture
-        h = Maybe.withDefault height <| Maybe.map (\t -> (Canvas.Texture.dimensions t).height ) model.texture
-        zoomAfter = max (Graph.getZoom model.currentGraph) (max ( width / w ) ( height / h ) )
-        newModel = { model | width = width, height = height }
-      in
-      ( { newModel
-        | currentGraph = Maybe.map
-          ( Graph.setPosition
-            ( Geom.constrainBackgroundToCanvas newModel
-              <| Graph.getPosition model.currentGraph
-            ) << Graph.setZoom zoomAfter
-          ) model.currentGraph
-        }
-      , Cmd.none
-      )
+      ( model, Cmd.none)
+      |> adaptToNewDimensions width height
 
     ZoomChanged delta ->
       let
@@ -230,6 +218,13 @@ update msg model =
     SetCurrentGraph graph ->
       ({ model | currentGraph = Just graph, vertexCounter = Graph.getNextVertexId graph, edgeCounter = Graph.getNextEdgeId graph }, saveGraph model.currentGraph)
 
+    SetMenuShown shown ->
+      ({ model | menuShown = shown }, Cmd.none )
+      |> adaptToNewDimensions model.width model.height
+
+    SetBackgroundOpacity opacity ->
+      ({ model | backgroundOpacity = max 0 <| min 1 opacity }, Cmd.none)
+
 
 saveGraphAndIndex : Model -> Cmd Msg
 saveGraphAndIndex model =
@@ -256,7 +251,23 @@ checkMouseEventForPointHover : MouseEvent -> (Model, Cmd Msg) -> (Model, Cmd Msg
 checkMouseEventForPointHover event (model, cmd) =
   ({ model | animations = animateHoveredPoint model.animations <| getHoveringVertex model event }, cmd )
 
-
+adaptToNewDimensions width height (model, cmd) =
+  let
+    w = Maybe.withDefault width <| Maybe.map (\t -> (Canvas.Texture.dimensions t).width ) model.texture
+    h = Maybe.withDefault height <| Maybe.map (\t -> (Canvas.Texture.dimensions t).height ) model.texture
+    zoomAfter = max (Graph.getZoom model.currentGraph) (max ( width / w ) ( height / h ) )
+    newModel = { model | width = width, height = height }
+  in
+  ( { newModel
+    | currentGraph = Maybe.map
+      ( Graph.setPosition
+        ( Geom.constrainBackgroundToCanvas newModel
+          <| Graph.getPosition model.currentGraph
+        ) << Graph.setZoom zoomAfter
+      ) model.currentGraph
+    }
+  , cmd
+  )
 
 setModelMousePosition : MouseEvent -> (Model, Cmd Msg) -> (Model, Cmd Msg)
 setModelMousePosition event (model, cmd) =
@@ -480,7 +491,7 @@ animateHoveredPoint animations newHover =
 view : Model -> Html.Html Msg
 view model =
   Html.main_
-  [ Attr.class "h-screen w-screen overflow-hidden" ]
+  [ Attr.class "h-screen w-screen overflow-hidden relative" ]
   <| case model.currentGraph of
       Nothing ->
         [ Html.div
@@ -514,8 +525,49 @@ view model =
             ]
           ]
         ]
-      Just _ ->
-        canvasView model
+      Just graph ->
+        (menuPane model graph) :: (canvasView model)
+
+
+menuPane : Model -> Graph.Graph ->Html.Html Msg
+menuPane model graph =
+  Html.div
+  [ Attr.class "fixed top-0 bottom-0 w-96 transition-all bg-primary shadow-md z-20"
+  , Attr.classList
+    [ ("left-0", model.menuShown)
+    , ("-left-96", not model.menuShown)
+    ]
+  ]
+  [ Html.button
+    [ Attr.class "bg-primary text-secondary p-4 rounded-br-md absolute right-0 translate-x-full shadow-md top-0 z-10"
+    , Events.onClick <| SetMenuShown <| not model.menuShown
+    ]
+    [ Icons.menu ]
+  , Html.div
+    [ Attr.class "h-full w-full p-4 text-white" ]
+    [ Html.h1
+      [ Attr.class "text-xl font-bold mb-4" ]
+      [ Html.text graph.title ]
+    , Html.div
+      [ Attr.class "w-full" ]
+      [ Html.label
+        [ Attr.class "font-light text-sm flex justify-between" ]
+        [ Html.span [] [ Html.text "Background opacity"]
+        , Html.span [] [ Html.text <| (String.fromFloat <| 100 * model.backgroundOpacity) ++ "%" ]
+        ]
+      , Html.input
+        [ Attr.type_ "range"
+        , Attr.class "w-full block mt-1"
+        , Attr.max "1"
+        , Attr.min "0"
+        , Attr.step "0.01"
+        , Attr.value <| String.fromFloat model.backgroundOpacity
+        , Events.onInput <| SetBackgroundOpacity << Maybe.withDefault 1 << String.toFloat
+        ]
+        []
+      ]
+    ]
+  ]
 
 
 
@@ -526,7 +578,7 @@ canvasView model =
     , height = ceiling model.height
     , textures = [ Canvas.Texture.loadFromImageUrl model.mapFieldInput TextureLoaded ]
     }
-    [ Attr.class "h-full w-full"
+    [ Attr.class "h-full"
     , Events.on "mousedown" <| mouseDecoder MouseDown
     , Events.on "mouseup" <| mouseDecoder MouseUp
     , Events.on "mouseleave" <| mouseDecoder (\_ -> MouseLeave)
@@ -545,7 +597,7 @@ canvasView model =
         ]
       )
       ]
-      <| addBackground model.width model.height (0, 0) model.texture
+      <| addBackground model
       [ Canvas.group []
         <| (List.map (edgeView model) <| Graph.getEdgesList model.currentGraph)
         ++ (List.map (vertexView model) <| Graph.getVerticesList model.currentGraph)
@@ -696,12 +748,18 @@ skiRunColor skiRunType =
     Graph.Difficult -> Color.black
     Graph.SkiRoute -> Color.red
 
-
-addBackground width height position texture renderables =
-  case texture of
-    Nothing -> renderables
+addBackground : Model -> List Canvas.Renderable -> List Canvas.Renderable
+addBackground model renderables =
+  case model.texture of
+    Nothing -> [ Canvas.clear (0, 0) model.width model.height ]
     Just t ->
-      [ Canvas.clear (0, 0) width height, Canvas.texture [] position t ] ++ renderables
+      let zoom = Graph.getZoom model.currentGraph in
+      [ Canvas.clear (0, 0) ((Canvas.Texture.dimensions t).width / zoom) ((Canvas.Texture.dimensions t).height / zoom)
+      , Canvas.texture
+        [ Canvas.Settings.Advanced.alpha model.backgroundOpacity ]
+        (0, 0)
+        t
+      ] ++ renderables
 
 
 

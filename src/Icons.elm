@@ -108,3 +108,19 @@ saveIcon =
       ]
       []
     ]
+
+menu =
+  svg
+  [ SvgAttr.class "h-6 w-6"
+  , SvgAttr.fill "none"
+  , SvgAttr.viewBox "0 0 24 24"
+  , SvgAttr.stroke "currentColor"
+  ]
+  [ path
+    [ SvgAttr.strokeLinecap "round"
+    , SvgAttr.strokeLinejoin "round"
+    , SvgAttr.strokeWidth "2"
+    , SvgAttr.d "M4 6h16M4 12h16M4 18h16"
+    ]
+    []
+  ]
