@@ -10187,15 +10187,14 @@ var $author$project$Main$addBackground = F2(
 				]);
 		} else {
 			var t = _v0.a;
-			var zoom = $author$project$Graph$getZoom(model.cz);
 			return _Utils_ap(
 				_List_fromArray(
 					[
 						A3(
 						$joakin$elm_canvas$Canvas$clear,
 						_Utils_Tuple2(0, 0),
-						$joakin$elm_canvas$Canvas$Texture$dimensions(t).ci / zoom,
-						$joakin$elm_canvas$Canvas$Texture$dimensions(t).b$ / zoom),
+						$joakin$elm_canvas$Canvas$Texture$dimensions(t).ci,
+						$joakin$elm_canvas$Canvas$Texture$dimensions(t).b$),
 						A3(
 						$joakin$elm_canvas$Canvas$texture,
 						_List_fromArray(
