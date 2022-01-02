@@ -62,7 +62,7 @@ init flags =
     , graphIndex = Saves.graphIndexFromJson Graph.Local flags.localGraphIndex
     , selectedGraphIndexEntryId = flags.selectedGraphID
     , baseUrl = flags.baseUrl
-    , menuShown = True
+    , menuShown = False
     , backgroundOpacity = 1
     } |> Saves.loadGraphFromJsonToModel flags.graphJson
   , Requests.fetchGraphIndex flags.baseUrl
