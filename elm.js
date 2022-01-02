@@ -6927,7 +6927,7 @@ var $author$project$Main$init = function (flags) {
 				G: flags.dc,
 				O: 1,
 				aP: false,
-				eb: true,
+				eb: false,
 				aQ: false,
 				cX: A2($author$project$Graph$Point, 0, 0),
 				aR: A2($author$project$Graph$Point, 0, 0),
