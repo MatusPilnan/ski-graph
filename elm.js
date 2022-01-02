@@ -5022,10 +5022,10 @@ var $elm$core$Array$builderToArray = F2(
 		if (!builder.j) {
 			return A4(
 				$elm$core$Array$Array_elm_builtin,
-				$elm$core$Elm$JsArray$length(builder.n),
+				$elm$core$Elm$JsArray$length(builder.m),
 				$elm$core$Array$shiftStep,
 				$elm$core$Elm$JsArray$empty,
-				builder.n);
+				builder.m);
 		} else {
 			var treeLen = builder.j * $elm$core$Array$branchFactor;
 			var depth = $elm$core$Basics$floor(
@@ -5034,10 +5034,10 @@ var $elm$core$Array$builderToArray = F2(
 			var tree = A2($elm$core$Array$treeFromBuilder, correctNodeList, builder.j);
 			return A4(
 				$elm$core$Array$Array_elm_builtin,
-				$elm$core$Elm$JsArray$length(builder.n) + treeLen,
+				$elm$core$Elm$JsArray$length(builder.m) + treeLen,
 				A2($elm$core$Basics$max, 5, depth * $elm$core$Array$shiftStep),
 				tree,
-				builder.n);
+				builder.m);
 		}
 	});
 var $elm$core$Basics$idiv = _Basics_idiv;
@@ -5050,7 +5050,7 @@ var $elm$core$Array$initializeHelp = F5(
 				return A2(
 					$elm$core$Array$builderToArray,
 					false,
-					{o: nodeList, j: (len / $elm$core$Array$branchFactor) | 0, n: tail});
+					{o: nodeList, j: (len / $elm$core$Array$branchFactor) | 0, m: tail});
 			} else {
 				var leaf = $elm$core$Array$Leaf(
 					A3($elm$core$Elm$JsArray$initialize, $elm$core$Array$branchFactor, fromIndex, fn));
@@ -6898,7 +6898,7 @@ var $author$project$Saves$loadGraphFromJsonToModel = F2(
 					{
 						cy: $elm$core$Maybe$Just(
 							$author$project$Graph$calculateVertexTypes(graph)),
-						m: $author$project$Graph$getNextEdgeId(graph),
+						n: $author$project$Graph$getNextEdgeId(graph),
 						l: $author$project$Graph$getNextVertexId(graph)
 					});
 			} else {
@@ -6919,7 +6919,7 @@ var $author$project$Main$init = function (flags) {
 				a5: flags.a5,
 				cy: $elm$core$Maybe$Nothing,
 				s: $elm$core$Maybe$Nothing,
-				m: 0,
+				n: 0,
 				_: A2($author$project$Saves$graphIndexFromJson, 0, flags.cT),
 				bu: false,
 				b_: flags.b_,
@@ -8107,11 +8107,6 @@ var $author$project$Geometry$pointOverEdge = F3(
 									},
 									edge.bW))))).a)) : $elm$core$Maybe$Nothing;
 	});
-var $author$project$Geometry$mouseOverEdge = F4(
-	function (backgroundPosition, zoom, mousePosition, edge) {
-		var mousePos = A3($author$project$Geometry$canvasPointToBackgroundPoint, mousePosition, backgroundPosition, zoom);
-		return A3($author$project$Geometry$pointOverEdge, mousePos, zoom, edge);
-	});
 var $author$project$Geometry$splitEdgeSegments = F3(
 	function (edge, splitPoint, zoom) {
 		return function (_v2) {
@@ -8222,7 +8217,7 @@ var $author$project$Main$connectEdgeToEdge = F4(
 													function (p) {
 														return _Utils_Tuple2(e, p);
 													},
-													A4($author$project$Geometry$mouseOverEdge, graph.bR, graph.eK, edge.aW.am, e));
+													A3($author$project$Geometry$pointOverEdge, edge.aW.am, graph.eK, e));
 											},
 											A2($elm$core$Dict$get, targetEdge.b$, updatedGraph.cC)),
 										A2(
@@ -8233,9 +8228,28 @@ var $author$project$Main$connectEdgeToEdge = F4(
 													function (p) {
 														return _Utils_Tuple2(e, p);
 													},
-													A4($author$project$Geometry$mouseOverEdge, graph.bR, graph.eK, edge.aW.am, e));
+													A3($author$project$Geometry$pointOverEdge, edge.aW.am, graph.eK, e));
 											},
-											A2($elm$core$Dict$get, model.m + 2, updatedGraph.cC)));
+											A2($elm$core$Dict$get, model.n + 2, updatedGraph.cC)));
+									var action = F2(
+										function (splitEdge, splitPoint) {
+											return A2(
+												$author$project$Graph$addEdge,
+												$author$project$Geometry$calculateEdgeBoundingBox(
+													_Utils_update(
+														newEdge,
+														{
+															aW: function () {
+																var s = newEdge.aW;
+																return _Utils_update(
+																	s,
+																	{
+																		b$: _Utils_eq(s.b$, -1) ? (model.l + 2) : s.b$
+																	});
+															}()
+														})),
+												A5($author$project$Geometry$splitEdge, splitEdge, splitPoint, model.n + 3, model.l + 2, updatedGraph));
+										});
 									_v0$2:
 									while (true) {
 										if (decision.a) {
@@ -8243,14 +8257,13 @@ var $author$project$Main$connectEdgeToEdge = F4(
 												var _v1 = decision.b.a;
 												var splitEdge = _v1.a;
 												var splitPoint = _v1.b;
-												return A5($author$project$Geometry$splitEdge, splitEdge, splitPoint, model.m + 3, model.l + 2, updatedGraph);
+												return A2(action, splitEdge, splitPoint);
 											} else {
 												if (!decision.c.$) {
-													var _v2 = decision.b;
-													var _v3 = decision.c.a;
-													var splitEdge = _v3.a;
-													var splitPoint = _v3.b;
-													return A5($author$project$Geometry$splitEdge, splitEdge, splitPoint, model.m + 3, model.l + 2, updatedGraph);
+													var _v2 = decision.c.a;
+													var splitEdge = _v2.a;
+													var splitPoint = _v2.b;
+													return A2(action, splitEdge, splitPoint);
 												} else {
 													break _v0$2;
 												}
@@ -8259,13 +8272,13 @@ var $author$project$Main$connectEdgeToEdge = F4(
 											break _v0$2;
 										}
 									}
-									return $elm$core$Basics$identity(updatedGraph);
+									return updatedGraph;
 								}(
 									A5(
 										$author$project$Geometry$splitEdge,
 										targetEdge,
 										point,
-										model.m + 2,
+										model.n + 2,
 										model.l + 1,
 										A2(
 											$author$project$Graph$addEdge,
@@ -8281,7 +8294,7 @@ var $author$project$Main$connectEdgeToEdge = F4(
 						}),
 					model.cy),
 				s: $elm$core$Maybe$Nothing,
-				m: _Utils_eq(edge.aW.b$, -1) ? (model.m + 3) : (model.m + 2),
+				n: _Utils_eq(edge.aW.b$, -1) ? (model.n + 3) : (model.n + 2),
 				l: _Utils_eq(edge.aW.b$, -1) ? (model.l + 2) : (model.l + 1)
 			});
 	});
@@ -8353,7 +8366,7 @@ var $author$project$Main$connectEdgeToVertex = F3(
 										$elm$core$Tuple$first,
 										A2($author$project$Main$getEdgeOnPosition, model, newEdge.aW.am))),
 								newEdge.aW.am,
-								model.m + 2,
+								model.n + 2,
 								model.l) : $elm$core$Basics$identity,
 							A2(
 								$elm$core$Basics$composeR,
@@ -8382,7 +8395,7 @@ var $author$project$Main$connectEdgeToVertex = F3(
 							})),
 					model.cy),
 				s: $elm$core$Maybe$Nothing,
-				m: _Utils_eq(edge.aW.b$, -1) ? (model.m + 2) : (model.m + 1),
+				n: _Utils_eq(edge.aW.b$, -1) ? (model.n + 2) : (model.n + 1),
 				l: _Utils_eq(edge.aW.b$, -1) ? (model.l + 1) : model.l
 			});
 	});
@@ -8396,6 +8409,11 @@ var $author$project$Graph$getPosition = function (graph) {
 		$author$project$Graph$zeroPoint,
 		graph);
 };
+var $author$project$Geometry$mouseOverEdge = F4(
+	function (backgroundPosition, zoom, mousePosition, edge) {
+		var mousePos = A3($author$project$Geometry$canvasPointToBackgroundPoint, mousePosition, backgroundPosition, zoom);
+		return A3($author$project$Geometry$pointOverEdge, mousePos, zoom, edge);
+	});
 var $author$project$Main$getHoveringEdge = F2(
 	function (model, event) {
 		return $elm$core$List$head(
@@ -8894,7 +8912,7 @@ var $author$project$Main$checkToStartDrawing = F2(
 						var _v2 = _v1.a;
 						var vertex = _v1.b.a;
 						var _v3 = _v1.c;
-						var edgeId = $elm$core$String$fromInt(model.m + 1);
+						var edgeId = $elm$core$String$fromInt(model.n + 1);
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
@@ -8902,7 +8920,7 @@ var $author$project$Main$checkToStartDrawing = F2(
 									s: $elm$core$Maybe$Just(
 										A8(
 											$author$project$Graph$Edge,
-											model.m + 1,
+											model.n + 1,
 											$elm$core$Maybe$Just('Edge ' + edgeId),
 											vertex,
 											$elm$core$Maybe$Nothing,
@@ -8930,7 +8948,7 @@ var $author$project$Main$checkToStartDrawing = F2(
 							var _v9 = _Utils_Tuple2(model.ag, edge.cB);
 							if ((!_v9.a.$) && (!_v9.b.$)) {
 								var vertex = A4($author$project$Graph$Vertex, -1, $elm$core$Maybe$Nothing, $author$project$Graph$LiftStation, point);
-								var edgeId = $elm$core$String$fromInt(model.m + 1);
+								var edgeId = $elm$core$String$fromInt(model.n + 1);
 								return _Utils_Tuple2(
 									_Utils_update(
 										model,
@@ -8938,7 +8956,7 @@ var $author$project$Main$checkToStartDrawing = F2(
 											s: $elm$core$Maybe$Just(
 												A8(
 													$author$project$Graph$Edge,
-													model.m + 1,
+													model.n + 1,
 													$elm$core$Maybe$Just('Edge ' + edgeId),
 													vertex,
 													$elm$core$Maybe$Nothing,
@@ -9853,7 +9871,7 @@ var $author$project$Main$update = F2(
 							model,
 							{
 								cy: $elm$core$Maybe$Just(newGraph),
-								m: 0,
+								n: 0,
 								_: newIndex,
 								l: 0
 							}),
@@ -9923,7 +9941,7 @@ var $author$project$Main$update = F2(
 						model,
 						{
 							cy: $elm$core$Maybe$Just(graph),
-							m: $author$project$Graph$getNextEdgeId(graph),
+							n: $author$project$Graph$getNextEdgeId(graph),
 							l: $author$project$Graph$getNextVertexId(graph)
 						}),
 					$author$project$Main$saveGraph(model.cy));
