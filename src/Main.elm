@@ -753,8 +753,7 @@ addBackground model renderables =
   case model.texture of
     Nothing -> [ Canvas.clear (0, 0) model.width model.height ]
     Just t ->
-      let zoom = Graph.getZoom model.currentGraph in
-      [ Canvas.clear (0, 0) ((Canvas.Texture.dimensions t).width / zoom) ((Canvas.Texture.dimensions t).height / zoom)
+      [ Canvas.clear (0, 0) ((Canvas.Texture.dimensions t).width) ((Canvas.Texture.dimensions t).height)
       , Canvas.texture
         [ Canvas.Settings.Advanced.alpha model.backgroundOpacity ]
         (0, 0)
