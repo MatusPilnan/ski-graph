@@ -519,11 +519,11 @@ function _Debug_crash_UNUSED(identifier, fact1, fact2, fact3, fact4)
 
 function _Debug_regionToString(region)
 {
-	if (region.aW.bc === region.bX.bc)
+	if (region.aW.bc === region.bY.bc)
 	{
 		return 'on line ' + region.aW.bc;
 	}
-	return 'on lines ' + region.aW.bc + ' through ' + region.bX.bc;
+	return 'on lines ' + region.aW.bc + ' through ' + region.bY.bc;
 }
 
 
@@ -1857,7 +1857,7 @@ var _Platform_worker = F4(function(impl, flagDecoder, debugMetadata, args)
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.d2,
+		impl.d1,
 		impl.eH,
 		impl.eB,
 		function() { return function() {} }
@@ -2704,9 +2704,9 @@ var _VirtualDom_mapEventTuple = F2(function(func, tuple)
 var _VirtualDom_mapEventRecord = F2(function(func, record)
 {
 	return {
-		ab: func(record.ab),
-		cb: record.cb,
-		b8: record.b8
+		aa: func(record.aa),
+		cc: record.cc,
+		b9: record.b9
 	}
 });
 
@@ -2974,11 +2974,11 @@ function _VirtualDom_makeCallback(eventNode, initialHandler)
 		// 3 = Custom
 
 		var value = result.a;
-		var message = !tag ? value : tag < 3 ? value.a : value.ab;
-		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.cb;
+		var message = !tag ? value : tag < 3 ? value.a : value.aa;
+		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.cc;
 		var currentEventNode = (
 			stopPropagation && event.stopPropagation(),
-			(tag == 2 ? value.b : tag == 3 && value.b8) && event.preventDefault(),
+			(tag == 2 ? value.b : tag == 3 && value.b9) && event.preventDefault(),
 			eventNode
 		);
 		var tagger;
@@ -3928,7 +3928,7 @@ var _Browser_element = _Debugger_element || F4(function(impl, flagDecoder, debug
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.d2,
+		impl.d1,
 		impl.eH,
 		impl.eB,
 		function(sendToApp, initialModel) {
@@ -3964,11 +3964,11 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.d2,
+		impl.d1,
 		impl.eH,
 		impl.eB,
 		function(sendToApp, initialModel) {
-			var divertHrefToApp = impl.ca && impl.ca(sendToApp)
+			var divertHrefToApp = impl.cb && impl.cb(sendToApp)
 			var view = impl.eJ;
 			var title = _VirtualDom_doc.title;
 			var bodyNode = _VirtualDom_doc.body;
@@ -3977,12 +3977,12 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 			{
 				_VirtualDom_divertHrefToApp = divertHrefToApp;
 				var doc = view(model);
-				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.dJ);
+				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.dI);
 				var patches = _VirtualDom_diff(currNode, nextNode);
 				bodyNode = _VirtualDom_applyPatches(bodyNode, currNode, patches, sendToApp);
 				currNode = nextNode;
 				_VirtualDom_divertHrefToApp = 0;
-				(title !== doc.bO) && (_VirtualDom_doc.title = title = doc.bO);
+				(title !== doc.bP) && (_VirtualDom_doc.title = title = doc.bP);
 			});
 		}
 	);
@@ -4038,12 +4038,12 @@ function _Browser_makeAnimator(model, draw)
 
 function _Browser_application(impl)
 {
-	var onUrlChange = impl.el;
-	var onUrlRequest = impl.em;
+	var onUrlChange = impl.ek;
+	var onUrlRequest = impl.el;
 	var key = function() { key.a(onUrlChange(_Browser_getUrl())); };
 
 	return _Browser_document({
-		ca: function(sendToApp)
+		cb: function(sendToApp)
 		{
 			key.a = sendToApp;
 			_Browser_window.addEventListener('popstate', key);
@@ -4060,7 +4060,7 @@ function _Browser_application(impl)
 					sendToApp(onUrlRequest(
 						(next
 							&& curr.c4 === next.c4
-							&& curr.cL === next.cL
+							&& curr.cM === next.cM
 							&& curr.c1.a === next.c1.a
 						)
 							? $elm$browser$Browser$Internal(next)
@@ -4069,9 +4069,9 @@ function _Browser_application(impl)
 				}
 			});
 		},
-		d2: function(flags)
+		d1: function(flags)
 		{
-			return A3(impl.d2, flags, _Browser_getUrl(), key);
+			return A3(impl.d1, flags, _Browser_getUrl(), key);
 		},
 		eJ: impl.eJ,
 		eH: impl.eH,
@@ -4141,17 +4141,17 @@ var _Browser_decodeEvent = F2(function(decoder, event)
 function _Browser_visibilityInfo()
 {
 	return (typeof _VirtualDom_doc.hidden !== 'undefined')
-		? { d$: 'hidden', dK: 'visibilitychange' }
+		? { d_: 'hidden', dJ: 'visibilitychange' }
 		:
 	(typeof _VirtualDom_doc.mozHidden !== 'undefined')
-		? { d$: 'mozHidden', dK: 'mozvisibilitychange' }
+		? { d_: 'mozHidden', dJ: 'mozvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.msHidden !== 'undefined')
-		? { d$: 'msHidden', dK: 'msvisibilitychange' }
+		? { d_: 'msHidden', dJ: 'msvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.webkitHidden !== 'undefined')
-		? { d$: 'webkitHidden', dK: 'webkitvisibilitychange' }
-		: { d$: 'hidden', dK: 'visibilitychange' };
+		? { d_: 'webkitHidden', dJ: 'webkitvisibilitychange' }
+		: { d_: 'hidden', dJ: 'visibilitychange' };
 }
 
 
@@ -4233,11 +4233,11 @@ function _Browser_getViewport()
 {
 	return {
 		dd: _Browser_getScene(),
-		dz: {
+		dy: {
 			f: _Browser_window.pageXOffset,
 			g: _Browser_window.pageYOffset,
-			ci: _Browser_doc.documentElement.clientWidth,
-			b$: _Browser_doc.documentElement.clientHeight
+			cj: _Browser_doc.documentElement.clientWidth,
+			b0: _Browser_doc.documentElement.clientHeight
 		}
 	};
 }
@@ -4247,8 +4247,8 @@ function _Browser_getScene()
 	var body = _Browser_doc.body;
 	var elem = _Browser_doc.documentElement;
 	return {
-		ci: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
-		b$: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
+		cj: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
+		b0: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
 	};
 }
 
@@ -4272,14 +4272,14 @@ function _Browser_getViewportOf(id)
 	{
 		return {
 			dd: {
-				ci: node.scrollWidth,
-				b$: node.scrollHeight
+				cj: node.scrollWidth,
+				b0: node.scrollHeight
 			},
-			dz: {
+			dy: {
 				f: node.scrollLeft,
 				g: node.scrollTop,
-				ci: node.clientWidth,
-				b$: node.clientHeight
+				cj: node.clientWidth,
+				b0: node.clientHeight
 			}
 		};
 	});
@@ -4310,17 +4310,17 @@ function _Browser_getElement(id)
 		var y = _Browser_window.pageYOffset;
 		return {
 			dd: _Browser_getScene(),
-			dz: {
+			dy: {
 				f: x,
 				g: y,
-				ci: _Browser_doc.documentElement.clientWidth,
-				b$: _Browser_doc.documentElement.clientHeight
+				cj: _Browser_doc.documentElement.clientWidth,
+				b0: _Browser_doc.documentElement.clientHeight
 			},
-			dW: {
+			dV: {
 				f: x + rect.left,
 				g: y + rect.top,
-				ci: rect.width,
-				b$: rect.height
+				cj: rect.width,
+				b0: rect.height
 			}
 		};
 	});
@@ -4365,25 +4365,25 @@ var _Http_toTask = F3(function(router, toTask, request)
 	return _Scheduler_binding(function(callback)
 	{
 		function done(response) {
-			callback(toTask(request.cG.a(response)));
+			callback(toTask(request.cH.a(response)));
 		}
 
 		var xhr = new XMLHttpRequest();
 		xhr.addEventListener('error', function() { done($elm$http$Http$NetworkError_); });
 		xhr.addEventListener('timeout', function() { done($elm$http$Http$Timeout_); });
-		xhr.addEventListener('load', function() { done(_Http_toResponse(request.cG.b, xhr)); });
-		$elm$core$Maybe$isJust(request.dt) && _Http_track(router, xhr, request.dt.a);
+		xhr.addEventListener('load', function() { done(_Http_toResponse(request.cH.b, xhr)); });
+		$elm$core$Maybe$isJust(request.ds) && _Http_track(router, xhr, request.ds.a);
 
 		try {
-			xhr.open(request.ec, request.dw, true);
+			xhr.open(request.eb, request.dv, true);
 		} catch (e) {
-			return done($elm$http$Http$BadUrl_(request.dw));
+			return done($elm$http$Http$BadUrl_(request.dv));
 		}
 
 		_Http_configureRequest(xhr, request);
 
-		request.dJ.a && xhr.setRequestHeader('Content-Type', request.dJ.a);
-		xhr.send(request.dJ.b);
+		request.dI.a && xhr.setRequestHeader('Content-Type', request.dI.a);
+		xhr.send(request.dI.b);
 
 		return function() { xhr.c = true; xhr.abort(); };
 	});
@@ -4394,13 +4394,13 @@ var _Http_toTask = F3(function(router, toTask, request)
 
 function _Http_configureRequest(xhr, request)
 {
-	for (var headers = request.cK; headers.b; headers = headers.b) // WHILE_CONS
+	for (var headers = request.cL; headers.b; headers = headers.b) // WHILE_CONS
 	{
 		xhr.setRequestHeader(headers.a.a, headers.a.b);
 	}
 	xhr.timeout = request.eF.a || 0;
-	xhr.responseType = request.cG.d;
-	xhr.withCredentials = request.dD;
+	xhr.responseType = request.cH.d;
+	xhr.withCredentials = request.dC;
 }
 
 
@@ -4421,10 +4421,10 @@ function _Http_toResponse(toBody, xhr)
 function _Http_toMetadata(xhr)
 {
 	return {
-		dw: xhr.responseURL,
+		dv: xhr.responseURL,
 		ey: xhr.status,
 		ez: xhr.statusText,
-		cK: _Http_parseHeaders(xhr.getAllResponseHeaders())
+		cL: _Http_parseHeaders(xhr.getAllResponseHeaders())
 	};
 }
 
@@ -4520,14 +4520,14 @@ function _Http_track(router, xhr, tracker)
 		if (xhr.c) { return; }
 		_Scheduler_rawSpawn(A2($elm$core$Platform$sendToSelf, router, _Utils_Tuple2(tracker, $elm$http$Http$Sending({
 			ew: event.loaded,
-			dl: event.total
+			dk: event.total
 		}))));
 	});
 	xhr.addEventListener('progress', function(event) {
 		if (xhr.c) { return; }
 		_Scheduler_rawSpawn(A2($elm$core$Platform$sendToSelf, router, _Utils_Tuple2(tracker, $elm$http$Http$Receiving({
-			eq: event.loaded,
-			dl: event.lengthComputable ? $elm$core$Maybe$Just(event.total) : $elm$core$Maybe$Nothing
+			ep: event.loaded,
+			dk: event.lengthComputable ? $elm$core$Maybe$Just(event.total) : $elm$core$Maybe$Nothing
 		}))));
 	});
 }
@@ -5118,7 +5118,7 @@ var $elm$url$Url$Http = 0;
 var $elm$url$Url$Https = 1;
 var $elm$url$Url$Url = F6(
 	function (protocol, host, port_, path, query, fragment) {
-		return {cI: fragment, cL: host, eo: path, c1: port_, c4: protocol, c5: query};
+		return {cJ: fragment, cM: host, en: path, c1: port_, c4: protocol, c5: query};
 	});
 var $elm$core$String$contains = _String_contains;
 var $elm$core$String$length = _String_length;
@@ -5406,6 +5406,8 @@ var $author$project$Graph$Point = F2(
 	function (x, y) {
 		return {f: x, g: y};
 	});
+var $elm$core$Dict$RBEmpty_elm_builtin = {$: -2};
+var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
 var $author$project$Graph$Remote = 1;
 var $elm$json$Json$Decode$decodeString = _Json_runOnString;
 var $elm$http$Http$BadStatus_ = F2(
@@ -5427,8 +5429,6 @@ var $elm$http$Http$Sending = function (a) {
 	return {$: 0, a: a};
 };
 var $elm$http$Http$Timeout_ = {$: 1};
-var $elm$core$Dict$RBEmpty_elm_builtin = {$: -2};
-var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
 var $elm$core$Maybe$isJust = function (maybe) {
 	if (!maybe.$) {
 		return true;
@@ -6027,7 +6027,7 @@ var $elm$http$Http$Request = function (a) {
 };
 var $elm$http$Http$State = F2(
 	function (reqs, subs) {
-		return {c8: reqs, $7: subs};
+		return {c8: reqs, dn: subs};
 	});
 var $elm$http$Http$init = $elm$core$Task$succeed(
 	A2($elm$http$Http$State, $elm$core$Dict$empty, _List_Nil));
@@ -6071,7 +6071,7 @@ var $elm$http$Http$updateReqs = F3(
 					return A2(
 						$elm$core$Task$andThen,
 						function (pid) {
-							var _v4 = req.dt;
+							var _v4 = req.ds;
 							if (_v4.$ === 1) {
 								return A3($elm$http$Http$updateReqs, router, otherCmds, reqs);
 							} else {
@@ -6144,7 +6144,7 @@ var $elm$http$Http$onSelfMsg = F3(
 				A2(
 					$elm$core$List$filterMap,
 					A3($elm$http$Http$maybeSend, router, tracker, progress),
-					state.$7)));
+					state.dn)));
 	});
 var $elm$http$Http$Cancel = function (a) {
 	return {$: 0, a: a};
@@ -6158,14 +6158,14 @@ var $elm$http$Http$cmdMap = F2(
 			var r = cmd.a;
 			return $elm$http$Http$Request(
 				{
-					dD: r.dD,
-					dJ: r.dJ,
-					cG: A2(_Http_mapExpect, func, r.cG),
-					cK: r.cK,
-					ec: r.ec,
+					dC: r.dC,
+					dI: r.dI,
+					cH: A2(_Http_mapExpect, func, r.cH),
+					cL: r.cL,
+					eb: r.eb,
 					eF: r.eF,
-					dt: r.dt,
-					dw: r.dw
+					ds: r.ds,
+					dv: r.dv
 				});
 		}
 	});
@@ -6188,16 +6188,12 @@ var $elm$http$Http$subscription = _Platform_leaf('Http');
 var $elm$http$Http$request = function (r) {
 	return $elm$http$Http$command(
 		$elm$http$Http$Request(
-			{dD: false, dJ: r.dJ, cG: r.cG, cK: r.cK, ec: r.ec, eF: r.eF, dt: r.dt, dw: r.dw}));
+			{dC: false, dI: r.dI, cH: r.cH, cL: r.cL, eb: r.eb, eF: r.eF, ds: r.ds, dv: r.dv}));
 };
 var $elm$http$Http$get = function (r) {
 	return $elm$http$Http$request(
-		{dJ: $elm$http$Http$emptyBody, cG: r.cG, cK: _List_Nil, ec: 'GET', eF: $elm$core$Maybe$Nothing, dt: $elm$core$Maybe$Nothing, dw: r.dw});
+		{dI: $elm$http$Http$emptyBody, cH: r.cH, cL: _List_Nil, eb: 'GET', eF: $elm$core$Maybe$Nothing, ds: $elm$core$Maybe$Nothing, dv: r.dv});
 };
-var $author$project$Graph$GraphIndexEntry = F4(
-	function (title, path, id, location) {
-		return {b0: id, d6: location, eo: path, bO: title};
-	});
 var $elm$core$Dict$fromList = function (assocs) {
 	return A3(
 		$elm$core$List$foldl,
@@ -6210,28 +6206,69 @@ var $elm$core$Dict$fromList = function (assocs) {
 		$elm$core$Dict$empty,
 		assocs);
 };
-var $elm$json$Json$Decode$list = _Json_decodeList;
-var $elm$json$Json$Decode$map3 = _Json_map3;
+var $author$project$Graph$GraphIndexEntry = F4(
+	function (title, path, id, location) {
+		return {b1: id, d5: location, en: path, bP: title};
+	});
+var $elm$json$Json$Decode$fail = _Json_fail;
 var $elm$json$Json$Decode$string = _Json_decodeString;
+var $author$project$Saves$graphIndexEntryLocationDecoder = A2(
+	$elm$json$Json$Decode$andThen,
+	function (loc) {
+		switch (loc) {
+			case 'local':
+				return $elm$json$Json$Decode$succeed(0);
+			case 'remote':
+				return $elm$json$Json$Decode$succeed(1);
+			default:
+				var other = loc;
+				return $elm$json$Json$Decode$fail('Unrecognized location type: ' + other);
+		}
+	},
+	$elm$json$Json$Decode$string);
+var $elm$json$Json$Decode$map3 = _Json_map3;
+var $elm$json$Json$Decode$map4 = _Json_map4;
+var $author$project$Saves$graphIndexEntryDecoder = function (location) {
+	if (!location.$) {
+		var loc = location.a;
+		return A4(
+			$elm$json$Json$Decode$map3,
+			F3(
+				function (title, path, id) {
+					return A4($author$project$Graph$GraphIndexEntry, title, path, id, loc);
+				}),
+			A2($elm$json$Json$Decode$field, 'title', $elm$json$Json$Decode$string),
+			A2($elm$json$Json$Decode$field, 'path', $elm$json$Json$Decode$string),
+			A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$string));
+	} else {
+		return A5(
+			$elm$json$Json$Decode$map4,
+			F4(
+				function (title, path, id, loc) {
+					return A4($author$project$Graph$GraphIndexEntry, title, path, id, loc);
+				}),
+			A2($elm$json$Json$Decode$field, 'title', $elm$json$Json$Decode$string),
+			A2($elm$json$Json$Decode$field, 'path', $elm$json$Json$Decode$string),
+			A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$string),
+			A2($elm$json$Json$Decode$field, 'location', $author$project$Saves$graphIndexEntryLocationDecoder));
+	}
+};
+var $elm$json$Json$Decode$list = _Json_decodeList;
 var $author$project$Saves$graphIndexDecoder = function (location) {
 	return A2(
 		$elm$json$Json$Decode$map,
 		$elm$core$Dict$fromList,
 		$elm$json$Json$Decode$list(
-			A4(
-				$elm$json$Json$Decode$map3,
-				F3(
-					function (title, path, id) {
-						return _Utils_Tuple2(
-							id,
-							A4($author$project$Graph$GraphIndexEntry, title, path, id, location));
-					}),
-				A2($elm$json$Json$Decode$field, 'title', $elm$json$Json$Decode$string),
-				A2($elm$json$Json$Decode$field, 'path', $elm$json$Json$Decode$string),
-				A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$string))));
+			A2(
+				$elm$json$Json$Decode$map,
+				function (entry) {
+					return _Utils_Tuple2(entry.b1, entry);
+				},
+				$author$project$Saves$graphIndexEntryDecoder(
+					$elm$core$Maybe$Just(location)))));
 };
 var $author$project$Messages$LoadGraphIndex = function (a) {
-	return {$: 16, a: a};
+	return {$: 17, a: a};
 };
 var $author$project$Requests$graphIndexHandler = function (response) {
 	if (!response.$) {
@@ -6248,11 +6285,11 @@ var $author$project$Requests$graphIndexHandler = function (response) {
 var $author$project$Requests$fetchGraphIndex = function (baseUrl) {
 	return $elm$http$Http$get(
 		{
-			cG: A2(
+			cH: A2(
 				$elm$http$Http$expectJson,
 				$author$project$Requests$graphIndexHandler,
 				$author$project$Saves$graphIndexDecoder(1)),
-			dw: baseUrl + '/graphs/index.json'
+			dv: baseUrl + '/graphs/index.json'
 		});
 };
 var $elm$core$Result$toMaybe = function (result) {
@@ -6302,13 +6339,13 @@ var $elm$time$Time$Posix = $elm$core$Basics$identity;
 var $elm$time$Time$millisToPosix = $elm$core$Basics$identity;
 var $mdgriffith$elm_animator$Animator$init = function (first) {
 	return {
-		cF: _List_Nil,
-		cP: first,
+		cG: _List_Nil,
+		cQ: first,
 		ba: _List_Nil,
 		cZ: $mdgriffith$elm_animator$Internal$Time$absolute(
 			$elm$time$Time$millisToPosix(0)),
 		bg: $elm$core$Maybe$Nothing,
-		bI: true
+		bJ: true
 	};
 };
 var $elm$core$Dict$foldl = F3(
@@ -6495,10 +6532,10 @@ var $author$project$Graph$selectVertexType = F2(
 			},
 			edgeTypes) ? _Utils_update(
 			vertex,
-			{cg: $author$project$Graph$LiftStation}) : _Utils_update(
+			{ch: $author$project$Graph$LiftStation}) : _Utils_update(
 			vertex,
 			{
-				cg: $author$project$Graph$SkiRunFork(percentages)
+				ch: $author$project$Graph$SkiRunFork(percentages)
 			});
 	});
 var $elm$core$Dict$values = function (dict) {
@@ -6517,14 +6554,14 @@ var $author$project$Graph$calculateVertexTypes = function (graph) {
 			if (types.$ === 1) {
 				return $elm$core$Maybe$Just(
 					_List_fromArray(
-						[edge.cC]));
+						[edge.cD]));
 			} else {
 				var list = types.a;
 				return $elm$core$Maybe$Just(
 					_Utils_ap(
 						list,
 						_List_fromArray(
-							[edge.cC])));
+							[edge.cD])));
 			}
 		});
 	var vertexEdgeTypes = A3(
@@ -6532,12 +6569,12 @@ var $author$project$Graph$calculateVertexTypes = function (graph) {
 		F2(
 			function (edge, edgeTypes) {
 				return function () {
-					var _v2 = edge.bX;
+					var _v2 = edge.bY;
 					if (!_v2.$) {
 						var v = _v2.a;
 						return A2(
 							$elm$core$Dict$update,
-							v.b0,
+							v.b1,
 							update(edge));
 					} else {
 						return $elm$core$Basics$identity;
@@ -6545,16 +6582,16 @@ var $author$project$Graph$calculateVertexTypes = function (graph) {
 				}()(
 					A3(
 						$elm$core$Dict$update,
-						edge.aW.b0,
+						edge.aW.b1,
 						update(edge),
 						edgeTypes));
 			}),
 		$elm$core$Dict$empty,
-		$elm$core$Dict$values(graph.cD));
+		$elm$core$Dict$values(graph.cE));
 	return _Utils_update(
 		graph,
 		{
-			dy: A6(
+			dx: A6(
 				$elm$core$Dict$merge,
 				F3(
 					function (_v0, _v1, result) {
@@ -6573,7 +6610,7 @@ var $author$project$Graph$calculateVertexTypes = function (graph) {
 						return A3($elm$core$Dict$insert, vertexId, vertex, vertices);
 					}),
 				vertexEdgeTypes,
-				graph.dy,
+				graph.dx,
 				$elm$core$Dict$empty)
 		});
 };
@@ -6597,7 +6634,7 @@ var $author$project$Graph$getNextEdgeId = function (graph) {
 				return x + 1;
 			},
 			$elm$core$List$maximum(
-				$elm$core$Dict$keys(graph.cD))));
+				$elm$core$Dict$keys(graph.cE))));
 };
 var $author$project$Graph$getNextVertexId = function (graph) {
 	return A2(
@@ -6609,15 +6646,15 @@ var $author$project$Graph$getNextVertexId = function (graph) {
 				return x + 1;
 			},
 			$elm$core$List$maximum(
-				$elm$core$Dict$keys(graph.dy))));
+				$elm$core$Dict$keys(graph.dx))));
 };
 var $author$project$Graph$Graph = F7(
 	function (title, id, background, vertices, edges, backgroundPosition, zoom) {
-		return {bQ: background, bS: backgroundPosition, cD: edges, b0: id, bO: title, dy: vertices, eM: zoom};
+		return {bR: background, bT: backgroundPosition, cE: edges, b1: id, bP: title, dx: vertices, eM: zoom};
 	});
 var $author$project$Graph$Edge = F8(
 	function (id, title, start, end, edgeType, boundBoxTopLeft, boundBoxBottomRight, points) {
-		return {ct: boundBoxBottomRight, cu: boundBoxTopLeft, cC: edgeType, bX: end, b0: id, bf: points, aW: start, bO: title};
+		return {cu: boundBoxBottomRight, cv: boundBoxTopLeft, cD: edgeType, bY: end, b1: id, bf: points, aW: start, bP: title};
 	});
 var $elm$core$Basics$composeL = F3(
 	function (g, f, x) {
@@ -6688,12 +6725,12 @@ var $author$project$Geometry$calculateEdgeBoundingBox = function (edge) {
 								function ($) {
 									return $.am;
 								},
-								edge.bX)))))));
+								edge.bY)))))));
 	var topLeft = _v0.a;
 	var bottomRight = _v0.b;
 	return _Utils_update(
 		edge,
-		{ct: bottomRight, cu: topLeft});
+		{cu: bottomRight, cv: topLeft});
 };
 var $author$project$Graph$Difficult = 2;
 var $author$project$Graph$Easy = 0;
@@ -6703,7 +6740,6 @@ var $author$project$Graph$SkiRun = function (a) {
 	return {$: 0, a: a};
 };
 var $author$project$Graph$Unfinished = {$: 2};
-var $elm$json$Json$Decode$fail = _Json_fail;
 var $author$project$Saves$edgeTypeDecoder = A2(
 	$elm$json$Json$Decode$andThen,
 	function (edgeType) {
@@ -6769,7 +6805,7 @@ var $author$project$Saves$pointDecoder = A2(
 	$elm$json$Json$Decode$list($elm$json$Json$Decode$float));
 var $author$project$Graph$Vertex = F4(
 	function (id, title, vertexType, position) {
-		return {b0: id, am: position, bO: title, cg: vertexType};
+		return {b1: id, am: position, bP: title, ch: vertexType};
 	});
 var $author$project$Saves$vertexDecoder = A4(
 	$elm$json$Json$Decode$map3,
@@ -6792,7 +6828,7 @@ var $author$project$Saves$edgeDecoder = A2(
 			A2(
 				$elm$core$List$map,
 				function (v) {
-					return _Utils_Tuple2(v.b0, v);
+					return _Utils_Tuple2(v.b1, v);
 				},
 				vertices));
 		var starts = A2(
@@ -6896,7 +6932,7 @@ var $author$project$Saves$loadGraphFromJsonToModel = F2(
 				return _Utils_update(
 					model,
 					{
-						cz: $elm$core$Maybe$Just(
+						cA: $elm$core$Maybe$Just(
 							$author$project$Graph$calculateVertexTypes(graph)),
 						n: $author$project$Graph$getNextEdgeId(graph),
 						l: $author$project$Graph$getNextVertexId(graph)
@@ -6910,31 +6946,32 @@ var $author$project$Main$init = function (flags) {
 	return _Utils_Tuple2(
 		A2(
 			$author$project$Saves$loadGraphFromJsonToModel,
-			flags.cJ,
+			flags.cK,
 			{
-				ag: $author$project$Graph$Lift,
+				af: $author$project$Graph$Lift,
 				E: {
 					M: $mdgriffith$elm_animator$Animator$init($elm$core$Maybe$Nothing)
 				},
 				a5: 1,
 				a6: flags.a6,
-				cz: $elm$core$Maybe$Nothing,
+				cA: $elm$core$Maybe$Nothing,
 				s: $elm$core$Maybe$Nothing,
 				n: 0,
-				_: A2($author$project$Saves$graphIndexFromJson, 0, flags.cU),
 				bv: false,
-				b$: flags.b$,
+				b0: flags.b0,
+				ak: A2($author$project$Saves$graphIndexFromJson, 0, flags.ak),
 				G: flags.dc,
 				O: 1,
 				aP: false,
-				eb: false,
+				ea: false,
 				aQ: false,
 				cX: A2($author$project$Graph$Point, 0, 0),
 				aR: A2($author$project$Graph$Point, 0, 0),
-				bK: flags.dj,
-				dr: $elm$core$Maybe$Nothing,
+				bG: $elm$core$Dict$empty,
+				bL: $elm$core$Maybe$Nothing,
+				dq: $elm$core$Maybe$Nothing,
 				l: 0,
-				ci: flags.ci
+				cj: flags.cj
 			}),
 		$author$project$Requests$fetchGraphIndex(flags.a6));
 };
@@ -7172,7 +7209,7 @@ var $mdgriffith$elm_animator$Internal$Timeline$addToCurrentLine = F3(
 	});
 var $mdgriffith$elm_animator$Internal$Timeline$enqueue = F3(
 	function (timeline, now, scheduled) {
-		var _v0 = timeline.cF;
+		var _v0 = timeline.cG;
 		var lines = _v0;
 		return A3($mdgriffith$elm_animator$Internal$Timeline$addToCurrentLine, now, scheduled, lines);
 	});
@@ -7459,7 +7496,7 @@ var $mdgriffith$elm_animator$Internal$Timeline$interruptLines = F5(
 	});
 var $mdgriffith$elm_animator$Internal$Timeline$interrupt = F3(
 	function (details, startAt, scheduled) {
-		var _v0 = details.cF;
+		var _v0 = details.cG;
 		var lines = _v0;
 		var _v1 = A5($mdgriffith$elm_animator$Internal$Timeline$interruptLines, details.cZ, startAt, scheduled, _List_Nil, lines);
 		if (_v1.$ === 1) {
@@ -7490,7 +7527,7 @@ var $mdgriffith$elm_animator$Internal$Timeline$applyInterruptionHelper = F2(
 				var $temp$interrupts = remaining,
 					$temp$timeline = _Utils_update(
 					timeline,
-					{cF: newEvents});
+					{cG: newEvents});
 				interrupts = $temp$interrupts;
 				timeline = $temp$timeline;
 				continue applyInterruptionHelper;
@@ -7519,7 +7556,7 @@ var $mdgriffith$elm_animator$Internal$Timeline$applyQueued = function (timeline)
 		return _Utils_update(
 			timeline,
 			{
-				cF: A3($mdgriffith$elm_animator$Internal$Timeline$enqueue, timeline, timeline.cZ, queued),
+				cG: A3($mdgriffith$elm_animator$Internal$Timeline$enqueue, timeline, timeline.cZ, queued),
 				bg: $elm$core$Maybe$Nothing
 			});
 	}
@@ -7700,20 +7737,20 @@ var $mdgriffith$elm_animator$Internal$Timeline$linesAreActive = F2(
 var $mdgriffith$elm_animator$Internal$Timeline$clean = F2(
 	function (runGC, details) {
 		var running = function () {
-			var _v1 = details.cF;
+			var _v1 = details.cG;
 			var lines = _v1;
 			return A2($mdgriffith$elm_animator$Internal$Timeline$linesAreActive, details.cZ, lines);
 		}();
 		var events = function () {
-			var _v0 = details.cF;
+			var _v0 = details.cG;
 			var evs = _v0;
 			return evs;
 		}();
 		return _Utils_update(
 			details,
 			{
-				cF: runGC ? A3($mdgriffith$elm_animator$Internal$Timeline$garbageCollectOldEvents, details.cZ, _List_Nil, events) : details.cF,
-				bI: running
+				cG: runGC ? A3($mdgriffith$elm_animator$Internal$Timeline$garbageCollectOldEvents, details.cZ, _List_Nil, events) : details.cG,
+				bJ: running
 			});
 	});
 var $ianmackenzie$elm_units$Quantity$max = F2(
@@ -7729,7 +7766,7 @@ var $mdgriffith$elm_animator$Internal$Timeline$updateWith = F3(
 			$ianmackenzie$elm_units$Quantity$max,
 			$mdgriffith$elm_animator$Internal$Time$absolute(possiblyNow),
 			timeline.cZ);
-		return _Utils_eq(timeline.cF, _List_Nil) ? A2(
+		return _Utils_eq(timeline.cG, _List_Nil) ? A2(
 			$mdgriffith$elm_animator$Internal$Timeline$clean,
 			withGC,
 			$mdgriffith$elm_animator$Internal$Timeline$applyInterruptions(
@@ -7737,8 +7774,8 @@ var $mdgriffith$elm_animator$Internal$Timeline$updateWith = F3(
 					_Utils_update(
 						timeline,
 						{
-							cF: function () {
-								var firstOccurring = A3($mdgriffith$elm_animator$Internal$Timeline$Occurring, timeline.cP, now, now);
+							cG: function () {
+								var firstOccurring = A3($mdgriffith$elm_animator$Internal$Timeline$Occurring, timeline.cQ, now, now);
 								return _List_fromArray(
 									[
 										A3($mdgriffith$elm_animator$Internal$Timeline$Line, now, firstOccurring, _List_Nil)
@@ -7827,7 +7864,7 @@ var $elm$browser$Browser$AnimationManager$Time = function (a) {
 };
 var $elm$browser$Browser$AnimationManager$State = F3(
 	function (subs, request, oldTime) {
-		return {b5: oldTime, c9: request, $7: subs};
+		return {b6: oldTime, c9: request, dn: subs};
 	});
 var $elm$browser$Browser$AnimationManager$init = $elm$core$Task$succeed(
 	A3($elm$browser$Browser$AnimationManager$State, _List_Nil, $elm$core$Maybe$Nothing, 0));
@@ -7836,7 +7873,7 @@ var $elm$browser$Browser$AnimationManager$rAF = _Browser_rAF(0);
 var $elm$browser$Browser$AnimationManager$onEffects = F3(
 	function (router, subs, _v0) {
 		var request = _v0.c9;
-		var oldTime = _v0.b5;
+		var oldTime = _v0.b6;
 		var _v1 = _Utils_Tuple2(request, subs);
 		if (_v1.a.$ === 1) {
 			if (!_v1.b.b) {
@@ -7882,8 +7919,8 @@ var $elm$browser$Browser$AnimationManager$onEffects = F3(
 	});
 var $elm$browser$Browser$AnimationManager$onSelfMsg = F3(
 	function (router, newTime, _v0) {
-		var subs = _v0.$7;
-		var oldTime = _v0.b5;
+		var subs = _v0.dn;
+		var oldTime = _v0.b6;
 		var send = function (sub) {
 			if (!sub.$) {
 				var tagger = sub.a;
@@ -7976,10 +8013,10 @@ var $author$project$Model$Loaded = 0;
 var $joakin$elm_canvas$Canvas$Texture$dimensions = function (texture) {
 	if (!texture.$) {
 		var image = texture.a;
-		return {b$: image.b$, ci: image.ci};
+		return {b0: image.b0, cj: image.cj};
 	} else {
 		var data = texture.a;
-		return {b$: data.b$, ci: data.ci};
+		return {b0: data.b0, cj: data.cj};
 	}
 };
 var $author$project$Graph$getProperty = F3(
@@ -8002,37 +8039,37 @@ var $author$project$Geometry$constrainBackgroundToCanvas = F2(
 	function (model, _new) {
 		var w = A2(
 			$elm$core$Maybe$withDefault,
-			model.ci,
+			model.cj,
 			A2(
 				$elm$core$Maybe$map,
 				function (t) {
-					return $joakin$elm_canvas$Canvas$Texture$dimensions(t).ci;
+					return $joakin$elm_canvas$Canvas$Texture$dimensions(t).cj;
 				},
-				model.dr));
+				model.dq));
 		var h = A2(
 			$elm$core$Maybe$withDefault,
-			model.b$,
+			model.b0,
 			A2(
 				$elm$core$Maybe$map,
 				function (t) {
-					return $joakin$elm_canvas$Canvas$Texture$dimensions(t).b$;
+					return $joakin$elm_canvas$Canvas$Texture$dimensions(t).b0;
 				},
-				model.dr));
+				model.dq));
 		return A2(
 			$author$project$Graph$Point,
 			A2(
 				$elm$core$Basics$min,
-				model.eb ? 384 : 0,
+				model.ea ? 384 : 0,
 				A2(
 					$elm$core$Basics$max,
-					(0 - (w * $author$project$Graph$getZoom(model.cz))) + model.ci,
+					(0 - (w * $author$project$Graph$getZoom(model.cA))) + model.cj,
 					_new.f)),
 			A2(
 				$elm$core$Basics$min,
 				0,
 				A2(
 					$elm$core$Basics$max,
-					(0 - (h * $author$project$Graph$getZoom(model.cz))) + model.b$,
+					(0 - (h * $author$project$Graph$getZoom(model.cA))) + model.b0,
 					_new.g)));
 	});
 var $author$project$Graph$zeroPoint = A2($author$project$Graph$Point, 0, 0);
@@ -8040,7 +8077,7 @@ var $author$project$Graph$getPosition = function (graph) {
 	return A3(
 		$author$project$Graph$getProperty,
 		function ($) {
-			return $.bS;
+			return $.bT;
 		},
 		$author$project$Graph$zeroPoint,
 		graph);
@@ -8049,7 +8086,7 @@ var $author$project$Graph$setPosition = F2(
 	function (_new, graph) {
 		return _Utils_update(
 			graph,
-			{bS: _new});
+			{bT: _new});
 	});
 var $author$project$Graph$setZoom = F2(
 	function (_new, graph) {
@@ -8067,30 +8104,30 @@ var $author$project$Main$adaptToNewDimensions = F3(
 			A2(
 				$elm$core$Maybe$map,
 				function (t) {
-					return $joakin$elm_canvas$Canvas$Texture$dimensions(t).ci;
+					return $joakin$elm_canvas$Canvas$Texture$dimensions(t).cj;
 				},
-				model.dr));
+				model.dq));
 		var newModel = _Utils_update(
 			model,
-			{b$: height, ci: width});
+			{b0: height, cj: width});
 		var h = A2(
 			$elm$core$Maybe$withDefault,
 			height,
 			A2(
 				$elm$core$Maybe$map,
 				function (t) {
-					return $joakin$elm_canvas$Canvas$Texture$dimensions(t).b$;
+					return $joakin$elm_canvas$Canvas$Texture$dimensions(t).b0;
 				},
-				model.dr));
+				model.dq));
 		var zoomAfter = A2(
 			$elm$core$Basics$max,
-			$author$project$Graph$getZoom(model.cz),
+			$author$project$Graph$getZoom(model.cA),
 			A2($elm$core$Basics$max, width / w, height / h));
 		return _Utils_Tuple2(
 			_Utils_update(
 				newModel,
 				{
-					cz: A2(
+					cA: A2(
 						$elm$core$Maybe$map,
 						A2(
 							$elm$core$Basics$composeL,
@@ -8098,9 +8135,9 @@ var $author$project$Main$adaptToNewDimensions = F3(
 								A2(
 									$author$project$Geometry$constrainBackgroundToCanvas,
 									newModel,
-									$author$project$Graph$getPosition(model.cz))),
+									$author$project$Graph$getPosition(model.cA))),
 							$author$project$Graph$setZoom(zoomAfter)),
-						model.cz)
+						model.cA)
 				}),
 			cmd);
 	});
@@ -8129,7 +8166,7 @@ var $author$project$Graph$addEdge = F2(
 		return _Utils_update(
 			graph,
 			{
-				cD: A3($elm$core$Dict$insert, edge.b0, edge, graph.cD)
+				cE: A3($elm$core$Dict$insert, edge.b1, edge, graph.cE)
 			});
 	});
 var $author$project$Geometry$isPointInRect = F3(
@@ -8148,7 +8185,7 @@ var $author$project$Geometry$normalVector = function (line) {
 var $elm$core$Basics$pow = _Basics_pow;
 var $author$project$Geometry$closestPointOnLine = F2(
 	function (line, point) {
-		var n = (((-(line.as * point.f)) - (line.ax * point.g)) - line.bU) / (A2($elm$core$Basics$pow, line.as, 2) + A2($elm$core$Basics$pow, line.ax, 2));
+		var n = (((-(line.as * point.f)) - (line.ax * point.g)) - line.bV) / (A2($elm$core$Basics$pow, line.as, 2) + A2($elm$core$Basics$pow, line.ax, 2));
 		return A2(
 			$author$project$Geometry$addPoints,
 			point,
@@ -8164,7 +8201,7 @@ var $author$project$Geometry$pointToLength = function (point) {
 };
 var $author$project$Geometry$pointToLineDistance = F2(
 	function (line, point) {
-		return $elm$core$Basics$abs(((line.as * point.f) + (line.ax * point.g)) + line.bU) / $author$project$Geometry$pointToLength(
+		return $elm$core$Basics$abs(((line.as * point.f) + (line.ax * point.g)) + line.bV) / $author$project$Geometry$pointToLength(
 			A2($author$project$Graph$Point, line.as, line.ax));
 	});
 var $author$project$Geometry$isPointOnLine = F3(
@@ -8176,7 +8213,7 @@ var $author$project$Geometry$isPointOnLine = F3(
 	});
 var $author$project$Geometry$Line = F3(
 	function (a, b, c) {
-		return {as: a, ax: b, bU: c};
+		return {as: a, ax: b, bV: c};
 	});
 var $author$project$Geometry$lineFromPoints = F2(
 	function (one, other) {
@@ -8189,7 +8226,7 @@ var $author$project$Geometry$lineFromPoints = F2(
 var $author$project$Geometry$lineWidth = 5;
 var $author$project$Geometry$pointOverEdge = F3(
 	function (target, zoom, edge) {
-		return A3($author$project$Geometry$isPointInRect, target, edge.cu, edge.ct) ? $elm$core$List$head(
+		return A3($author$project$Geometry$isPointInRect, target, edge.cv, edge.cu) ? $elm$core$List$head(
 			A2(
 				$elm$core$List$filterMap,
 				function (_v2) {
@@ -8238,7 +8275,7 @@ var $author$project$Geometry$pointOverEdge = F3(
 									function ($) {
 										return $.am;
 									},
-									edge.bX))))).a)) : $elm$core$Maybe$Nothing;
+									edge.bY))))).a)) : $elm$core$Maybe$Nothing;
 	});
 var $author$project$Geometry$splitEdgeSegments = F3(
 	function (edge, splitPoint, zoom) {
@@ -8293,7 +8330,7 @@ var $author$project$Geometry$splitEdge = F5(
 			$author$project$Graph$SkiRunFork(
 				$author$project$Graph$calculateForkPercentages(
 					_List_fromArray(
-						[edge.cC, edge.cC]))),
+						[edge.cD, edge.cD]))),
 			point);
 		var _v0 = A3($author$project$Geometry$splitEdgeSegments, edge, point, graph.eM);
 		var pointsBeforeSplit = _v0.a;
@@ -8301,25 +8338,25 @@ var $author$project$Geometry$splitEdge = F5(
 		return _Utils_update(
 			graph,
 			{
-				cD: A3(
+				cE: A3(
 					$elm$core$Dict$insert,
 					newEdgeId,
 					$author$project$Geometry$calculateEdgeBoundingBox(
 						_Utils_update(
 							edge,
-							{b0: newEdgeId, bf: pointsAfterSplit, aW: newVertex})),
+							{b1: newEdgeId, bf: pointsAfterSplit, aW: newVertex})),
 					A3(
 						$elm$core$Dict$insert,
-						edge.b0,
+						edge.b1,
 						$author$project$Geometry$calculateEdgeBoundingBox(
 							_Utils_update(
 								edge,
 								{
-									bX: $elm$core$Maybe$Just(newVertex),
+									bY: $elm$core$Maybe$Just(newVertex),
 									bf: pointsBeforeSplit
 								})),
-						graph.cD)),
-				dy: A3($elm$core$Dict$insert, newVertex.b0, newVertex, graph.dy)
+						graph.cE)),
+				dx: A3($elm$core$Dict$insert, newVertex.b1, newVertex, graph.dx)
 			});
 	});
 var $author$project$Graph$updateGraphProperty = F3(
@@ -8334,14 +8371,14 @@ var $author$project$Main$connectEdgeToEdge = F4(
 		return _Utils_eq(point, edge.aW.am) ? model : _Utils_update(
 			model,
 			{
-				cz: A3(
+				cA: A3(
 					$author$project$Graph$updateGraphProperty,
 					F2(
 						function (newEdge, graph) {
 							return $author$project$Graph$calculateVertexTypes(
 								function (updatedGraph) {
 									var decision = _Utils_Tuple3(
-										_Utils_eq(newEdge.aW.b0, -1),
+										_Utils_eq(newEdge.aW.b1, -1),
 										A2(
 											$elm$core$Maybe$andThen,
 											function (e) {
@@ -8352,7 +8389,7 @@ var $author$project$Main$connectEdgeToEdge = F4(
 													},
 													A3($author$project$Geometry$pointOverEdge, edge.aW.am, graph.eM, e));
 											},
-											A2($elm$core$Dict$get, targetEdge.b0, updatedGraph.cD)),
+											A2($elm$core$Dict$get, targetEdge.b1, updatedGraph.cE)),
 										A2(
 											$elm$core$Maybe$andThen,
 											function (e) {
@@ -8363,7 +8400,7 @@ var $author$project$Main$connectEdgeToEdge = F4(
 													},
 													A3($author$project$Geometry$pointOverEdge, edge.aW.am, graph.eM, e));
 											},
-											A2($elm$core$Dict$get, model.n + 2, updatedGraph.cD)));
+											A2($elm$core$Dict$get, model.n + 2, updatedGraph.cE)));
 									var action = F2(
 										function (splitEdge, splitPoint) {
 											return A2(
@@ -8377,7 +8414,7 @@ var $author$project$Main$connectEdgeToEdge = F4(
 																return _Utils_update(
 																	s,
 																	{
-																		b0: _Utils_eq(s.b0, -1) ? (model.l + 2) : s.b0
+																		b1: _Utils_eq(s.b1, -1) ? (model.l + 2) : s.b1
 																	});
 															}()
 														})),
@@ -8421,21 +8458,21 @@ var $author$project$Main$connectEdgeToEdge = F4(
 					_Utils_update(
 						edge,
 						{
-							cC: model.ag,
-							bX: $elm$core$Maybe$Just(
+							cD: model.af,
+							bY: $elm$core$Maybe$Just(
 								A4($author$project$Graph$Vertex, model.l + 1, $elm$core$Maybe$Nothing, $author$project$Graph$LiftStation, point))
 						}),
-					model.cz),
+					model.cA),
 				s: $elm$core$Maybe$Nothing,
-				n: _Utils_eq(edge.aW.b0, -1) ? (model.n + 3) : (model.n + 2),
-				l: _Utils_eq(edge.aW.b0, -1) ? (model.l + 2) : (model.l + 1)
+				n: _Utils_eq(edge.aW.b1, -1) ? (model.n + 3) : (model.n + 2),
+				l: _Utils_eq(edge.aW.b1, -1) ? (model.l + 2) : (model.l + 1)
 			});
 	});
 var $author$project$Graph$getEdges = function (graph) {
 	return A3(
 		$author$project$Graph$getProperty,
 		function ($) {
-			return $.cD;
+			return $.cE;
 		},
 		$elm$core$Dict$empty,
 		graph);
@@ -8458,22 +8495,22 @@ var $author$project$Main$getEdgeOnPosition = F2(
 						A3(
 							$author$project$Geometry$pointOverEdge,
 							position,
-							$author$project$Graph$getZoom(model.cz),
+							$author$project$Graph$getZoom(model.cA),
 							edge));
 				},
-				$author$project$Graph$getEdgesList(model.cz)));
+				$author$project$Graph$getEdgesList(model.cA)));
 	});
 var $author$project$Main$connectEdgeToVertex = F3(
 	function (model, edge, vertex) {
 		return _Utils_update(
 			model,
 			{
-				cz: A3(
+				cA: A3(
 					$author$project$Graph$updateGraphProperty,
 					function (newEdge) {
 						return A2(
 							$elm$core$Basics$composeR,
-							_Utils_eq(newEdge.aW.b0, -1) ? A4(
+							_Utils_eq(newEdge.aW.b1, -1) ? A4(
 								$author$project$Geometry$splitEdge,
 								A2(
 									$elm$core$Maybe$withDefault,
@@ -8497,7 +8534,7 @@ var $author$project$Main$connectEdgeToVertex = F3(
 													return _Utils_update(
 														s,
 														{
-															b0: _Utils_eq(s.b0, -1) ? model.l : s.b0
+															b1: _Utils_eq(s.b1, -1) ? model.l : s.b1
 														});
 												}()
 											}))),
@@ -8507,13 +8544,13 @@ var $author$project$Main$connectEdgeToVertex = F3(
 						_Utils_update(
 							edge,
 							{
-								cC: model.ag,
-								bX: $elm$core$Maybe$Just(vertex)
+								cD: model.af,
+								bY: $elm$core$Maybe$Just(vertex)
 							})),
-					model.cz),
+					model.cA),
 				s: $elm$core$Maybe$Nothing,
-				n: _Utils_eq(edge.aW.b0, -1) ? (model.n + 2) : (model.n + 1),
-				l: _Utils_eq(edge.aW.b0, -1) ? (model.l + 1) : model.l
+				n: _Utils_eq(edge.aW.b1, -1) ? (model.n + 2) : (model.n + 1),
+				l: _Utils_eq(edge.aW.b1, -1) ? (model.l + 1) : model.l
 			});
 	});
 var $author$project$Geometry$mouseOverEdge = F4(
@@ -8534,12 +8571,12 @@ var $author$project$Main$getHoveringEdge = F2(
 						},
 						A4(
 							$author$project$Geometry$mouseOverEdge,
-							$author$project$Graph$getPosition(model.cz),
-							$author$project$Graph$getZoom(model.cz),
+							$author$project$Graph$getPosition(model.cA),
+							$author$project$Graph$getZoom(model.cA),
 							event.am,
 							edge));
 				},
-				$author$project$Graph$getEdgesList(model.cz)));
+				$author$project$Graph$getEdgesList(model.cA)));
 	});
 var $elm$core$List$filter = F2(
 	function (isGood, list) {
@@ -8556,7 +8593,7 @@ var $author$project$Graph$getVertices = function (graph) {
 	return A3(
 		$author$project$Graph$getProperty,
 		function ($) {
-			return $.dy;
+			return $.dx;
 		},
 		$elm$core$Dict$empty,
 		graph);
@@ -8589,12 +8626,12 @@ var $author$project$Main$getHoveringVertex = F2(
 				function (v) {
 					return A4(
 						$author$project$Geometry$mouseOverPoint,
-						$author$project$Graph$getPosition(model.cz),
-						$author$project$Graph$getZoom(model.cz),
+						$author$project$Graph$getPosition(model.cA),
+						$author$project$Graph$getZoom(model.cA),
 						event.am,
 						v.am);
 				},
-				$author$project$Graph$getVerticesList(model.cz)));
+				$author$project$Graph$getVerticesList(model.cA)));
 	});
 var $elm$core$Basics$neq = _Utils_notEqual;
 var $author$project$Main$checkConnectDrawing = F2(
@@ -8638,8 +8675,8 @@ var $author$project$Main$checkConnectDrawing = F2(
 																	A3(
 																	$author$project$Geometry$canvasPointToBackgroundPoint,
 																	event.am,
-																	$author$project$Graph$getPosition(model.cz),
-																	$author$project$Graph$getZoom(model.cz))
+																	$author$project$Graph$getPosition(model.cA),
+																	$author$project$Graph$getZoom(model.cA))
 																]))
 													}))
 										});
@@ -8694,8 +8731,8 @@ var $author$project$Main$checkDrawing = F2(
 													A3(
 													$author$project$Geometry$canvasPointToBackgroundPoint,
 													event.am,
-													$author$project$Graph$getPosition(model.cz),
-													$author$project$Graph$getZoom(model.cz))
+													$author$project$Graph$getPosition(model.cA),
+													$author$project$Graph$getZoom(model.cA))
 												]))
 									}))
 						});
@@ -8723,17 +8760,17 @@ var $author$project$Main$checkModelDragging = F2(
 		if (model.aQ && (!$author$project$Utils$maybeHasValue(model.s))) {
 			var _new = A2(
 				$author$project$Geometry$addPoints,
-				event.ee,
-				$author$project$Graph$getPosition(model.cz));
+				event.ed,
+				$author$project$Graph$getPosition(model.cA));
 			return _Utils_Tuple2(
 				_Utils_update(
 					model,
 					{
-						cz: A3(
+						cA: A3(
 							$author$project$Graph$updateGraphProperty,
 							$author$project$Graph$setPosition,
 							A2($author$project$Geometry$constrainBackgroundToCanvas, model, _new),
-							model.cz),
+							model.cA),
 						bv: true
 					}),
 				cmd);
@@ -8903,7 +8940,7 @@ var $mdgriffith$elm_animator$Animator$interrupt = F2(
 							tl.ba);
 					}
 				}(),
-				bI: true
+				bJ: true
 			});
 	});
 var $mdgriffith$elm_animator$Animator$go = F3(
@@ -9000,7 +9037,7 @@ var $author$project$Main$checkToStartDrawing = F2(
 							var _v8 = _v7.a;
 							var edge = _v8.a;
 							var point = _v8.b;
-							var _v9 = _Utils_Tuple2(model.ag, edge.cC);
+							var _v9 = _Utils_Tuple2(model.af, edge.cD);
 							if ((!_v9.a.$) && (!_v9.b.$)) {
 								var vertex = A4($author$project$Graph$Vertex, -1, $elm$core$Maybe$Nothing, $author$project$Graph$LiftStation, point);
 								var edgeId = $elm$core$String$fromInt(model.n + 1);
@@ -9040,11 +9077,11 @@ var $author$project$Graph$addVertex = F3(
 		return _Utils_update(
 			graph,
 			{
-				dy: A3(
+				dx: A3(
 					$elm$core$Dict$insert,
 					id,
 					A4($author$project$Graph$Vertex, id, $elm$core$Maybe$Nothing, $author$project$Graph$LiftStation, position),
-					graph.dy)
+					graph.dx)
 			});
 	});
 var $author$project$Main$checkVertexCreation = F2(
@@ -9056,15 +9093,15 @@ var $author$project$Main$checkVertexCreation = F2(
 			_Utils_update(
 				model,
 				{
-					cz: condition ? model.cz : A3(
+					cA: condition ? model.cA : A3(
 						$author$project$Graph$updateGraphProperty,
 						$author$project$Graph$addVertex(model.l),
 						A3(
 							$author$project$Geometry$canvasPointToBackgroundPoint,
 							event.am,
-							$author$project$Graph$getPosition(model.cz),
-							$author$project$Graph$getZoom(model.cz)),
-						model.cz),
+							$author$project$Graph$getPosition(model.cA),
+							$author$project$Graph$getZoom(model.cA)),
+						model.cA),
 					aQ: false,
 					l: condition ? model.l : (model.l + 1)
 				}),
@@ -9082,8 +9119,8 @@ var $author$project$Requests$fetchGraph = F2(
 	function (baseUrl, path) {
 		return $elm$http$Http$get(
 			{
-				cG: A2($elm$http$Http$expectJson, $author$project$Requests$handleGraph, $author$project$Saves$graphDecoder),
-				dw: _Utils_ap(baseUrl, path)
+				cH: A2($elm$http$Http$expectJson, $author$project$Requests$handleGraph, $author$project$Saves$graphDecoder),
+				dv: _Utils_ap(baseUrl, path)
 			});
 	});
 var $elm$random$Random$Generate = $elm$core$Basics$identity;
@@ -9289,7 +9326,7 @@ var $author$project$Graph$getBackground = function (graph) {
 	return A3(
 		$author$project$Graph$getProperty,
 		function ($) {
-			return $.bQ;
+			return $.bR;
 		},
 		'',
 		graph);
@@ -9360,16 +9397,16 @@ var $author$project$Saves$edgeToJson = function (edge) {
 			[
 				_Utils_Tuple2(
 				'id',
-				$elm$json$Json$Encode$int(edge.b0)),
+				$elm$json$Json$Encode$int(edge.b1)),
 				_Utils_Tuple2(
 				'title',
-				A2($author$project$Saves$encodeMaybe, $elm$json$Json$Encode$string, edge.bO)),
+				A2($author$project$Saves$encodeMaybe, $elm$json$Json$Encode$string, edge.bP)),
 				_Utils_Tuple2(
 				'points',
 				A2($elm$json$Json$Encode$list, $author$project$Saves$pointToJson, edge.bf)),
 				_Utils_Tuple2(
 				'start_id',
-				$elm$json$Json$Encode$int(edge.aW.b0)),
+				$elm$json$Json$Encode$int(edge.aW.b1)),
 				_Utils_Tuple2(
 				'end_id',
 				A2(
@@ -9378,13 +9415,13 @@ var $author$project$Saves$edgeToJson = function (edge) {
 					A2(
 						$elm$core$Maybe$map,
 						function ($) {
-							return $.b0;
+							return $.b1;
 						},
-						edge.bX))),
+						edge.bY))),
 				_Utils_Tuple2(
 				'type',
 				$elm$json$Json$Encode$string(
-					$author$project$Graph$edgeTypeToString(edge.cC)))
+					$author$project$Graph$edgeTypeToString(edge.cD)))
 			]));
 };
 var $author$project$Saves$vertexToJson = function (vertex) {
@@ -9393,10 +9430,10 @@ var $author$project$Saves$vertexToJson = function (vertex) {
 			[
 				_Utils_Tuple2(
 				'id',
-				$elm$json$Json$Encode$int(vertex.b0)),
+				$elm$json$Json$Encode$int(vertex.b1)),
 				_Utils_Tuple2(
 				'title',
-				A2($author$project$Saves$encodeMaybe, $elm$json$Json$Encode$string, vertex.bO)),
+				A2($author$project$Saves$encodeMaybe, $elm$json$Json$Encode$string, vertex.bP)),
 				_Utils_Tuple2(
 				'position',
 				$author$project$Saves$pointToJson(vertex.am))
@@ -9412,31 +9449,31 @@ var $author$project$Saves$graphToJson = F2(
 					[
 						_Utils_Tuple2(
 						'title',
-						$elm$json$Json$Encode$string(graph.bO)),
+						$elm$json$Json$Encode$string(graph.bP)),
 						_Utils_Tuple2(
 						'background',
-						$elm$json$Json$Encode$string(graph.bQ)),
+						$elm$json$Json$Encode$string(graph.bR)),
 						_Utils_Tuple2(
 						'zoom',
 						$elm$json$Json$Encode$float(graph.eM)),
 						_Utils_Tuple2(
 						'position',
-						$author$project$Saves$pointToJson(graph.bS)),
+						$author$project$Saves$pointToJson(graph.bT)),
 						_Utils_Tuple2(
 						'vertices',
 						A2(
 							$elm$json$Json$Encode$list,
 							$author$project$Saves$vertexToJson,
-							$elm$core$Dict$values(graph.dy))),
+							$elm$core$Dict$values(graph.dx))),
 						_Utils_Tuple2(
 						'edges',
 						A2(
 							$elm$json$Json$Encode$list,
 							$author$project$Saves$edgeToJson,
-							$elm$core$Dict$values(graph.cD))),
+							$elm$core$Dict$values(graph.cE))),
 						_Utils_Tuple2(
 						'id',
-						$elm$json$Json$Encode$string(graph.b0))
+						$elm$json$Json$Encode$string(graph.b1))
 					])));
 	});
 var $author$project$Main$saveToLocalStorage = _Platform_outgoingPort(
@@ -9460,29 +9497,47 @@ var $author$project$Main$saveGraph = function (graph) {
 		var g = graph.a;
 		return $author$project$Main$saveToLocalStorage(
 			_Utils_Tuple2(
-				g.b0,
+				g.b1,
 				A2($author$project$Saves$graphToJson, 0, g)));
 	}
 };
-var $author$project$Saves$graphIndexEntryEncoder = function (entry) {
-	return $elm$json$Json$Encode$object(
-		_List_fromArray(
-			[
-				_Utils_Tuple2(
-				'title',
-				$elm$json$Json$Encode$string(entry.bO)),
-				_Utils_Tuple2(
-				'path',
-				$elm$json$Json$Encode$string(entry.eo)),
-				_Utils_Tuple2(
-				'id',
-				$elm$json$Json$Encode$string(entry.b0))
-			]));
+var $author$project$Saves$graphIndexEntryLocationEncoder = function (loc) {
+	return $elm$json$Json$Encode$string(
+		function () {
+			if (!loc) {
+				return 'local';
+			} else {
+				return 'remote';
+			}
+		}());
 };
+var $author$project$Saves$graphIndexEntryEncoder = F2(
+	function (withLocation, entry) {
+		return $elm$json$Json$Encode$object(
+			_Utils_ap(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'title',
+						$elm$json$Json$Encode$string(entry.bP)),
+						_Utils_Tuple2(
+						'path',
+						$elm$json$Json$Encode$string(entry.en)),
+						_Utils_Tuple2(
+						'id',
+						$elm$json$Json$Encode$string(entry.b1))
+					]),
+				withLocation ? _List_fromArray(
+					[
+						_Utils_Tuple2(
+						'location',
+						$author$project$Saves$graphIndexEntryLocationEncoder(entry.d5))
+					]) : _List_Nil));
+	});
 var $author$project$Saves$graphIndexEncoder = function (index) {
 	return A2(
 		$elm$json$Json$Encode$list,
-		$author$project$Saves$graphIndexEntryEncoder,
+		$author$project$Saves$graphIndexEntryEncoder(false),
 		$elm$core$Dict$values(index));
 };
 var $author$project$Saves$graphIndexToJson = function (graphIndex) {
@@ -9501,8 +9556,8 @@ var $author$project$Main$saveGraphAndIndex = function (model) {
 	return $elm$core$Platform$Cmd$batch(
 		_List_fromArray(
 			[
-				$author$project$Main$saveGraph(model.cz),
-				$author$project$Main$saveGraphIndex(model._)
+				$author$project$Main$saveGraph(model.cA),
+				$author$project$Main$saveGraphIndex(model.ak)
 			]));
 };
 var $author$project$Main$saveModel = function (_v0) {
@@ -9521,7 +9576,7 @@ var $author$project$Graph$setBackground = F2(
 	function (_new, graph) {
 		return _Utils_update(
 			graph,
-			{bQ: _new});
+			{bR: _new});
 	});
 var $author$project$Main$setModelMousePosition = F2(
 	function (event, _v0) {
@@ -9695,12 +9750,12 @@ var $author$project$Main$update = F2(
 							_Utils_update(
 								model,
 								{
-									cz: A2(
+									cA: A2(
 										$elm$core$Maybe$map,
 										$author$project$Graph$setBackground(model.G),
-										model.cz),
+										model.cA),
 									O: 0,
-									dr: $elm$core$Maybe$Just(t)
+									dq: $elm$core$Maybe$Just(t)
 								}),
 							$author$project$Main$saveToLocalStorage(
 								_Utils_Tuple2('background', model.G))));
@@ -9754,7 +9809,7 @@ var $author$project$Main$update = F2(
 					_Utils_update(
 						model,
 						{
-							G: ((!bool) && $elm$core$String$isEmpty(model.G)) ? $author$project$Graph$getBackground(model.cz) : model.G,
+							G: ((!bool) && $elm$core$String$isEmpty(model.G)) ? $author$project$Graph$getBackground(model.cA) : model.G,
 							O: ((!bool) && $elm$core$String$isEmpty(model.G)) ? 1 : model.O,
 							aP: bool
 						}),
@@ -9777,35 +9832,35 @@ var $author$project$Main$update = F2(
 					_Utils_Tuple2(model, $elm$core$Platform$Cmd$none));
 			case 9:
 				var delta = msg.a;
-				var zoomBefore = $author$project$Graph$getZoom(model.cz);
+				var zoomBefore = $author$project$Graph$getZoom(model.cA);
 				var w = A2(
 					$elm$core$Maybe$withDefault,
-					model.ci,
+					model.cj,
 					A2(
 						$elm$core$Maybe$map,
 						function (t) {
-							return $joakin$elm_canvas$Canvas$Texture$dimensions(t).ci;
+							return $joakin$elm_canvas$Canvas$Texture$dimensions(t).cj;
 						},
-						model.dr));
+						model.dq));
 				var h = A2(
 					$elm$core$Maybe$withDefault,
-					model.b$,
+					model.b0,
 					A2(
 						$elm$core$Maybe$map,
 						function (t) {
-							return $joakin$elm_canvas$Canvas$Texture$dimensions(t).b$;
+							return $joakin$elm_canvas$Canvas$Texture$dimensions(t).b0;
 						},
-						model.dr));
+						model.dq));
 				var zoomAfter = A2(
 					$elm$core$Basics$max,
-					$author$project$Graph$getZoom(model.cz) - (delta / 1000),
-					A2($elm$core$Basics$max, model.ci / w, model.b$ / h));
+					$author$project$Graph$getZoom(model.cA) - (delta / 1000),
+					A2($elm$core$Basics$max, model.cj / w, model.b0 / h));
 				return $author$project$Main$saveModel(
 					_Utils_Tuple2(
 						_Utils_update(
 							model,
 							{
-								cz: A2(
+								cA: A2(
 									$elm$core$Maybe$map,
 									A2(
 										$elm$core$Basics$composeL,
@@ -9815,10 +9870,10 @@ var $author$project$Main$update = F2(
 												_Utils_update(
 													model,
 													{
-														cz: A2(
+														cA: A2(
 															$elm$core$Maybe$map,
 															$author$project$Graph$setZoom(zoomAfter),
-															model.cz)
+															model.cA)
 													}),
 												A2(
 													$author$project$Geometry$subPoints,
@@ -9828,11 +9883,11 @@ var $author$project$Main$update = F2(
 														A3(
 															$author$project$Geometry$canvasPointToBackgroundPoint,
 															model.aR,
-															$author$project$Graph$getPosition(model.cz),
+															$author$project$Graph$getPosition(model.cA),
 															zoomBefore),
 														zoomAfter)))),
 										$author$project$Graph$setZoom(zoomAfter)),
-									model.cz)
+									model.cA)
 							}),
 						$elm$core$Platform$Cmd$none));
 			case 5:
@@ -9846,7 +9901,7 @@ var $author$project$Main$update = F2(
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{ag: edgeType}),
+						{af: edgeType}),
 					$elm$core$Platform$Cmd$none);
 			case 12:
 				return _Utils_Tuple2(
@@ -9874,64 +9929,67 @@ var $author$project$Main$update = F2(
 						var g = $author$project$Graph$init;
 						return _Utils_update(
 							g,
-							{b0: string});
+							{b1: string});
 					}();
 					var newIndex = A3(
 						$elm$core$Dict$insert,
 						string,
-						A4($author$project$Graph$GraphIndexEntry, newGraph.bO, string, string, 0),
-						model._);
+						A4($author$project$Graph$GraphIndexEntry, newGraph.bP, string, string, 0),
+						model.ak);
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
 							{
-								cz: $elm$core$Maybe$Just(newGraph),
+								cA: $elm$core$Maybe$Just(newGraph),
 								n: 0,
-								_: newIndex,
+								ak: newIndex,
 								l: 0
 							}),
 						$elm$core$Platform$Cmd$batch(
 							_List_fromArray(
 								[
-									$author$project$Main$saveGraph(model.cz),
+									$author$project$Main$saveGraph(model.cA),
 									$author$project$Main$saveGraph(
 									$elm$core$Maybe$Just(newGraph)),
 									$author$project$Main$saveGraphIndex(newIndex)
 								])));
 				}
-			case 15:
+			case 16:
 				return _Utils_Tuple2(
 					model,
 					function () {
-						var _v4 = A2(
-							$elm$core$Maybe$andThen,
-							function (id) {
-								return A2($elm$core$Dict$get, id, model._);
-							},
-							model.bK);
+						var _v4 = model.bL;
 						if (_v4.$ === 1) {
 							return $elm$core$Platform$Cmd$none;
 						} else {
 							var indexEntry = _v4.a;
-							var _v5 = indexEntry.d6;
+							var _v5 = indexEntry.d5;
 							if (_v5 === 1) {
-								return A2($author$project$Requests$fetchGraph, model.a6, indexEntry.eo);
+								return A2($author$project$Requests$fetchGraph, model.a6, indexEntry.en);
 							} else {
-								return $author$project$Main$loadLocalGraph(indexEntry.b0);
+								return $author$project$Main$loadLocalGraph(indexEntry.b1);
 							}
 						}
 					}());
-			case 17:
+			case 18:
 				var selection = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{bK: selection}),
+						{bL: selection}),
 					$author$project$Main$saveToLocalStorage(
 						_Utils_Tuple2(
 							'selected',
-							A2($elm$core$Maybe$withDefault, '', selection))));
-			case 16:
+							A2(
+								$elm$core$Maybe$withDefault,
+								'',
+								A2(
+									$elm$core$Maybe$map,
+									function ($) {
+										return $.b1;
+									},
+									selection)))));
+			case 17:
 				var maybeResult = msg.a;
 				if (maybeResult.$ === 1) {
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
@@ -9942,7 +10000,7 @@ var $author$project$Main$update = F2(
 							_Utils_update(
 								model,
 								{
-									_: A2($elm$core$Dict$union, model._, index)
+									bG: A2($elm$core$Dict$union, model.bG, index)
 								}),
 							$elm$core$Platform$Cmd$none);
 					} else {
@@ -9955,23 +10013,23 @@ var $author$project$Main$update = F2(
 					_Utils_update(
 						model,
 						{
-							cz: $elm$core$Maybe$Just(graph),
+							cA: $elm$core$Maybe$Just(graph),
 							n: $author$project$Graph$getNextEdgeId(graph),
 							l: $author$project$Graph$getNextVertexId(graph)
 						}),
-					$author$project$Main$saveGraph(model.cz));
-			case 18:
+					$author$project$Main$saveGraph(model.cA));
+			case 19:
 				var shown = msg.a;
 				return A3(
 					$author$project$Main$adaptToNewDimensions,
-					model.ci,
-					model.b$,
+					model.cj,
+					model.b0,
 					_Utils_Tuple2(
 						_Utils_update(
 							model,
-							{eb: shown}),
+							{ea: shown}),
 						$elm$core$Platform$Cmd$none));
-			default:
+			case 20:
 				var opacity = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
@@ -9983,17 +10041,14 @@ var $author$project$Main$update = F2(
 								A2($elm$core$Basics$min, 1, opacity))
 						}),
 					$elm$core$Platform$Cmd$none);
+			default:
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{cA: $elm$core$Maybe$Nothing}),
+					$author$project$Main$saveGraphAndIndex(model));
 		}
 	});
-var $author$project$Messages$LoadExistingGraph = {$: 15};
-var $author$project$Messages$SelectGraphFromIndex = function (a) {
-	return {$: 17, a: a};
-};
-var $elm$json$Json$Decode$at = F2(
-	function (fields, decoder) {
-		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
-	});
-var $elm$html$Html$button = _VirtualDom_node('button');
 var $author$project$Messages$MouseDown = function (a) {
 	return {$: 2, a: a};
 };
@@ -10175,15 +10230,15 @@ var $joakin$elm_canvas$Canvas$texture = F3(
 	});
 var $author$project$Main$addBackground = F2(
 	function (model, renderables) {
-		var _v0 = model.dr;
+		var _v0 = model.dq;
 		if (_v0.$ === 1) {
 			return _List_fromArray(
 				[
 					A3(
 					$joakin$elm_canvas$Canvas$clear,
 					_Utils_Tuple2(0, 0),
-					model.ci,
-					model.b$)
+					model.cj,
+					model.b0)
 				]);
 		} else {
 			var t = _v0.a;
@@ -10193,8 +10248,8 @@ var $author$project$Main$addBackground = F2(
 						A3(
 						$joakin$elm_canvas$Canvas$clear,
 						_Utils_Tuple2(0, 0),
-						$joakin$elm_canvas$Canvas$Texture$dimensions(t).ci,
-						$joakin$elm_canvas$Canvas$Texture$dimensions(t).b$),
+						$joakin$elm_canvas$Canvas$Texture$dimensions(t).cj,
+						$joakin$elm_canvas$Canvas$Texture$dimensions(t).b0),
 						A3(
 						$joakin$elm_canvas$Canvas$texture,
 						_List_fromArray(
@@ -10413,8 +10468,8 @@ var $author$project$Main$edgeView = F2(
 			$joakin$elm_canvas$Canvas$shapes,
 			A2(
 				$author$project$Main$edgeStyle,
-				edge.cC,
-				$author$project$Graph$getZoom(model.cz)),
+				edge.cD,
+				$author$project$Graph$getZoom(model.cA)),
 			_Utils_ap(
 				_List_fromArray(
 					[
@@ -10429,13 +10484,13 @@ var $author$project$Main$edgeView = F2(
 								_List_fromArray(
 									[
 										function () {
-										var _v0 = edge.bX;
+										var _v0 = edge.bY;
 										if (_v0.$ === 1) {
 											return A3(
 												$author$project$Geometry$canvasPointToBackgroundPoint,
 												model.aR,
-												$author$project$Graph$getPosition(model.cz),
-												$author$project$Graph$getZoom(model.cz));
+												$author$project$Graph$getPosition(model.cA),
+												$author$project$Graph$getZoom(model.cA));
 										} else {
 											var vertex = _v0.a;
 											return vertex.am;
@@ -10448,15 +10503,15 @@ var $author$project$Main$edgeView = F2(
 						return A2(
 							$joakin$elm_canvas$Canvas$circle,
 							$author$project$Main$pointToCanvasLibPoint(point),
-							$author$project$Geometry$skiRunConnectionPointSize / $author$project$Graph$getZoom(model.cz));
+							$author$project$Geometry$skiRunConnectionPointSize / $author$project$Graph$getZoom(model.cA));
 					};
 					var _v1 = _Utils_Tuple3(
-						model.ag,
-						edge.cC,
+						model.af,
+						edge.cD,
 						A4(
 							$author$project$Geometry$mouseOverEdge,
-							$author$project$Graph$getPosition(model.cz),
-							$author$project$Graph$getZoom(model.cz),
+							$author$project$Graph$getPosition(model.cA),
+							$author$project$Graph$getZoom(model.cA),
 							model.aR,
 							edge));
 					if (((!_v1.a.$) && (!_v1.b.$)) && (!_v1.c.$)) {
@@ -10466,7 +10521,7 @@ var $author$project$Main$edgeView = F2(
 								tempVertex(point)
 							]);
 					} else {
-						return _Utils_eq(edge.aW.b0, -1) ? _List_fromArray(
+						return _Utils_eq(edge.aW.b1, -1) ? _List_fromArray(
 							[
 								tempVertex(edge.aW.am)
 							]) : _List_Nil;
@@ -10503,6 +10558,7 @@ var $perzanko$elm_loading$Loading$Sonar = 5;
 var $author$project$Messages$TrySettingBackground = function (a) {
 	return {$: 7, a: a};
 };
+var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$html$Html$Attributes$classList = function (classes) {
 	return $elm$html$Html$Attributes$class(
 		A2(
@@ -10513,7 +10569,7 @@ var $elm$html$Html$Attributes$classList = function (classes) {
 				$elm$core$Tuple$first,
 				A2($elm$core$List$filter, $elm$core$Tuple$second, classes))));
 };
-var $perzanko$elm_loading$Loading$defaultConfig = {cy: '', dM: '#74b4c9', dl: 30, dn: 1};
+var $perzanko$elm_loading$Loading$defaultConfig = {cz: '', dL: '#74b4c9', dk: 30, dm: 1};
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
 var $elm$svg$Svg$Attributes$d = _VirtualDom_attribute('d');
@@ -10600,6 +10656,10 @@ var $elm$html$Html$Events$stopPropagationOn = F2(
 			$elm$virtual_dom$VirtualDom$on,
 			event,
 			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
+	});
+var $elm$json$Json$Decode$at = F2(
+	function (fields, decoder) {
+		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
 	});
 var $elm$html$Html$Events$targetValue = A2(
 	$elm$json$Json$Decode$at,
@@ -10948,8 +11008,8 @@ var $rtfeldman$elm_css$Css$Structure$compactHelp = F2(
 					A2($elm$core$List$cons, declaration, declarations));
 			case 6:
 				var record = declaration.a;
-				return $elm$core$String$isEmpty(record.dO) ? _Utils_Tuple2(keyframesByName, declarations) : _Utils_Tuple2(
-					A3($elm$core$Dict$insert, record.eh, record.dO, keyframesByName),
+				return $elm$core$String$isEmpty(record.dN) ? _Utils_Tuple2(keyframesByName, declarations) : _Utils_Tuple2(
+					A3($elm$core$Dict$insert, record.eg, record.dN, keyframesByName),
 					declarations);
 			case 7:
 				var properties = declaration.a;
@@ -10987,16 +11047,16 @@ var $rtfeldman$elm_css$Css$Structure$withKeyframeDeclarations = F2(
 					var name = _v0.a;
 					var decl = _v0.b;
 					return $rtfeldman$elm_css$Css$Structure$Keyframes(
-						{dO: decl, eh: name});
+						{dN: decl, eg: name});
 				},
 				$elm$core$Dict$toList(keyframesByName)),
 			compactedDeclarations);
 	});
 var $rtfeldman$elm_css$Css$Structure$compactStylesheet = function (_v0) {
-	var charset = _v0.cx;
-	var imports = _v0.cN;
+	var charset = _v0.cy;
+	var imports = _v0.cO;
 	var namespaces = _v0.cY;
-	var declarations = _v0.dP;
+	var declarations = _v0.dO;
 	var _v1 = A3(
 		$elm$core$List$foldr,
 		$rtfeldman$elm_css$Css$Structure$compactHelp,
@@ -11005,7 +11065,7 @@ var $rtfeldman$elm_css$Css$Structure$compactStylesheet = function (_v0) {
 	var keyframesByName = _v1.a;
 	var compactedDeclarations = _v1.b;
 	var finalDeclarations = A2($rtfeldman$elm_css$Css$Structure$withKeyframeDeclarations, keyframesByName, compactedDeclarations);
-	return {cx: charset, dP: finalDeclarations, cN: imports, cY: namespaces};
+	return {cy: charset, dO: finalDeclarations, cO: imports, cY: namespaces};
 };
 var $rtfeldman$elm_css$Css$Structure$Output$charsetToString = function (charset) {
 	return A2(
@@ -11019,7 +11079,7 @@ var $rtfeldman$elm_css$Css$Structure$Output$charsetToString = function (charset)
 			charset));
 };
 var $rtfeldman$elm_css$Css$Structure$Output$mediaExpressionToString = function (expression) {
-	return '(' + (expression.cH + (A2(
+	return '(' + (expression.cI + (A2(
 		$elm$core$Maybe$withDefault,
 		'',
 		A2(
@@ -11266,8 +11326,8 @@ var $rtfeldman$elm_css$Css$Structure$Output$prettyPrintDeclaration = function (d
 		case 5:
 			return 'TODO';
 		case 6:
-			var name = decl.a.eh;
-			var declaration = decl.a.dO;
+			var name = decl.a.eg;
+			var declaration = decl.a.dN;
 			return '@keyframes ' + (name + (' {\n' + (declaration + '\n}')));
 		case 7:
 			return 'TODO';
@@ -11278,10 +11338,10 @@ var $rtfeldman$elm_css$Css$Structure$Output$prettyPrintDeclaration = function (d
 	}
 };
 var $rtfeldman$elm_css$Css$Structure$Output$prettyPrint = function (_v0) {
-	var charset = _v0.cx;
-	var imports = _v0.cN;
+	var charset = _v0.cy;
+	var imports = _v0.cO;
 	var namespaces = _v0.cY;
-	var declarations = _v0.dP;
+	var declarations = _v0.dO;
 	return A2(
 		$elm$core$String$join,
 		'\n\n',
@@ -12355,7 +12415,7 @@ var $rtfeldman$elm_css$Css$Preprocess$Resolve$applyStyles = F2(
 						_List_fromArray(
 							[
 								$rtfeldman$elm_css$Css$Structure$Keyframes(
-								{dO: str, eh: name})
+								{dN: str, eg: name})
 							]));
 				case 4:
 					var _v12 = styles.a;
@@ -12490,13 +12550,13 @@ var $rtfeldman$elm_css$Css$Preprocess$Resolve$toDeclarations = function (snippet
 	}
 };
 var $rtfeldman$elm_css$Css$Preprocess$Resolve$toStructure = function (_v0) {
-	var charset = _v0.cx;
-	var imports = _v0.cN;
+	var charset = _v0.cy;
+	var imports = _v0.cO;
 	var namespaces = _v0.cY;
-	var snippets = _v0.dm;
+	var snippets = _v0.dl;
 	var declarations = $rtfeldman$elm_css$Css$Preprocess$Resolve$extract(
 		A2($elm$core$List$concatMap, $rtfeldman$elm_css$Css$Preprocess$unwrapSnippet, snippets));
-	return {cx: charset, dP: declarations, cN: imports, cY: namespaces};
+	return {cy: charset, dO: declarations, cO: imports, cY: namespaces};
 };
 var $rtfeldman$elm_css$Css$Preprocess$Resolve$compileHelp = function (sheet) {
 	return $rtfeldman$elm_css$Css$Structure$Output$prettyPrint(
@@ -12542,7 +12602,7 @@ var $rtfeldman$elm_css$VirtualDom$Styled$snippetFromPair = function (_v0) {
 				])));
 };
 var $rtfeldman$elm_css$Css$Preprocess$stylesheet = function (snippets) {
-	return {cx: $elm$core$Maybe$Nothing, cN: _List_Nil, cY: _List_Nil, dm: snippets};
+	return {cy: $elm$core$Maybe$Nothing, cO: _List_Nil, cY: _List_Nil, dl: snippets};
 };
 var $rtfeldman$elm_css$VirtualDom$Styled$toDeclaration = function (dict) {
 	return $rtfeldman$elm_css$Css$Preprocess$Resolve$compile(
@@ -12801,19 +12861,19 @@ var $elm$core$String$fromFloat = _String_fromNumber;
 var $rtfeldman$elm_css$Css$Internal$lengthConverter = F3(
 	function (units, unitLabel, numericValue) {
 		return {
-			cj: 0,
-			cv: 0,
+			ck: 0,
+			cw: 0,
 			aI: 0,
 			v: 0,
 			bb: 0,
 			aM: 0,
-			aa: 0,
+			_: 0,
 			aN: 0,
 			aO: 0,
+			ai: 0,
 			aj: 0,
-			ak: 0,
 			N: 0,
-			ac: numericValue,
+			ab: numericValue,
 			aZ: 0,
 			a0: unitLabel,
 			bo: units,
@@ -12844,7 +12904,7 @@ var $rtfeldman$elm_css$Css$prop1 = F2(
 var $rtfeldman$elm_css$Css$animationName = function (arg) {
 	return ((arg.R === 'none') || ((arg.R === 'inherit') || ((arg.R === 'unset') || (arg.R === 'initial')))) ? A2($rtfeldman$elm_css$Css$prop1, 'animation-name', arg) : $rtfeldman$elm_css$Css$Preprocess$WithKeyframes(arg.R);
 };
-var $rtfeldman$elm_css$Css$auto = {dC: 0, a: 0, aI: 0, bw: 0, d4: 0, aM: 0, aa: 0, N: 0, aS: 0, J: 0, bM: 0, a_: 0, B: 0, R: 'auto'};
+var $rtfeldman$elm_css$Css$auto = {dB: 0, a: 0, aI: 0, bw: 0, d3: 0, aM: 0, _: 0, N: 0, aS: 0, J: 0, bN: 0, a_: 0, B: 0, R: 'auto'};
 var $rtfeldman$elm_css$Css$backgroundColor = function (c) {
 	return A2($rtfeldman$elm_css$Css$property, 'background-color', c.R);
 };
@@ -12918,10 +12978,10 @@ var $rtfeldman$elm_css$Css$withPrecedingHash = function (str) {
 var $rtfeldman$elm_css$Css$erroneousHex = function (str) {
 	return {
 		at: 1,
-		bT: 0,
-		dM: 0,
-		b_: 0,
-		b9: 0,
+		bU: 0,
+		dL: 0,
+		b$: 0,
+		ca: 0,
 		R: $rtfeldman$elm_css$Css$withPrecedingHash(str)
 	};
 };
@@ -13162,10 +13222,10 @@ var $rtfeldman$elm_css$Css$validHex = F5(
 			var alpha = _v6.b.a;
 			return {
 				at: alpha / 255,
-				bT: blue,
-				dM: 0,
-				b_: green,
-				b9: red,
+				bU: blue,
+				dL: 0,
+				b$: green,
+				ca: red,
 				R: $rtfeldman$elm_css$Css$withPrecedingHash(str)
 			};
 		} else {
@@ -13297,9 +13357,9 @@ var $rtfeldman$elm_css$Css$Internal$compileKeyframes = function (tuples) {
 		A2($elm$core$List$map, $rtfeldman$elm_css$Css$Internal$printKeyframeSelector, tuples));
 };
 var $rtfeldman$elm_css$Css$Animations$keyframes = function (tuples) {
-	return $elm$core$List$isEmpty(tuples) ? {by: 0, b4: 0, R: 'none'} : {
+	return $elm$core$List$isEmpty(tuples) ? {by: 0, b5: 0, R: 'none'} : {
 		by: 0,
-		b4: 0,
+		b5: 0,
 		R: $rtfeldman$elm_css$Css$Internal$compileKeyframes(tuples)
 	};
 };
@@ -13328,14 +13388,14 @@ var $rtfeldman$elm_css$Css$spaceBetween = $rtfeldman$elm_css$Css$prop1('space-be
 var $rtfeldman$elm_css$Css$width = $rtfeldman$elm_css$Css$prop1('width');
 var $perzanko$elm_loading$Loading$Bars$view = function (config) {
 	var withSpeed = function (x) {
-		return $elm$core$String$fromFloat(x / config.dn);
+		return $elm$core$String$fromFloat(x / config.dm);
 	};
 	var outerStyle = _List_fromArray(
 		[
 			$rtfeldman$elm_css$Css$width(
-			$rtfeldman$elm_css$Css$px(config.dl)),
+			$rtfeldman$elm_css$Css$px(config.dk)),
 			$rtfeldman$elm_css$Css$height(
-			$rtfeldman$elm_css$Css$px(config.dl)),
+			$rtfeldman$elm_css$Css$px(config.dk)),
 			$rtfeldman$elm_css$Css$position($rtfeldman$elm_css$Css$relative),
 			A2(
 			$rtfeldman$elm_css$Css$margin2,
@@ -13348,13 +13408,13 @@ var $perzanko$elm_loading$Loading$Bars$view = function (config) {
 	var childStyle = _List_fromArray(
 		[
 			$rtfeldman$elm_css$Css$width(
-			$rtfeldman$elm_css$Css$px(config.dl / 3.5)),
+			$rtfeldman$elm_css$Css$px(config.dk / 3.5)),
 			$rtfeldman$elm_css$Css$height(
-			$rtfeldman$elm_css$Css$px(config.dl / 3.5)),
+			$rtfeldman$elm_css$Css$px(config.dk / 3.5)),
 			$rtfeldman$elm_css$Css$borderRadius(
 			$rtfeldman$elm_css$Css$px(5)),
 			$rtfeldman$elm_css$Css$backgroundColor(
-			$rtfeldman$elm_css$Css$hex(config.dM)),
+			$rtfeldman$elm_css$Css$hex(config.dL)),
 			A2(
 			$rtfeldman$elm_css$Css$property,
 			'animation-duration',
@@ -13372,7 +13432,7 @@ var $perzanko$elm_loading$Loading$Bars$view = function (config) {
 								A2(
 								$rtfeldman$elm_css$Css$Animations$property,
 								'height',
-								$elm$core$String$fromFloat(config.dl / 3.5) + 'px'),
+								$elm$core$String$fromFloat(config.dk / 3.5) + 'px'),
 								A2($rtfeldman$elm_css$Css$Animations$property, 'transform', 'translate3d(0,0,0)')
 							])),
 						_Utils_Tuple2(
@@ -13382,7 +13442,7 @@ var $perzanko$elm_loading$Loading$Bars$view = function (config) {
 								A2(
 								$rtfeldman$elm_css$Css$Animations$property,
 								'height',
-								$elm$core$String$fromFloat(config.dl) + 'px'),
+								$elm$core$String$fromFloat(config.dk) + 'px'),
 								A2($rtfeldman$elm_css$Css$Animations$property, 'transform', 'translate3d(0,0,0)')
 							])),
 						_Utils_Tuple2(
@@ -13392,7 +13452,7 @@ var $perzanko$elm_loading$Loading$Bars$view = function (config) {
 								A2(
 								$rtfeldman$elm_css$Css$Animations$property,
 								'height',
-								$elm$core$String$fromFloat(config.dl / 3.5) + 'px'),
+								$elm$core$String$fromFloat(config.dk / 3.5) + 'px'),
 								A2($rtfeldman$elm_css$Css$Animations$property, 'transform', 'translate3d(0,0,0)')
 							]))
 					])))
@@ -13402,7 +13462,7 @@ var $perzanko$elm_loading$Loading$Bars$view = function (config) {
 		_List_fromArray(
 			[
 				$rtfeldman$elm_css$Html$Styled$Attributes$css(outerStyle),
-				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.cy)
+				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.cz)
 			]),
 		_List_fromArray(
 			[
@@ -13463,14 +13523,14 @@ var $rtfeldman$elm_css$Css$PercentageUnits = 0;
 var $rtfeldman$elm_css$Css$pct = A2($rtfeldman$elm_css$Css$Internal$lengthConverter, 0, '%');
 var $perzanko$elm_loading$Loading$BouncingBalls$view = function (config) {
 	var withSpeed = function (x) {
-		return $elm$core$String$fromFloat(x / config.dn);
+		return $elm$core$String$fromFloat(x / config.dm);
 	};
 	var outerStyle = _List_fromArray(
 		[
 			$rtfeldman$elm_css$Css$width(
-			$rtfeldman$elm_css$Css$px(config.dl)),
+			$rtfeldman$elm_css$Css$px(config.dk)),
 			$rtfeldman$elm_css$Css$height(
-			$rtfeldman$elm_css$Css$px(config.dl)),
+			$rtfeldman$elm_css$Css$px(config.dk)),
 			$rtfeldman$elm_css$Css$position($rtfeldman$elm_css$Css$relative),
 			A2(
 			$rtfeldman$elm_css$Css$margin2,
@@ -13484,13 +13544,13 @@ var $perzanko$elm_loading$Loading$BouncingBalls$view = function (config) {
 		[
 			$rtfeldman$elm_css$Css$display($rtfeldman$elm_css$Css$block),
 			$rtfeldman$elm_css$Css$width(
-			$rtfeldman$elm_css$Css$px(config.dl / 3.5)),
+			$rtfeldman$elm_css$Css$px(config.dk / 3.5)),
 			$rtfeldman$elm_css$Css$height(
-			$rtfeldman$elm_css$Css$px(config.dl / 3.5)),
+			$rtfeldman$elm_css$Css$px(config.dk / 3.5)),
 			$rtfeldman$elm_css$Css$borderRadius(
 			$rtfeldman$elm_css$Css$pct(100)),
 			$rtfeldman$elm_css$Css$backgroundColor(
-			$rtfeldman$elm_css$Css$hex(config.dM)),
+			$rtfeldman$elm_css$Css$hex(config.dL)),
 			A2(
 			$rtfeldman$elm_css$Css$property,
 			'animation-duration',
@@ -13518,7 +13578,7 @@ var $perzanko$elm_loading$Loading$BouncingBalls$view = function (config) {
 								A2(
 								$rtfeldman$elm_css$Css$Animations$property,
 								'transform',
-								'translate3d(0,0,0) translateZ(0) translate(0,' + ($elm$core$String$fromFloat(config.dl / 3.5) + 'px)'))
+								'translate3d(0,0,0) translateZ(0) translate(0,' + ($elm$core$String$fromFloat(config.dk / 3.5) + 'px)'))
 							])),
 						_Utils_Tuple2(
 						100,
@@ -13533,7 +13593,7 @@ var $perzanko$elm_loading$Loading$BouncingBalls$view = function (config) {
 		_List_fromArray(
 			[
 				$rtfeldman$elm_css$Html$Styled$Attributes$css(outerStyle),
-				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.cy)
+				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.cz)
 			]),
 		_List_fromArray(
 			[
@@ -13592,11 +13652,11 @@ var $rtfeldman$elm_css$Css$left = $rtfeldman$elm_css$Css$prop1('left');
 var $rtfeldman$elm_css$Css$UnitlessFloat = 0;
 var $rtfeldman$elm_css$Css$num = function (val) {
 	return {
-		ak: 0,
+		aj: 0,
 		N: 0,
 		be: 0,
 		bA: 0,
-		ac: val,
+		ab: val,
 		a0: '',
 		bo: 0,
 		R: $elm$core$String$fromFloat(val)
@@ -13606,14 +13666,14 @@ var $rtfeldman$elm_css$Css$opacity = $rtfeldman$elm_css$Css$prop1('opacity');
 var $rtfeldman$elm_css$Css$top = $rtfeldman$elm_css$Css$prop1('top');
 var $perzanko$elm_loading$Loading$Circle$view = function (config) {
 	var withSpeed = function (x) {
-		return $elm$core$String$fromFloat(x / config.dn);
+		return $elm$core$String$fromFloat(x / config.dm);
 	};
 	var outerStyle = _List_fromArray(
 		[
 			$rtfeldman$elm_css$Css$width(
-			$rtfeldman$elm_css$Css$px(config.dl)),
+			$rtfeldman$elm_css$Css$px(config.dk)),
 			$rtfeldman$elm_css$Css$height(
-			$rtfeldman$elm_css$Css$px(config.dl * 0.95)),
+			$rtfeldman$elm_css$Css$px(config.dk * 0.95)),
 			$rtfeldman$elm_css$Css$position($rtfeldman$elm_css$Css$relative),
 			A2(
 			$rtfeldman$elm_css$Css$margin2,
@@ -13623,9 +13683,9 @@ var $perzanko$elm_loading$Loading$Circle$view = function (config) {
 	var childStyle = _List_fromArray(
 		[
 			$rtfeldman$elm_css$Css$width(
-			$rtfeldman$elm_css$Css$px(config.dl - (2 * (config.dl * 0.17)))),
+			$rtfeldman$elm_css$Css$px(config.dk - (2 * (config.dk * 0.17)))),
 			$rtfeldman$elm_css$Css$height(
-			$rtfeldman$elm_css$Css$px(config.dl - (2 * (config.dl * 0.17)))),
+			$rtfeldman$elm_css$Css$px(config.dk - (2 * (config.dk * 0.17)))),
 			$rtfeldman$elm_css$Css$borderRadius(
 			$rtfeldman$elm_css$Css$pct(50)),
 			$rtfeldman$elm_css$Css$position($rtfeldman$elm_css$Css$absolute),
@@ -13662,7 +13722,7 @@ var $perzanko$elm_loading$Loading$Circle$view = function (config) {
 		_List_fromArray(
 			[
 				$rtfeldman$elm_css$Html$Styled$Attributes$css(outerStyle),
-				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.cy)
+				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.cz)
 			]),
 		_List_fromArray(
 			[
@@ -13680,7 +13740,7 @@ var $perzanko$elm_loading$Loading$Circle$view = function (config) {
 										A2(
 										$rtfeldman$elm_css$Css$property,
 										'border',
-										$elm$core$String$fromFloat(config.dl * 0.17) + ('px ' + (config.dM + ' solid'))),
+										$elm$core$String$fromFloat(config.dk * 0.17) + ('px ' + (config.dL + ' solid'))),
 										$rtfeldman$elm_css$Css$opacity(
 										$rtfeldman$elm_css$Css$num(0.25))
 									])
@@ -13701,11 +13761,11 @@ var $perzanko$elm_loading$Loading$Circle$view = function (config) {
 										A2(
 										$rtfeldman$elm_css$Css$property,
 										'border',
-										$elm$core$String$fromFloat(config.dl * 0.17) + 'px transparent solid'),
+										$elm$core$String$fromFloat(config.dk * 0.17) + 'px transparent solid'),
 										A2(
 										$rtfeldman$elm_css$Css$property,
 										'border-top',
-										$elm$core$String$fromFloat(config.dl * 0.17) + ('px ' + (config.dM + ' solid'))),
+										$elm$core$String$fromFloat(config.dk * 0.17) + ('px ' + (config.dL + ' solid'))),
 										$rtfeldman$elm_css$Css$opacity(
 										$rtfeldman$elm_css$Css$num(0.8))
 									])
@@ -13718,9 +13778,9 @@ var $perzanko$elm_loading$Loading$DoubleBounce$view = function (config) {
 	var outerStyle = _List_fromArray(
 		[
 			$rtfeldman$elm_css$Css$width(
-			$rtfeldman$elm_css$Css$px(config.dl)),
+			$rtfeldman$elm_css$Css$px(config.dk)),
 			$rtfeldman$elm_css$Css$height(
-			$rtfeldman$elm_css$Css$px(config.dl)),
+			$rtfeldman$elm_css$Css$px(config.dk)),
 			$rtfeldman$elm_css$Css$position($rtfeldman$elm_css$Css$relative),
 			A2(
 			$rtfeldman$elm_css$Css$margin2,
@@ -13736,7 +13796,7 @@ var $perzanko$elm_loading$Loading$DoubleBounce$view = function (config) {
 			$rtfeldman$elm_css$Css$borderRadius(
 			$rtfeldman$elm_css$Css$pct(50)),
 			$rtfeldman$elm_css$Css$backgroundColor(
-			$rtfeldman$elm_css$Css$hex(config.dM)),
+			$rtfeldman$elm_css$Css$hex(config.dL)),
 			$rtfeldman$elm_css$Css$opacity(
 			$rtfeldman$elm_css$Css$num(0.6)),
 			$rtfeldman$elm_css$Css$position($rtfeldman$elm_css$Css$absolute),
@@ -13770,7 +13830,7 @@ var $perzanko$elm_loading$Loading$DoubleBounce$view = function (config) {
 			A2(
 			$rtfeldman$elm_css$Css$property,
 			'animation-duration',
-			$elm$core$String$fromFloat(2 / config.dn) + 's'),
+			$elm$core$String$fromFloat(2 / config.dm) + 's'),
 			A2($rtfeldman$elm_css$Css$property, 'animation-timing-function', 'ease-in-out'),
 			A2($rtfeldman$elm_css$Css$property, 'animation-iteration-count', 'infinite')
 		]);
@@ -13779,7 +13839,7 @@ var $perzanko$elm_loading$Loading$DoubleBounce$view = function (config) {
 		_List_fromArray(
 			[
 				$rtfeldman$elm_css$Html$Styled$Attributes$css(outerStyle),
-				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.cy)
+				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.cz)
 			]),
 		_List_fromArray(
 			[
@@ -13804,7 +13864,7 @@ var $perzanko$elm_loading$Loading$DoubleBounce$view = function (config) {
 										A2(
 										$rtfeldman$elm_css$Css$property,
 										'animation-delay',
-										'-' + ($elm$core$String$fromFloat(1 / config.dn) + 's'))
+										'-' + ($elm$core$String$fromFloat(1 / config.dm) + 's'))
 									])
 								])))
 					]),
@@ -13842,9 +13902,9 @@ var $perzanko$elm_loading$Loading$Sonar$view = function (config) {
 	var outerStyle = _List_fromArray(
 		[
 			$rtfeldman$elm_css$Css$width(
-			$rtfeldman$elm_css$Css$px(config.dl)),
+			$rtfeldman$elm_css$Css$px(config.dk)),
 			$rtfeldman$elm_css$Css$height(
-			$rtfeldman$elm_css$Css$px(config.dl)),
+			$rtfeldman$elm_css$Css$px(config.dk)),
 			$rtfeldman$elm_css$Css$position($rtfeldman$elm_css$Css$relative),
 			A2(
 			$rtfeldman$elm_css$Css$margin2,
@@ -13858,23 +13918,23 @@ var $perzanko$elm_loading$Loading$Sonar$view = function (config) {
 					$rtfeldman$elm_css$Css$borderRadius(
 					$rtfeldman$elm_css$Css$pct(50)),
 					$rtfeldman$elm_css$Css$width(
-					$rtfeldman$elm_css$Css$px(config.dl / 3)),
+					$rtfeldman$elm_css$Css$px(config.dk / 3)),
 					$rtfeldman$elm_css$Css$height(
-					$rtfeldman$elm_css$Css$px(config.dl / 3)),
+					$rtfeldman$elm_css$Css$px(config.dk / 3)),
 					A2(
 					$rtfeldman$elm_css$Css$property,
 					'top',
-					'calc(50% - ' + ($elm$core$String$fromFloat(config.dl / 6) + 'px)')),
+					'calc(50% - ' + ($elm$core$String$fromFloat(config.dk / 6) + 'px)')),
 					A2(
 					$rtfeldman$elm_css$Css$property,
 					'left',
-					'calc(50% - ' + ($elm$core$String$fromFloat(config.dl / 6) + 'px)')),
+					'calc(50% - ' + ($elm$core$String$fromFloat(config.dk / 6) + 'px)')),
 					$rtfeldman$elm_css$Css$backgroundColor(
-					$rtfeldman$elm_css$Css$hex(config.dM)),
+					$rtfeldman$elm_css$Css$hex(config.dL)),
 					A2(
 					$rtfeldman$elm_css$Css$property,
 					'animation-duration',
-					$elm$core$String$fromFloat(3 / config.dn) + 's'),
+					$elm$core$String$fromFloat(3 / config.dm) + 's'),
 					A2($rtfeldman$elm_css$Css$property, 'animation-timing-funtion', 'linear'),
 					A2($rtfeldman$elm_css$Css$property, 'animation-iteration-count', 'infinite'),
 					$rtfeldman$elm_css$Css$animationName(
@@ -13937,28 +13997,28 @@ var $perzanko$elm_loading$Loading$Sonar$view = function (config) {
 					$rtfeldman$elm_css$Css$borderRadius(
 					$rtfeldman$elm_css$Css$pct(50)),
 					$rtfeldman$elm_css$Css$width(
-					$rtfeldman$elm_css$Css$px(config.dl / 3)),
+					$rtfeldman$elm_css$Css$px(config.dk / 3)),
 					$rtfeldman$elm_css$Css$height(
-					$rtfeldman$elm_css$Css$px(config.dl / 3)),
+					$rtfeldman$elm_css$Css$px(config.dk / 3)),
 					A2(
 					$rtfeldman$elm_css$Css$property,
 					'top',
-					'calc(50% - ' + ($elm$core$String$fromFloat(config.dl / 6) + 'px)')),
+					'calc(50% - ' + ($elm$core$String$fromFloat(config.dk / 6) + 'px)')),
 					A2(
 					$rtfeldman$elm_css$Css$property,
 					'left',
-					'calc(50% - ' + ($elm$core$String$fromFloat(config.dl / 6) + 'px)')),
+					'calc(50% - ' + ($elm$core$String$fromFloat(config.dk / 6) + 'px)')),
 					A3(
 					$rtfeldman$elm_css$Css$border3,
 					$rtfeldman$elm_css$Css$px(1),
 					$rtfeldman$elm_css$Css$solid,
-					$rtfeldman$elm_css$Css$hex(config.dM)),
+					$rtfeldman$elm_css$Css$hex(config.dL)),
 					$rtfeldman$elm_css$Css$opacity(
 					$rtfeldman$elm_css$Css$num(0)),
 					A2(
 					$rtfeldman$elm_css$Css$property,
 					'animation-duration',
-					$elm$core$String$fromFloat(3 / config.dn) + 's'),
+					$elm$core$String$fromFloat(3 / config.dm) + 's'),
 					A2($rtfeldman$elm_css$Css$property, 'animation-timing-funtion', 'linear'),
 					A2($rtfeldman$elm_css$Css$property, 'animation-iteration-count', 'infinite'),
 					$rtfeldman$elm_css$Css$animationName(
@@ -14009,7 +14069,7 @@ var $perzanko$elm_loading$Loading$Sonar$view = function (config) {
 		_List_fromArray(
 			[
 				$rtfeldman$elm_css$Html$Styled$Attributes$css(outerStyle),
-				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.cy)
+				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.cz)
 			]),
 		_List_Nil);
 };
@@ -14017,9 +14077,9 @@ var $perzanko$elm_loading$Loading$Spinner$view = function (config) {
 	var outerStyle = _List_fromArray(
 		[
 			$rtfeldman$elm_css$Css$width(
-			$rtfeldman$elm_css$Css$px(config.dl)),
+			$rtfeldman$elm_css$Css$px(config.dk)),
 			$rtfeldman$elm_css$Css$height(
-			$rtfeldman$elm_css$Css$px(config.dl)),
+			$rtfeldman$elm_css$Css$px(config.dk)),
 			$rtfeldman$elm_css$Css$position($rtfeldman$elm_css$Css$relative),
 			A2(
 			$rtfeldman$elm_css$Css$margin2,
@@ -14035,14 +14095,14 @@ var $perzanko$elm_loading$Loading$Spinner$view = function (config) {
 			$rtfeldman$elm_css$Css$pct(100))
 		]);
 	var calcAnimationDelay = function (x) {
-		return (x === 1) ? '0s' : ($elm$core$String$fromFloat(-((1.1 - (x / 10)) / config.dn)) + 's');
+		return (x === 1) ? '0s' : ($elm$core$String$fromFloat(-((1.1 - (x / 10)) / config.dm)) + 's');
 	};
 	return A2(
 		$rtfeldman$elm_css$Html$Styled$div,
 		_List_fromArray(
 			[
 				$rtfeldman$elm_css$Html$Styled$Attributes$css(outerStyle),
-				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.cy)
+				$rtfeldman$elm_css$Html$Styled$Attributes$class(config.cz)
 			]),
 		_List_fromArray(
 			[
@@ -14093,13 +14153,13 @@ var $perzanko$elm_loading$Loading$Spinner$view = function (config) {
 													$rtfeldman$elm_css$Css$height(
 													$rtfeldman$elm_css$Css$pct(15)),
 													$rtfeldman$elm_css$Css$backgroundColor(
-													$rtfeldman$elm_css$Css$hex(config.dM)),
+													$rtfeldman$elm_css$Css$hex(config.dL)),
 													$rtfeldman$elm_css$Css$borderRadius(
 													$rtfeldman$elm_css$Css$pct(100)),
 													A2(
 													$rtfeldman$elm_css$Css$property,
 													'animation-duration',
-													$elm$core$String$fromFloat(1.2 / config.dn) + 's'),
+													$elm$core$String$fromFloat(1.2 / config.dm) + 's'),
 													A2($rtfeldman$elm_css$Css$property, 'animation-iteration-count', 'infinite'),
 													A2($rtfeldman$elm_css$Css$property, 'animation-fill-mode', 'both'),
 													$rtfeldman$elm_css$Css$animationName(
@@ -14196,7 +14256,7 @@ var $author$project$Main$mapField = function (model) {
 								5,
 								_Utils_update(
 									$perzanko$elm_loading$Loading$defaultConfig,
-									{dM: '#60a5fa'}),
+									{dL: '#60a5fa'}),
 								0)
 							]);
 					case 0:
@@ -14456,7 +14516,7 @@ var $author$project$Main$modeSelectionButtons = function (selected) {
 };
 var $author$project$Model$MouseEvent = F3(
 	function (position, movement, button) {
-		return {aA: button, ee: movement, am: position};
+		return {aA: button, ed: movement, am: position};
 	});
 var $author$project$Model$Other = 3;
 var $author$project$Model$Wheel = 2;
@@ -14537,7 +14597,7 @@ var $author$project$Main$saveMapButtons = function (model) {
 							A2(
 								$elm$core$Maybe$map,
 								$author$project$Saves$graphToJson(2),
-								model.cz))),
+								model.cA))),
 						$elm$html$Html$Attributes$download('graph.json'),
 						$elm$html$Html$Events$onClick($author$project$Messages$DownloadCurrentGraph)
 					]),
@@ -14983,7 +15043,7 @@ var $joakin$elm_canvas$Canvas$renderTextFill = F5(
 	function (txt, x, y, maybeColor, cmds) {
 		return A2(
 			$elm$core$List$cons,
-			A4($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$fillText, txt.cd, x, y, txt.b2),
+			A4($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$fillText, txt.ce, x, y, txt.b3),
 			function () {
 				if (!maybeColor.$) {
 					var color = maybeColor.a;
@@ -15026,7 +15086,7 @@ var $joakin$elm_canvas$Canvas$renderTextStroke = F5(
 	function (txt, x, y, maybeColor, cmds) {
 		return A2(
 			$elm$core$List$cons,
-			A4($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$strokeText, txt.cd, x, y, txt.b2),
+			A4($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$strokeText, txt.ce, x, y, txt.b3),
 			function () {
 				if (!maybeColor.$) {
 					var color = maybeColor.a;
@@ -15118,11 +15178,11 @@ var $joakin$elm_canvas$Canvas$Internal$Texture$drawTexture = F4(
 			function () {
 				if (!t.$) {
 					var image = t.a;
-					return A9($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$drawImage, 0, 0, image.ci, image.b$, x, y, image.ci, image.b$, image.bx);
+					return A9($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$drawImage, 0, 0, image.cj, image.b0, x, y, image.cj, image.b0, image.bx);
 				} else {
 					var sprite = t.a;
 					var image = t.b;
-					return A9($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$drawImage, sprite.f, sprite.g, sprite.ci, sprite.b$, x, y, sprite.ci, sprite.b$, image.bx);
+					return A9($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$drawImage, sprite.f, sprite.g, sprite.cj, sprite.b0, x, y, sprite.cj, sprite.b0, image.bx);
 				}
 			}(),
 			cmds);
@@ -15245,7 +15305,7 @@ var $joakin$elm_canvas$Canvas$Internal$Texture$decodeTextureImage = A2(
 				function (tagName, width, height) {
 					return (tagName === 'IMG') ? $elm$core$Maybe$Just(
 						$joakin$elm_canvas$Canvas$Internal$Texture$TImage(
-							{b$: height, bx: image, ci: width})) : $elm$core$Maybe$Nothing;
+							{b0: height, bx: image, cj: width})) : $elm$core$Maybe$Nothing;
 				}),
 			A2($elm$json$Json$Decode$field, 'tagName', $elm$json$Json$Decode$string),
 			A2($elm$json$Json$Decode$field, 'width', $elm$json$Json$Decode$float),
@@ -15303,10 +15363,10 @@ var $joakin$elm_canvas$Canvas$toHtmlWith = F3(
 					$joakin$elm_canvas$Canvas$render(entities)),
 				A2(
 					$elm$core$List$cons,
-					$elm$html$Html$Attributes$height(options.b$),
+					$elm$html$Html$Attributes$height(options.b0),
 					A2(
 						$elm$core$List$cons,
-						$elm$html$Html$Attributes$width(options.ci),
+						$elm$html$Html$Attributes$width(options.cj),
 						attrs))),
 			A2(
 				$elm$core$List$cons,
@@ -15380,12 +15440,12 @@ var $joakin$elm_canvas$Canvas$Settings$Advanced$transform = function (transforms
 						var y = t.b;
 						return A2($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$translate, x, y);
 					default:
-						var m11 = t.a.d7;
-						var m12 = t.a.d8;
-						var m21 = t.a.d9;
-						var m22 = t.a.ea;
-						var dx = t.a.dU;
-						var dy = t.a.dV;
+						var m11 = t.a.d6;
+						var m12 = t.a.d7;
+						var m21 = t.a.d8;
+						var m22 = t.a.d9;
+						var dx = t.a.dT;
+						var dy = t.a.dU;
 						return A6($joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$transform, m11, m12, m21, m22, dx, dy);
 				}
 			},
@@ -15410,8 +15470,8 @@ var $joakin$elm_canvas$Canvas$Internal$Canvas$Arc = F5(
 var $joakin$elm_canvas$Canvas$arc = F3(
 	function (pos, radius, _v0) {
 		var startAngle = _v0.ex;
-		var endAngle = _v0.dX;
-		var clockwise = _v0.dL;
+		var endAngle = _v0.dW;
+		var clockwise = _v0.dK;
 		return A5($joakin$elm_canvas$Canvas$Internal$Canvas$Arc, pos, radius, startAngle, endAngle, !clockwise);
 	});
 var $author$project$Main$renderPieSlice = F5(
@@ -15444,7 +15504,7 @@ var $author$project$Main$renderPieSlice = F5(
 					$joakin$elm_canvas$Canvas$arc,
 					$author$project$Main$pointToCanvasLibPoint(center),
 					radius,
-					{dL: true, dX: endAngle, ex: startAngle})
+					{dK: true, dW: endAngle, ex: startAngle})
 				]));
 	});
 var $author$project$Graph$skiRunTypeFromString = function (skiRunType) {
@@ -15507,12 +15567,12 @@ var $mdgriffith$elm_animator$Internal$Timeline$adjustTime = F4(
 			var nextStartTime = _v1.b;
 			var personality = getPersonality(
 				lookup(event));
-			if (!(!personality.dR)) {
+			if (!(!personality.dQ)) {
 				var totalDuration = A2($mdgriffith$elm_animator$Internal$Time$duration, eventEnd, nextStartTime);
 				var nextPersonality = getPersonality(
 					lookup(next));
-				var totalPortions = A2($elm$core$Basics$max, personality.dR + nextPersonality.dH, 1);
-				var lateBy = A2($ianmackenzie$elm_units$Quantity$multiplyBy, personality.dR / totalPortions, totalDuration);
+				var totalPortions = A2($elm$core$Basics$max, personality.dQ + nextPersonality.dG, 1);
+				var lateBy = A2($ianmackenzie$elm_units$Quantity$multiplyBy, personality.dQ / totalPortions, totalDuration);
 				return A3(
 					$mdgriffith$elm_animator$Internal$Timeline$Occurring,
 					event,
@@ -15553,8 +15613,8 @@ var $mdgriffith$elm_animator$Internal$Timeline$adjustTimeWithPrevious = F5(
 			lookup(prev));
 		var personality = getPersonality(
 			lookup(event));
-		var totalPrevPortions = A2($elm$core$Basics$max, prevPersonality.dR + personality.dH, 1);
-		var earlyBy = A2($ianmackenzie$elm_units$Quantity$multiplyBy, personality.dH / totalPrevPortions, totalPrevDuration);
+		var totalPrevPortions = A2($elm$core$Basics$max, prevPersonality.dQ + personality.dG, 1);
+		var earlyBy = A2($ianmackenzie$elm_units$Quantity$multiplyBy, personality.dG / totalPrevPortions, totalPrevDuration);
 		if (!upcomingOccurring.b) {
 			return $mdgriffith$elm_animator$Internal$Time$zeroDuration(earlyBy) ? unmodified : A3(
 				$mdgriffith$elm_animator$Internal$Timeline$Occurring,
@@ -15565,12 +15625,12 @@ var $mdgriffith$elm_animator$Internal$Timeline$adjustTimeWithPrevious = F5(
 			var _v2 = upcomingOccurring.a;
 			var next = _v2.a;
 			var nextStartTime = _v2.b;
-			if (!(!personality.dR)) {
+			if (!(!personality.dQ)) {
 				var totalDuration = A2($mdgriffith$elm_animator$Internal$Time$duration, eventEnd, nextStartTime);
 				var nextPersonality = getPersonality(
 					lookup(next));
-				var totalPortions = A2($elm$core$Basics$max, personality.dR + nextPersonality.dH, 1);
-				var lateBy = A2($ianmackenzie$elm_units$Quantity$multiplyBy, personality.dR / totalPortions, totalDuration);
+				var totalPortions = A2($elm$core$Basics$max, personality.dQ + nextPersonality.dG, 1);
+				var lateBy = A2($ianmackenzie$elm_units$Quantity$multiplyBy, personality.dQ / totalPortions, totalDuration);
 				return A3(
 					$mdgriffith$elm_animator$Internal$Timeline$Occurring,
 					event,
@@ -15601,13 +15661,13 @@ var $mdgriffith$elm_animator$Internal$Timeline$createLookAhead = F4(
 		} else {
 			var unadjustedUpcoming = upcomingEvents.a;
 			var remain = upcomingEvents.b;
-			var upcomingOccurring = A5($mdgriffith$elm_animator$Internal$Timeline$adjustTimeWithPrevious, lookup, fn.bP, currentEvent, unadjustedUpcoming, remain);
+			var upcomingOccurring = A5($mdgriffith$elm_animator$Internal$Timeline$adjustTimeWithPrevious, lookup, fn.bQ, currentEvent, unadjustedUpcoming, remain);
 			return $elm$core$Maybe$Just(
 				{
-					dE: lookup(
+					dD: lookup(
 						$mdgriffith$elm_animator$Internal$Timeline$getEvent(upcomingOccurring)),
-					er: $mdgriffith$elm_animator$Internal$Timeline$hasDwell(upcomingOccurring),
-					ds: $mdgriffith$elm_animator$Internal$Time$inMilliseconds(
+					eq: $mdgriffith$elm_animator$Internal$Timeline$hasDwell(upcomingOccurring),
+					dr: $mdgriffith$elm_animator$Internal$Time$inMilliseconds(
 						$mdgriffith$elm_animator$Internal$Timeline$startTime(upcomingOccurring))
 				});
 		}
@@ -15645,10 +15705,10 @@ var $mdgriffith$elm_animator$Internal$Timeline$overLines = F7(
 			}();
 			var lineStartEv = function () {
 				if (maybePreviousEvent.$ === 1) {
-					return A4($mdgriffith$elm_animator$Internal$Timeline$adjustTime, lookup, fn.bP, unadjustedStartEvent, lineRemain);
+					return A4($mdgriffith$elm_animator$Internal$Timeline$adjustTime, lookup, fn.bQ, unadjustedStartEvent, lineRemain);
 				} else {
 					var prev = maybePreviousEvent.a;
-					return A5($mdgriffith$elm_animator$Internal$Timeline$adjustTimeWithPrevious, lookup, fn.bP, prev, unadjustedStartEvent, lineRemain);
+					return A5($mdgriffith$elm_animator$Internal$Timeline$adjustTimeWithPrevious, lookup, fn.bQ, prev, unadjustedStartEvent, lineRemain);
 				}
 			}();
 			if (A2(
@@ -15657,10 +15717,10 @@ var $mdgriffith$elm_animator$Internal$Timeline$overLines = F7(
 				$mdgriffith$elm_animator$Internal$Timeline$startTime(lineStartEv))) {
 				return transition(
 					A7(
-						fn.b1,
+						fn.b2,
 						$mdgriffith$elm_animator$Internal$Time$inMilliseconds(lineStart),
 						$elm$core$Maybe$Just(
-							lookup(details.cP)),
+							lookup(details.cQ)),
 						lookup(
 							$mdgriffith$elm_animator$Internal$Timeline$getEvent(lineStartEv)),
 						$mdgriffith$elm_animator$Internal$Time$inMilliseconds(
@@ -15675,7 +15735,7 @@ var $mdgriffith$elm_animator$Internal$Timeline$overLines = F7(
 					$mdgriffith$elm_animator$Internal$Timeline$endTime(lineStartEv))) {
 					return transition(
 						A5(
-							fn.ch,
+							fn.ci,
 							lookup,
 							lineStartEv,
 							now,
@@ -15684,18 +15744,18 @@ var $mdgriffith$elm_animator$Internal$Timeline$overLines = F7(
 				} else {
 					if (!lineRemain.b) {
 						return transition(
-							A5(fn.ch, lookup, lineStartEv, now, $elm$core$Maybe$Nothing, state));
+							A5(fn.ci, lookup, lineStartEv, now, $elm$core$Maybe$Nothing, state));
 					} else {
 						var unadjustedNext = lineRemain.a;
 						var lineRemain2 = lineRemain.b;
-						var next = A5($mdgriffith$elm_animator$Internal$Timeline$adjustTimeWithPrevious, lookup, fn.bP, unadjustedStartEvent, unadjustedNext, lineRemain2);
+						var next = A5($mdgriffith$elm_animator$Internal$Timeline$adjustTimeWithPrevious, lookup, fn.bQ, unadjustedStartEvent, unadjustedNext, lineRemain2);
 						if (A2(
 							$mdgriffith$elm_animator$Internal$Time$thisBeforeThat,
 							now,
 							$mdgriffith$elm_animator$Internal$Timeline$startTime(next))) {
 							return transition(
 								A7(
-									fn.b1,
+									fn.b2,
 									$mdgriffith$elm_animator$Internal$Time$inMilliseconds(
 										$mdgriffith$elm_animator$Internal$Timeline$endTime(lineStartEv)),
 									$elm$core$Maybe$Just(
@@ -15708,7 +15768,7 @@ var $mdgriffith$elm_animator$Internal$Timeline$overLines = F7(
 									$mdgriffith$elm_animator$Internal$Time$inMilliseconds(now),
 									A4($mdgriffith$elm_animator$Internal$Timeline$createLookAhead, fn, lookup, unadjustedNext, lineRemain2),
 									A5(
-										fn.ch,
+										fn.ci,
 										lookup,
 										lineStartEv,
 										now,
@@ -15721,7 +15781,7 @@ var $mdgriffith$elm_animator$Internal$Timeline$overLines = F7(
 								$mdgriffith$elm_animator$Internal$Timeline$endTime(next))) {
 								return transition(
 									A5(
-										fn.ch,
+										fn.ci,
 										lookup,
 										next,
 										now,
@@ -15730,17 +15790,17 @@ var $mdgriffith$elm_animator$Internal$Timeline$overLines = F7(
 							} else {
 								if (!lineRemain2.b) {
 									return transition(
-										A5(fn.ch, lookup, next, now, $elm$core$Maybe$Nothing, state));
+										A5(fn.ci, lookup, next, now, $elm$core$Maybe$Nothing, state));
 								} else {
 									var unadjustedNext2 = lineRemain2.a;
 									var lineRemain3 = lineRemain2.b;
-									var next2 = A5($mdgriffith$elm_animator$Internal$Timeline$adjustTimeWithPrevious, lookup, fn.bP, unadjustedNext, unadjustedNext2, lineRemain3);
+									var next2 = A5($mdgriffith$elm_animator$Internal$Timeline$adjustTimeWithPrevious, lookup, fn.bQ, unadjustedNext, unadjustedNext2, lineRemain3);
 									if (A2(
 										$mdgriffith$elm_animator$Internal$Time$thisBeforeThat,
 										now,
 										$mdgriffith$elm_animator$Internal$Timeline$startTime(next2))) {
 										var after = A5(
-											fn.ch,
+											fn.ci,
 											lookup,
 											next,
 											now,
@@ -15748,7 +15808,7 @@ var $mdgriffith$elm_animator$Internal$Timeline$overLines = F7(
 											state);
 										return transition(
 											A7(
-												fn.b1,
+												fn.b2,
 												$mdgriffith$elm_animator$Internal$Time$inMilliseconds(
 													$mdgriffith$elm_animator$Internal$Timeline$endTime(next)),
 												$elm$core$Maybe$Just(
@@ -15768,7 +15828,7 @@ var $mdgriffith$elm_animator$Internal$Timeline$overLines = F7(
 											$mdgriffith$elm_animator$Internal$Timeline$endTime(next2))) {
 											return transition(
 												A5(
-													fn.ch,
+													fn.ci,
 													lookup,
 													next2,
 													now,
@@ -15776,7 +15836,7 @@ var $mdgriffith$elm_animator$Internal$Timeline$overLines = F7(
 													state));
 										} else {
 											var after = A5(
-												fn.ch,
+												fn.ci,
 												lookup,
 												next2,
 												now,
@@ -15814,10 +15874,10 @@ var $mdgriffith$elm_animator$Internal$Timeline$overLines = F7(
 var $mdgriffith$elm_animator$Internal$Timeline$foldp = F3(
 	function (lookup, fn, _v0) {
 		var timelineDetails = _v0;
-		var _v1 = timelineDetails.cF;
+		var _v1 = timelineDetails.cG;
 		var timetable = _v1;
 		var start = fn.aW(
-			lookup(timelineDetails.cP));
+			lookup(timelineDetails.cQ));
 		if (!timetable.b) {
 			return start;
 		} else {
@@ -15857,17 +15917,17 @@ var $mdgriffith$elm_animator$Internal$Interpolate$Spline = F4(
 	});
 var $mdgriffith$elm_animator$Internal$Interpolate$zeroPoint = {f: 0, g: 0};
 var $mdgriffith$elm_animator$Internal$Interpolate$createSpline = function (config) {
-	var totalX = config.bX.f - config.aW.f;
+	var totalX = config.bY.f - config.aW.f;
 	var startVelScale = 1 / (config.aX.f / totalX);
-	var startVelocity = (!config.a8.dS) ? {f: 0, g: 0} : (((!(config.aX.f - $mdgriffith$elm_animator$Internal$Interpolate$zeroPoint.f)) && (!(config.aX.g - $mdgriffith$elm_animator$Internal$Interpolate$zeroPoint.g))) ? {f: totalX * (config.a8.dS * 3), g: 0} : {f: (startVelScale * config.aX.f) * (config.a8.dS * 3), g: (startVelScale * config.aX.g) * (config.a8.dS * 3)});
+	var startVelocity = (!config.a8.dR) ? {f: 0, g: 0} : (((!(config.aX.f - $mdgriffith$elm_animator$Internal$Interpolate$zeroPoint.f)) && (!(config.aX.g - $mdgriffith$elm_animator$Internal$Interpolate$zeroPoint.g))) ? {f: totalX * (config.a8.dR * 3), g: 0} : {f: (startVelScale * config.aX.f) * (config.a8.dR * 3), g: (startVelScale * config.aX.g) * (config.a8.dR * 3)});
 	var endVelScale = 1 / (config.aF.f / totalX);
-	var endVelocity = (!config.a3.dI) ? {f: 0, g: 0} : (((!(config.aF.f - $mdgriffith$elm_animator$Internal$Interpolate$zeroPoint.f)) && (!(config.aF.g - $mdgriffith$elm_animator$Internal$Interpolate$zeroPoint.g))) ? {f: totalX * (config.a3.dI * 3), g: 0} : {f: (endVelScale * config.aF.f) * (config.a3.dI * 3), g: (endVelScale * config.aF.g) * (config.a3.dI * 3)});
+	var endVelocity = (!config.a3.dH) ? {f: 0, g: 0} : (((!(config.aF.f - $mdgriffith$elm_animator$Internal$Interpolate$zeroPoint.f)) && (!(config.aF.g - $mdgriffith$elm_animator$Internal$Interpolate$zeroPoint.g))) ? {f: totalX * (config.a3.dH * 3), g: 0} : {f: (endVelScale * config.aF.f) * (config.a3.dH * 3), g: (endVelScale * config.aF.g) * (config.a3.dH * 3)});
 	return A4(
 		$mdgriffith$elm_animator$Internal$Interpolate$Spline,
 		config.aW,
 		{f: config.aW.f + ((1 / 3) * startVelocity.f), g: config.aW.g + ((1 / 3) * startVelocity.g)},
-		{f: config.bX.f + (((-1) / 3) * endVelocity.f), g: config.bX.g + (((-1) / 3) * endVelocity.g)},
-		config.bX);
+		{f: config.bY.f + (((-1) / 3) * endVelocity.f), g: config.bY.g + (((-1) / 3) * endVelocity.g)},
+		config.bY);
 };
 var $mdgriffith$elm_animator$Internal$Interpolate$findAtXOnSpline = F6(
 	function (spline, desiredX, tolerance, jumpSize, t, depth) {
@@ -15895,10 +15955,10 @@ var $mdgriffith$elm_animator$Internal$Interpolate$findAtXOnSpline = F6(
 				}
 			}();
 			if (depth === 10) {
-				return {c0: point, cc: t};
+				return {c0: point, cd: t};
 			} else {
 				if (($elm$core$Basics$abs(point.f - desiredX) < 1) && ($elm$core$Basics$abs(point.f - desiredX) >= 0)) {
-					return {c0: point, cc: t};
+					return {c0: point, cd: t};
 				} else {
 					if ((point.f - desiredX) > 0) {
 						var $temp$spline = spline,
@@ -15966,7 +16026,7 @@ var $mdgriffith$elm_animator$Internal$Interpolate$guessTime = F2(
 		var four = _v0.d;
 		return (!(four.f - one.f)) ? 0.5 : ((now - one.f) / (four.f - one.f));
 	});
-var $mdgriffith$elm_animator$Internal$Interpolate$linearDefault = {dH: 0, dI: 0, dR: 0, dS: 0, eK: 0};
+var $mdgriffith$elm_animator$Internal$Interpolate$linearDefault = {dG: 0, dH: 0, dQ: 0, dR: 0, eK: 0};
 var $ianmackenzie$elm_units$Quantity$divideBy = F2(
 	function (divisor, _v0) {
 		var value = _v0;
@@ -16055,7 +16115,7 @@ var $mdgriffith$elm_animator$Internal$Interpolate$newVelocityAtTarget = F3(
 					return $ianmackenzie$elm_units$Pixels$pixels(x);
 				}
 			}();
-			var _v3 = lookAhead.dE;
+			var _v3 = lookAhead.dD;
 			if (_v3.$ === 1) {
 				var aheadPosition = _v3.b;
 				return A4(
@@ -16063,11 +16123,11 @@ var $mdgriffith$elm_animator$Internal$Interpolate$newVelocityAtTarget = F3(
 					targetPosition,
 					$mdgriffith$elm_animator$Internal$Time$millis(targetTime),
 					$ianmackenzie$elm_units$Pixels$pixels(aheadPosition),
-					$mdgriffith$elm_animator$Internal$Time$millis(lookAhead.ds));
+					$mdgriffith$elm_animator$Internal$Time$millis(lookAhead.dr));
 			} else {
 				var period = _v3.b;
 				var toX = _v3.c;
-				if (lookAhead.er) {
+				if (lookAhead.eq) {
 					if (!period.$) {
 						var periodDuration = period.a;
 						return A3($mdgriffith$elm_animator$Internal$Interpolate$derivativeOfEasing, toX, periodDuration, 0);
@@ -16083,7 +16143,7 @@ var $mdgriffith$elm_animator$Internal$Interpolate$newVelocityAtTarget = F3(
 						$mdgriffith$elm_animator$Internal$Time$millis(targetTime),
 						$ianmackenzie$elm_units$Pixels$pixels(
 							toX(0)),
-						$mdgriffith$elm_animator$Internal$Time$millis(lookAhead.ds));
+						$mdgriffith$elm_animator$Internal$Time$millis(lookAhead.dr));
 				}
 			}
 		}
@@ -16128,7 +16188,7 @@ var $mdgriffith$elm_animator$Internal$Interpolate$interpolateBetween = F7(
 						}
 					}
 				}(),
-				bX: {
+				bY: {
 					f: targetTimeInMs,
 					g: $ianmackenzie$elm_units$Pixels$inPixels(targetPosition)
 				},
@@ -16139,7 +16199,7 @@ var $mdgriffith$elm_animator$Internal$Interpolate$interpolateBetween = F7(
 				},
 				aX: {
 					f: 1000,
-					g: $ianmackenzie$elm_units$Pixels$inPixelsPerSecond(state.dx)
+					g: $ianmackenzie$elm_units$Pixels$inPixelsPerSecond(state.dw)
 				}
 			});
 		var current = A6(
@@ -16150,10 +16210,10 @@ var $mdgriffith$elm_animator$Internal$Interpolate$interpolateBetween = F7(
 			0.25,
 			A2($mdgriffith$elm_animator$Internal$Interpolate$guessTime, now, curve),
 			0);
-		var firstDerivative = A2($mdgriffith$elm_animator$Internal$Interpolate$firstDerivativeOnSpline, curve, current.cc);
+		var firstDerivative = A2($mdgriffith$elm_animator$Internal$Interpolate$firstDerivativeOnSpline, curve, current.cd);
 		return {
 			am: $ianmackenzie$elm_units$Pixels$pixels(current.c0.g),
-			dx: $ianmackenzie$elm_units$Pixels$pixelsPerSecond(1000 * (firstDerivative.g / firstDerivative.f))
+			dw: $ianmackenzie$elm_units$Pixels$pixelsPerSecond(1000 * (firstDerivative.g / firstDerivative.f))
 		};
 	});
 var $mdgriffith$elm_animator$Internal$Spring$criticalDamping = F2(
@@ -16245,12 +16305,12 @@ var $mdgriffith$elm_animator$Internal$Spring$step = F4(
 		var damping = _v0.a7;
 		var mass = _v0.bd;
 		var fspring = stiffness * (target - motion.am);
-		var fdamper = ((-1) * damping) * motion.dx;
+		var fdamper = ((-1) * damping) * motion.dw;
 		var dt = dtms / 1000;
 		var a = (fspring + fdamper) / mass;
-		var newVelocity = motion.dx + (a * dt);
+		var newVelocity = motion.dw + (a * dt);
 		var newPos = motion.am + (newVelocity * dt);
-		return {am: newPos, dx: newVelocity};
+		return {am: newPos, dw: newVelocity};
 	});
 var $mdgriffith$elm_animator$Internal$Spring$stepOver = F4(
 	function (duration, params, target, state) {
@@ -16308,11 +16368,11 @@ var $mdgriffith$elm_animator$Internal$Interpolate$springInterpolation = F7(
 			targetPos,
 			{
 				am: $ianmackenzie$elm_units$Pixels$inPixels(state.am),
-				dx: $ianmackenzie$elm_units$Pixels$inPixelsPerSecond(state.dx)
+				dw: $ianmackenzie$elm_units$Pixels$inPixelsPerSecond(state.dw)
 			});
 		return {
 			am: $ianmackenzie$elm_units$Pixels$pixels(_new.am),
-			dx: $ianmackenzie$elm_units$Pixels$pixelsPerSecond(_new.dx)
+			dw: $ianmackenzie$elm_units$Pixels$pixelsPerSecond(_new.dw)
 		};
 	});
 var $mdgriffith$elm_animator$Internal$Interpolate$lerp = F7(
@@ -16333,7 +16393,7 @@ var $mdgriffith$elm_animator$Internal$Interpolate$lerp = F7(
 				var x = target.b;
 				return _Utils_eq(
 					x,
-					$ianmackenzie$elm_units$Pixels$inPixels(state.am)) && (!$ianmackenzie$elm_units$Pixels$inPixelsPerSecond(state.dx));
+					$ianmackenzie$elm_units$Pixels$inPixels(state.am)) && (!$ianmackenzie$elm_units$Pixels$inPixelsPerSecond(state.dw));
 			}
 		}();
 		if (nothingHappened) {
@@ -16358,7 +16418,7 @@ var $mdgriffith$elm_animator$Internal$Interpolate$startMoving = function (moveme
 				return $ianmackenzie$elm_units$Pixels$pixels(x);
 			}
 		}(),
-		dx: $ianmackenzie$elm_units$Pixels$pixelsPerSecond(0)
+		dw: $ianmackenzie$elm_units$Pixels$pixelsPerSecond(0)
 	};
 };
 var $mdgriffith$elm_animator$Internal$Time$earliest = F2(
@@ -16409,7 +16469,7 @@ var $mdgriffith$elm_animator$Internal$Interpolate$visit = F5(
 						return $ianmackenzie$elm_units$Pixels$pixels(x);
 					}
 				}(),
-				dx: A3(
+				dw: A3(
 					$mdgriffith$elm_animator$Internal$Interpolate$newVelocityAtTarget,
 					lookup(event),
 					$mdgriffith$elm_animator$Internal$Time$inMilliseconds(start),
@@ -16421,7 +16481,7 @@ var $mdgriffith$elm_animator$Internal$Interpolate$visit = F5(
 				var pos = _v1.b;
 				return {
 					am: $ianmackenzie$elm_units$Pixels$pixels(pos),
-					dx: $ianmackenzie$elm_units$Pixels$pixelsPerSecond(0)
+					dw: $ianmackenzie$elm_units$Pixels$pixelsPerSecond(0)
 				};
 			} else {
 				var period = _v1.b;
@@ -16432,7 +16492,7 @@ var $mdgriffith$elm_animator$Internal$Interpolate$visit = F5(
 					return {
 						am: $ianmackenzie$elm_units$Pixels$pixels(
 							toX(progress)),
-						dx: A3($mdgriffith$elm_animator$Internal$Interpolate$derivativeOfEasing, toX, periodDuration, progress)
+						dw: A3($mdgriffith$elm_animator$Internal$Interpolate$derivativeOfEasing, toX, periodDuration, progress)
 					};
 				} else {
 					var n = period.a;
@@ -16444,30 +16504,30 @@ var $mdgriffith$elm_animator$Internal$Interpolate$visit = F5(
 						return {
 							am: $ianmackenzie$elm_units$Pixels$pixels(
 								toX(1)),
-							dx: $ianmackenzie$elm_units$Pixels$pixelsPerSecond(0)
+							dw: $ianmackenzie$elm_units$Pixels$pixelsPerSecond(0)
 						};
 					} else {
 						var progress = A2($mdgriffith$elm_animator$Internal$Interpolate$wrapUnitAfter, periodDuration, dwellTime);
 						return {
 							am: $ianmackenzie$elm_units$Pixels$pixels(
 								toX(progress)),
-							dx: A3($mdgriffith$elm_animator$Internal$Interpolate$derivativeOfEasing, toX, periodDuration, progress)
+							dw: A3($mdgriffith$elm_animator$Internal$Interpolate$derivativeOfEasing, toX, periodDuration, progress)
 						};
 					}
 				}
 			}
 		}
 	});
-var $mdgriffith$elm_animator$Internal$Interpolate$moving = {bP: $mdgriffith$elm_animator$Internal$Interpolate$getPersonality, bW: $mdgriffith$elm_animator$Internal$Interpolate$dwellPeriod, b1: $mdgriffith$elm_animator$Internal$Interpolate$lerp, aW: $mdgriffith$elm_animator$Internal$Interpolate$startMoving, ch: $mdgriffith$elm_animator$Internal$Interpolate$visit};
+var $mdgriffith$elm_animator$Internal$Interpolate$moving = {bQ: $mdgriffith$elm_animator$Internal$Interpolate$getPersonality, bX: $mdgriffith$elm_animator$Internal$Interpolate$dwellPeriod, b2: $mdgriffith$elm_animator$Internal$Interpolate$lerp, aW: $mdgriffith$elm_animator$Internal$Interpolate$startMoving, ci: $mdgriffith$elm_animator$Internal$Interpolate$visit};
 var $mdgriffith$elm_animator$Internal$Interpolate$unwrapUnits = function (_v0) {
 	var position = _v0.am;
-	var velocity = _v0.dx;
+	var velocity = _v0.dw;
 	return {
 		am: function () {
 			var val = position;
 			return val;
 		}(),
-		dx: function () {
+		dw: function () {
 			var val = velocity;
 			return val;
 		}()
@@ -16502,15 +16562,15 @@ var $mdgriffith$elm_animator$Internal$Interpolate$fillDefaults = F2(
 		} else {
 			var partial = specified.a;
 			return {
+				dG: A2($mdgriffith$elm_animator$Internal$Interpolate$withDefault, builtInDefault.dG, partial.dG),
 				dH: A2($mdgriffith$elm_animator$Internal$Interpolate$withDefault, builtInDefault.dH, partial.dH),
-				dI: A2($mdgriffith$elm_animator$Internal$Interpolate$withDefault, builtInDefault.dI, partial.dI),
+				dQ: A2($mdgriffith$elm_animator$Internal$Interpolate$withDefault, builtInDefault.dQ, partial.dQ),
 				dR: A2($mdgriffith$elm_animator$Internal$Interpolate$withDefault, builtInDefault.dR, partial.dR),
-				dS: A2($mdgriffith$elm_animator$Internal$Interpolate$withDefault, builtInDefault.dS, partial.dS),
 				eK: A2($mdgriffith$elm_animator$Internal$Interpolate$withDefault, builtInDefault.eK, partial.eK)
 			};
 		}
 	});
-var $mdgriffith$elm_animator$Internal$Interpolate$standardDefault = {dH: 0, dI: 0.8, dR: 0, dS: 0.4, eK: 0};
+var $mdgriffith$elm_animator$Internal$Interpolate$standardDefault = {dG: 0, dH: 0.8, dQ: 0, dR: 0.4, eK: 0};
 var $mdgriffith$elm_animator$Internal$Interpolate$withStandardDefault = function (defMovement) {
 	if (!defMovement.$) {
 		var specifiedPersonality = defMovement.a;
@@ -16549,27 +16609,27 @@ var $author$project$Main$vertexAnimation = F4(
 				}
 			}());
 	});
-var $mdgriffith$elm_animator$Internal$Timeline$linearDefault = {dH: 0, dI: 0, dR: 0, dS: 0, eK: 0};
+var $mdgriffith$elm_animator$Internal$Timeline$linearDefault = {dG: 0, dH: 0, dQ: 0, dR: 0, eK: 0};
 var $mdgriffith$elm_animator$Internal$Timeline$arrived = function (timeline) {
 	var details = timeline;
 	return A3(
 		$mdgriffith$elm_animator$Internal$Timeline$foldp,
 		$elm$core$Basics$identity,
 		{
-			bP: function (_v0) {
+			bQ: function (_v0) {
 				return $mdgriffith$elm_animator$Internal$Timeline$linearDefault;
 			},
-			bW: function (_v1) {
+			bX: function (_v1) {
 				return $elm$core$Maybe$Nothing;
 			},
-			b1: F7(
+			b2: F7(
 				function (_v2, _v3, _v4, _v5, _v6, _v7, state) {
 					return state;
 				}),
 			aW: function (_v8) {
-				return details.cP;
+				return details.cQ;
 			},
-			ch: F5(
+			ci: F5(
 				function (lookup, target, targetTime, maybeLookAhead, state) {
 					return $mdgriffith$elm_animator$Internal$Timeline$getEvent(target);
 				})
@@ -16583,20 +16643,20 @@ var $mdgriffith$elm_animator$Internal$Timeline$current = function (timeline) {
 		$mdgriffith$elm_animator$Internal$Timeline$foldp,
 		$elm$core$Basics$identity,
 		{
-			bP: function (_v0) {
+			bQ: function (_v0) {
 				return $mdgriffith$elm_animator$Internal$Timeline$linearDefault;
 			},
-			bW: function (_v1) {
+			bX: function (_v1) {
 				return $elm$core$Maybe$Nothing;
 			},
-			b1: F7(
+			b2: F7(
 				function (_v2, _v3, target, _v4, _v5, _v6, _v7) {
 					return target;
 				}),
 			aW: function (_v8) {
-				return details.cP;
+				return details.cQ;
 			},
-			ch: F5(
+			ci: F5(
 				function (lookup, target, targetTime, maybeLookAhead, state) {
 					return $mdgriffith$elm_animator$Internal$Timeline$getEvent(target);
 				})
@@ -16619,17 +16679,17 @@ var $mdgriffith$elm_animator$Internal$Timeline$previous = function (timeline) {
 		$mdgriffith$elm_animator$Internal$Timeline$foldp,
 		$elm$core$Basics$identity,
 		{
-			bP: function (_v0) {
+			bQ: function (_v0) {
 				return $mdgriffith$elm_animator$Internal$Timeline$linearDefault;
 			},
-			bW: function (_v1) {
+			bX: function (_v1) {
 				return $elm$core$Maybe$Nothing;
 			},
-			b1: $mdgriffith$elm_animator$Internal$Timeline$getPrev,
+			b2: $mdgriffith$elm_animator$Internal$Timeline$getPrev,
 			aW: function (_v2) {
-				return details.cP;
+				return details.cQ;
 			},
-			ch: F5(
+			ci: F5(
 				function (lookup, target, targetTime, maybeLookAhead, state) {
 					return state;
 				})
@@ -16655,7 +16715,7 @@ var $author$project$Main$vertexPointSize = F5(
 			A2($author$project$Main$vertexExpansionCondition, model, vertex) ? A2(
 				$mdgriffith$elm_animator$Animator$move,
 				model.E.M,
-				A3($author$project$Main$vertexAnimation, baseRadius, baseMultiplier, hoverMultiplier)) : (A2($author$project$Main$vertexEdgeDrawingCondition, model, vertex) ? (hoverMultiplier * baseRadius) : (baseMultiplier * baseRadius))) / $author$project$Graph$getZoom(model.cz);
+				A3($author$project$Main$vertexAnimation, baseRadius, baseMultiplier, hoverMultiplier)) : (A2($author$project$Main$vertexEdgeDrawingCondition, model, vertex) ? (hoverMultiplier * baseRadius) : (baseMultiplier * baseRadius))) / $author$project$Graph$getZoom(model.cA);
 	});
 var $avh4$elm_color$Color$white = A4($avh4$elm_color$Color$RgbaSpace, 255 / 255, 255 / 255, 255 / 255, 1.0);
 var $author$project$Main$vertexView = F2(
@@ -16666,7 +16726,7 @@ var $author$project$Main$vertexView = F2(
 			_List_fromArray(
 				[
 					function () {
-					var _v0 = vertex.cg;
+					var _v0 = vertex.ch;
 					if (!_v0.$) {
 						return A2(
 							$joakin$elm_canvas$Canvas$shapes,
@@ -16729,7 +16789,7 @@ var $author$project$Main$vertexView = F2(
 								$author$project$Main$vertexPointSize,
 								model,
 								vertex,
-								_Utils_eq(vertex.cg, $author$project$Graph$LiftStation) ? $author$project$Geometry$liftStationPointSize : $author$project$Geometry$skiRunConnectionPointSize,
+								_Utils_eq(vertex.ch, $author$project$Graph$LiftStation) ? $author$project$Geometry$liftStationPointSize : $author$project$Geometry$skiRunConnectionPointSize,
 								0,
 								1))
 						]))
@@ -16741,12 +16801,12 @@ var $author$project$Main$canvasView = function (model) {
 			A3(
 			$joakin$elm_canvas$Canvas$toHtmlWith,
 			{
-				b$: $elm$core$Basics$ceiling(model.b$),
+				b0: $elm$core$Basics$ceiling(model.b0),
 				eE: _List_fromArray(
 					[
 						A2($joakin$elm_canvas$Canvas$Texture$loadFromImageUrl, model.G, $author$project$Messages$TextureLoaded)
 					]),
-				ci: $elm$core$Basics$ceiling(model.ci)
+				cj: $elm$core$Basics$ceiling(model.cj)
 			},
 			_List_fromArray(
 				[
@@ -16783,8 +16843,8 @@ var $author$project$Main$canvasView = function (model) {
 						[
 							$joakin$elm_canvas$Canvas$Settings$Advanced$transform(
 							function () {
-								var zoom = $author$project$Graph$getZoom(model.cz);
-								var pos = $author$project$Graph$getPosition(model.cz);
+								var zoom = $author$project$Graph$getZoom(model.cA);
+								var pos = $author$project$Graph$getPosition(model.cA);
 								return _List_fromArray(
 									[
 										A2($joakin$elm_canvas$Canvas$Settings$Advanced$translate, pos.f, pos.g),
@@ -16804,12 +16864,12 @@ var $author$project$Main$canvasView = function (model) {
 									A2(
 										$elm$core$List$map,
 										$author$project$Main$edgeView(model),
-										$author$project$Graph$getEdgesList(model.cz)),
+										$author$project$Graph$getEdgesList(model.cA)),
 									_Utils_ap(
 										A2(
 											$elm$core$List$map,
 											$author$project$Main$vertexView(model),
-											$author$project$Graph$getVerticesList(model.cz)),
+											$author$project$Graph$getVerticesList(model.cA)),
 										function () {
 											var _v1 = model.s;
 											if (_v1.$ === 1) {
@@ -16825,9 +16885,13 @@ var $author$project$Main$canvasView = function (model) {
 							])))
 				])),
 			$author$project$Main$mapField(model),
-			$author$project$Main$modeSelectionButtons(model.ag),
+			$author$project$Main$modeSelectionButtons(model.af),
 			$author$project$Main$saveMapButtons(model)
 		]);
+};
+var $author$project$Messages$LoadExistingGraph = {$: 16};
+var $author$project$Messages$SelectGraphFromIndex = function (a) {
+	return {$: 18, a: a};
 };
 var $elm$html$Html$Attributes$boolProperty = F2(
 	function (key, bool) {
@@ -16837,12 +16901,156 @@ var $elm$html$Html$Attributes$boolProperty = F2(
 			$elm$json$Json$Encode$bool(bool));
 	});
 var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
+var $author$project$Saves$graphIndexEntryFromString = function (jsonString) {
+	var _v0 = A2(
+		$elm$json$Json$Decode$decodeString,
+		$author$project$Saves$graphIndexEntryDecoder($elm$core$Maybe$Nothing),
+		jsonString);
+	if (!_v0.$) {
+		var value = _v0.a;
+		return $elm$core$Maybe$Just(value);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $author$project$Saves$graphIndexEntryToString = F2(
+	function (indentation, entry) {
+		return A2(
+			$elm$json$Json$Encode$encode,
+			indentation,
+			A2($author$project$Saves$graphIndexEntryEncoder, true, entry));
+	});
+var $elm$html$Html$option = _VirtualDom_node('option');
+var $elm$html$Html$p = _VirtualDom_node('p');
+var $elm$html$Html$select = _VirtualDom_node('select');
+var $author$project$Main$graphSelectionView = function (model) {
+	return _List_fromArray(
+		[
+			A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('h-full w-full flex flex-col justify-center items-center')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$button,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('transition-colors shadow-md rounded-md bg-primary text-secondary px-4 py-2 hover:bg-secondary hover:text-primary font-bold uppercase mb-8'),
+							$elm$html$Html$Events$onClick(
+							$author$project$Messages$CreateNewGraph($elm$core$Maybe$Nothing))
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Create a new graph')
+						])),
+					A2(
+					$elm$html$Html$p,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('text-center my-8')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('or select one of existing graphs:')
+						])),
+					A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('flex')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$select,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('transition-all border-2 border-primary rounded-md min-w-[15rem]'),
+									A2(
+									$elm$html$Html$Events$on,
+									'change',
+									A2(
+										$elm$json$Json$Decode$map,
+										function (s) {
+											return $author$project$Messages$SelectGraphFromIndex(
+												$author$project$Saves$graphIndexEntryFromString(s));
+										},
+										A2(
+											$elm$json$Json$Decode$at,
+											_List_fromArray(
+												['target', 'value']),
+											$elm$json$Json$Decode$string)))
+								]),
+							A2(
+								$elm$core$List$cons,
+								A2(
+									$elm$html$Html$option,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$value('')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text('No graph selected...')
+										])),
+								A2(
+									$elm$core$List$map,
+									function (e) {
+										return A2(
+											$elm$html$Html$option,
+											_List_fromArray(
+												[
+													$elm$html$Html$Attributes$value(
+													A2($author$project$Saves$graphIndexEntryToString, 0, e))
+												]),
+											_List_fromArray(
+												[
+													$elm$html$Html$text(
+													_Utils_ap(
+														e.bP,
+														(!e.d5) ? ' (Local)' : ' (Remote)'))
+												]));
+									},
+									A2(
+										$elm$core$List$append,
+										$elm$core$Dict$values(model.ak),
+										$elm$core$Dict$values(model.bG))))),
+							function () {
+							var disabled = !$author$project$Utils$maybeHasValue(model.bL);
+							return A2(
+								$elm$html$Html$button,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('transition-colors rounded-md font-bold uppercase ml-2 px-4 py-2'),
+										$elm$html$Html$Attributes$classList(
+										_List_fromArray(
+											[
+												_Utils_Tuple2('bg-gray-200 text-gray-400', disabled),
+												_Utils_Tuple2('bg-primary text-secondary hover:bg-secondary hover:text-primary shadow-md', !disabled)
+											])),
+										$elm$html$Html$Events$onClick(
+										disabled ? $author$project$Messages$Noop : $author$project$Messages$LoadExistingGraph),
+										$elm$html$Html$Attributes$disabled(disabled)
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Load')
+									]));
+						}()
+						]))
+				]))
+		]);
+};
 var $elm$html$Html$main_ = _VirtualDom_node('main');
+var $author$project$Messages$LeaveGraph = {$: 15};
 var $author$project$Messages$SetBackgroundOpacity = function (a) {
-	return {$: 19, a: a};
+	return {$: 20, a: a};
 };
 var $author$project$Messages$SetMenuShown = function (a) {
-	return {$: 18, a: a};
+	return {$: 19, a: a};
 };
 var $elm$html$Html$h1 = _VirtualDom_node('h1');
 var $elm$html$Html$label = _VirtualDom_node('label');
@@ -16882,31 +17090,21 @@ var $author$project$Main$menuPane = F2(
 			$elm$html$Html$div,
 			_List_fromArray(
 				[
-					$elm$html$Html$Attributes$class('fixed top-0 bottom-0 w-96 transition-all bg-primary shadow-md z-20'),
+					$elm$html$Html$Attributes$class('fixed top-0 bottom-0 w-96 transition-all bg-primary shadow-md z-20 flex flex-col'),
 					$elm$html$Html$Attributes$classList(
 					_List_fromArray(
 						[
-							_Utils_Tuple2('left-0', model.eb),
-							_Utils_Tuple2('-left-96', !model.eb)
+							_Utils_Tuple2('left-0', model.ea),
+							_Utils_Tuple2('-left-96', !model.ea)
 						]))
 				]),
 			_List_fromArray(
 				[
 					A2(
-					$elm$html$Html$button,
-					_List_fromArray(
-						[
-							$elm$html$Html$Attributes$class('bg-primary text-secondary p-4 rounded-br-md absolute right-0 translate-x-full shadow-md top-0 z-10'),
-							$elm$html$Html$Events$onClick(
-							$author$project$Messages$SetMenuShown(!model.eb))
-						]),
-					_List_fromArray(
-						[$author$project$Icons$menu])),
-					A2(
 					$elm$html$Html$div,
 					_List_fromArray(
 						[
-							$elm$html$Html$Attributes$class('h-full w-full p-4 text-white')
+							$elm$html$Html$Attributes$class('flex items-center bg-primary text-secondary p-4 rounded-br-md shadow-md w-max')
 						]),
 					_List_fromArray(
 						[
@@ -16914,12 +17112,31 @@ var $author$project$Main$menuPane = F2(
 							$elm$html$Html$h1,
 							_List_fromArray(
 								[
-									$elm$html$Html$Attributes$class('text-xl font-bold mb-4')
+									$elm$html$Html$Attributes$class('text-xl font-bold inline-block w-96 pr-8')
 								]),
 							_List_fromArray(
 								[
-									$elm$html$Html$text(graph.bO)
+									$elm$html$Html$text(graph.bP)
 								])),
+							A2(
+							$elm$html$Html$button,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('inline-block'),
+									$elm$html$Html$Events$onClick(
+									$author$project$Messages$SetMenuShown(!model.ea))
+								]),
+							_List_fromArray(
+								[$author$project$Icons$menu]))
+						])),
+					A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('flex-grow w-full p-4 text-white')
+						]),
+					_List_fromArray(
+						[
 							A2(
 							$elm$html$Html$div,
 							_List_fromArray(
@@ -16974,12 +17191,29 @@ var $author$project$Main$menuPane = F2(
 										]),
 									_List_Nil)
 								]))
+						])),
+					A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('flex shadow-inner')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$button,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('px-6 py-3 shadow-inner text-secondary font-bold transition-colors hover:bg-secondary hover:text-primary'),
+									$elm$html$Html$Events$onClick($author$project$Messages$LeaveGraph)
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Leave graph')
+								]))
 						]))
 				]));
 	});
-var $elm$html$Html$option = _VirtualDom_node('option');
-var $elm$html$Html$p = _VirtualDom_node('p');
-var $elm$html$Html$select = _VirtualDom_node('select');
 var $author$project$Main$view = function (model) {
 	return A2(
 		$elm$html$Html$main_,
@@ -16988,123 +17222,9 @@ var $author$project$Main$view = function (model) {
 				$elm$html$Html$Attributes$class('h-screen w-screen overflow-hidden relative')
 			]),
 		function () {
-			var _v0 = model.cz;
+			var _v0 = model.cA;
 			if (_v0.$ === 1) {
-				return _List_fromArray(
-					[
-						A2(
-						$elm$html$Html$div,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('h-full w-full flex flex-col justify-center items-center')
-							]),
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$button,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$class('transition-colors shadow-md rounded-md bg-primary text-secondary px-4 py-2 hover:bg-secondary hover:text-primary font-bold uppercase mb-8'),
-										$elm$html$Html$Events$onClick(
-										$author$project$Messages$CreateNewGraph($elm$core$Maybe$Nothing))
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Create a new graph')
-									])),
-								A2(
-								$elm$html$Html$p,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$class('text-center my-8')
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('or select one of existing graphs:')
-									])),
-								A2(
-								$elm$html$Html$div,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$class('flex')
-									]),
-								_List_fromArray(
-									[
-										A2(
-										$elm$html$Html$select,
-										_List_fromArray(
-											[
-												$elm$html$Html$Attributes$class('transition-all border-2 border-primary rounded-md min-w-[15rem]'),
-												A2(
-												$elm$html$Html$Events$on,
-												'change',
-												A2(
-													$elm$json$Json$Decode$map,
-													function (s) {
-														return $author$project$Messages$SelectGraphFromIndex(
-															$elm$core$String$isEmpty(s) ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(s));
-													},
-													A2(
-														$elm$json$Json$Decode$at,
-														_List_fromArray(
-															['target', 'value']),
-														$elm$json$Json$Decode$string)))
-											]),
-										A2(
-											$elm$core$List$cons,
-											A2(
-												$elm$html$Html$option,
-												_List_fromArray(
-													[
-														$elm$html$Html$Attributes$value('')
-													]),
-												_List_fromArray(
-													[
-														$elm$html$Html$text('No graph selected...')
-													])),
-											A2(
-												$elm$core$List$map,
-												function (e) {
-													return A2(
-														$elm$html$Html$option,
-														_List_fromArray(
-															[
-																$elm$html$Html$Attributes$value(e.b0)
-															]),
-														_List_fromArray(
-															[
-																$elm$html$Html$text(
-																_Utils_ap(
-																	e.bO,
-																	(!e.d6) ? ' (Local)' : ' (Remote)'))
-															]));
-												},
-												$elm$core$Dict$values(model._)))),
-										function () {
-										var disabled = !$author$project$Utils$maybeHasValue(model.bK);
-										return A2(
-											$elm$html$Html$button,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$class('transition-colors rounded-md font-bold uppercase ml-2 px-4 py-2'),
-													$elm$html$Html$Attributes$classList(
-													_List_fromArray(
-														[
-															_Utils_Tuple2('bg-gray-200 text-gray-400', disabled),
-															_Utils_Tuple2('bg-primary text-secondary hover:bg-secondary hover:text-primary shadow-md', !disabled)
-														])),
-													$elm$html$Html$Events$onClick(
-													disabled ? $author$project$Messages$Noop : $author$project$Messages$LoadExistingGraph),
-													$elm$html$Html$Attributes$disabled(disabled)
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('Load')
-												]));
-									}()
-									]))
-							]))
-					]);
+				return $author$project$Main$graphSelectionView(model);
 			} else {
 				var graph = _v0.a;
 				return A2(
@@ -17115,7 +17235,7 @@ var $author$project$Main$view = function (model) {
 		}());
 };
 var $author$project$Main$main = $elm$browser$Browser$element(
-	{d2: $author$project$Main$init, eB: $author$project$Main$subscriptions, eH: $author$project$Main$update, eJ: $author$project$Main$view});
+	{d1: $author$project$Main$init, eB: $author$project$Main$subscriptions, eH: $author$project$Main$update, eJ: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
 	A2(
 		$elm$json$Json$Decode$andThen,
@@ -17139,7 +17259,7 @@ _Platform_export({'Main':{'init':$author$project$Main$main(
 														$elm$json$Json$Decode$andThen,
 														function (baseUrl) {
 															return $elm$json$Json$Decode$succeed(
-																{a6: baseUrl, cJ: graphJson, b$: height, cU: localGraphIndex, dc: savedBackground, dj: selectedGraphID, ci: width});
+																{a6: baseUrl, cK: graphJson, b0: height, ak: localGraphIndex, dc: savedBackground, ev: selectedGraphID, cj: width});
 														},
 														A2($elm$json$Json$Decode$field, 'baseUrl', $elm$json$Json$Decode$string));
 												},
