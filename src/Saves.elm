@@ -9,48 +9,77 @@ import Model exposing (..)
 import Utils
 
 
---graphIndexEntryLocationEncoder : GraphLocation -> E.Value
---graphIndexEntryLocationEncoder loc =
---  E.string <|
---    case loc of
---      Local -> "local"
---      Remote -> "remote"
+graphIndexEntryToString : Int -> GraphIndexEntry -> String
+graphIndexEntryToString indentation entry =
+  E.encode indentation (graphIndexEntryEncoder True entry)
+
+
+graphIndexEntryFromString : String -> Maybe GraphIndexEntry
+graphIndexEntryFromString jsonString =
+  case D.decodeString (graphIndexEntryDecoder Nothing) jsonString of
+    Ok value ->
+      Just value
+
+    Err _ ->
+      Nothing
 
 
 
-graphIndexEntryEncoder : GraphIndexEntry -> E.Value
-graphIndexEntryEncoder entry =
-  E.object
+graphIndexEntryLocationEncoder : GraphLocation -> E.Value
+graphIndexEntryLocationEncoder loc =
+  E.string <|
+    case loc of
+      Local -> "local"
+      Remote -> "remote"
+
+
+
+graphIndexEntryEncoder : Bool -> GraphIndexEntry -> E.Value
+graphIndexEntryEncoder withLocation entry =
+  E.object <|
   [ ("title", E.string entry.title)
   , ("path", E.string entry.path)
   , ("id", E.string entry.id)
-  ]
+  ] ++ (if withLocation then [("location", graphIndexEntryLocationEncoder entry.location)] else [])
 
 graphIndexEncoder : Dict GraphID GraphIndexEntry -> E.Value
 graphIndexEncoder index =
-  E.list graphIndexEntryEncoder (Dict.values index)
+  E.list (graphIndexEntryEncoder False) (Dict.values index)
 
 
---graphIndexEntryLocationDecoder : D.Decoder GraphLocation
---graphIndexEntryLocationDecoder =
---  D.string
---    |> D.andThen
---      ( \loc ->
---        case loc of
---          "local" -> D.succeed Local
---          "remote" -> D.succeed Remote
---          other -> D.fail <| "Unrecognized location type: " ++ other
---      )
+graphIndexEntryLocationDecoder : D.Decoder GraphLocation
+graphIndexEntryLocationDecoder =
+  D.string
+    |> D.andThen
+      ( \loc ->
+        case loc of
+          "local" -> D.succeed Local
+          "remote" -> D.succeed Remote
+          other -> D.fail <| "Unrecognized location type: " ++ other
+      )
 
 
 graphIndexDecoder : Graph.GraphLocation -> D.Decoder (Dict Graph.GraphID Graph.GraphIndexEntry)
 graphIndexDecoder location =
   D.map Dict.fromList <|
   D.list <|
-  D.map3 (\title path id -> (id, Graph.GraphIndexEntry title path id location))
-    (D.field "title" D.string)
-    (D.field "path" D.string)
-    (D.field "id" D.string)
+  D.map (\entry -> (entry.id, entry)) <| graphIndexEntryDecoder <| Just location
+
+graphIndexEntryDecoder : Maybe Graph.GraphLocation -> D.Decoder Graph.GraphIndexEntry
+graphIndexEntryDecoder location =
+  case location of
+    Just loc ->
+      D.map3 (\title path id -> (Graph.GraphIndexEntry title path id loc))
+        (D.field "title" D.string)
+        (D.field "path" D.string)
+        (D.field "id" D.string)
+    Nothing ->
+      D.map4 (\title path id loc -> (Graph.GraphIndexEntry title path id loc))
+        (D.field "title" D.string)
+        (D.field "path" D.string)
+        (D.field "id" D.string)
+        (D.field "location" graphIndexEntryLocationDecoder)
+
 
 graphIndexToJson : Dict GraphID GraphIndexEntry -> String
 graphIndexToJson graphIndex =

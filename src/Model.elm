@@ -18,8 +18,9 @@ type alias Animations =
 
 type alias Model =
   { currentGraph : Maybe Graph.Graph
-  , graphIndex : Dict Graph.GraphID Graph.GraphIndexEntry
-  , selectedGraphIndexEntryId : Maybe Graph.GraphID
+  , localGraphIndex : Dict Graph.GraphID Graph.GraphIndexEntry
+  , remoteGraphIndex : Dict Graph.GraphID Graph.GraphIndexEntry
+  , selectedGraphIndexEntry : Maybe Graph.GraphIndexEntry
   , animations : Animations
   , texture :  Maybe Canvas.Texture.Texture
   , width : Float

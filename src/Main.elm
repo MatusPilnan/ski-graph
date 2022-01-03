@@ -59,8 +59,9 @@ init flags =
     , mapFieldState = Loading
     , drawingEdge = Nothing
     , activeEdgeDrawingMode = Graph.Lift
-    , graphIndex = Saves.graphIndexFromJson Graph.Local flags.localGraphIndex
-    , selectedGraphIndexEntryId = flags.selectedGraphID
+    , localGraphIndex = Saves.graphIndexFromJson Graph.Local flags.localGraphIndex
+    , remoteGraphIndex = Dict.empty
+    , selectedGraphIndexEntry = Nothing
     , baseUrl = flags.baseUrl
     , menuShown = False
     , backgroundOpacity = 1
@@ -181,12 +182,12 @@ update msg model =
         Just string ->
           let
             newGraph = (let g = Graph.init in { g | id = string } )
-            newIndex = Dict.insert string (Graph.GraphIndexEntry newGraph.title string string Graph.Local) model.graphIndex
+            newIndex = Dict.insert string (Graph.GraphIndexEntry newGraph.title string string Graph.Local) model.localGraphIndex
           in
           ( { model | currentGraph = Just newGraph
             , vertexCounter = 0
             , edgeCounter = 0
-            , graphIndex = newIndex
+            , localGraphIndex = newIndex
             }
           , Cmd.batch
             [ saveGraph model.currentGraph
@@ -198,7 +199,7 @@ update msg model =
 
     LoadExistingGraph ->
       ( model
-      , case Maybe.andThen (\id -> Dict.get id model.graphIndex) <| model.selectedGraphIndexEntryId  of
+      , case model.selectedGraphIndexEntry of
           Nothing -> Cmd.none
           Just indexEntry ->
             case indexEntry.location of
@@ -207,12 +208,12 @@ update msg model =
       )
 
     SelectGraphFromIndex selection ->
-      ( { model | selectedGraphIndexEntryId = selection }, (saveToLocalStorage ("selected", Maybe.withDefault "" selection)))
+      ( { model | selectedGraphIndexEntry = selection }, (saveToLocalStorage ("selected", Maybe.withDefault "" <| Maybe.map .id selection)))
 
     LoadGraphIndex maybeResult ->
       case maybeResult of
         Nothing -> (model, Cmd.none)
-        Just (Result.Ok index) -> ({ model | graphIndex = Dict.union model.graphIndex index }, Cmd.none)
+        Just (Result.Ok index) -> ({ model | remoteGraphIndex = Dict.union model.remoteGraphIndex index }, Cmd.none)
         Just (Err _) -> (model, Cmd.none)
 
     SetCurrentGraph graph ->
@@ -225,10 +226,13 @@ update msg model =
     SetBackgroundOpacity opacity ->
       ({ model | backgroundOpacity = max 0 <| min 1 opacity }, Cmd.none)
 
+    LeaveGraph ->
+      ({ model | currentGraph = Nothing }, saveGraphAndIndex model )
+
 
 saveGraphAndIndex : Model -> Cmd Msg
 saveGraphAndIndex model =
-  Cmd.batch [ saveGraph model.currentGraph, saveGraphIndex model.graphIndex ]
+  Cmd.batch [ saveGraph model.currentGraph, saveGraphIndex model.localGraphIndex ]
 
 
 saveModel : (Model, Cmd Msg) -> (Model, Cmd Msg)
@@ -494,61 +498,75 @@ view model =
   [ Attr.class "h-screen w-screen overflow-hidden relative" ]
   <| case model.currentGraph of
       Nothing ->
-        [ Html.div
-          [ Attr.class "h-full w-full flex flex-col justify-center items-center" ]
-          [ Html.button
-            [ Attr.class "transition-colors shadow-md rounded-md bg-primary text-secondary px-4 py-2 hover:bg-secondary hover:text-primary font-bold uppercase mb-8"
-            , Events.onClick <| CreateNewGraph Nothing
-            ]
-            [ Html.text "Create a new graph" ]
-          , Html.p [ Attr.class "text-center my-8" ] [ Html.text "or select one of existing graphs:" ]
-          , Html.div
-            [ Attr.class "flex" ]
-            [ Html.select
-              [ Attr.class "transition-all border-2 border-primary rounded-md min-w-[15rem]"
-              , Events.on "change" <| D.map (\s -> SelectGraphFromIndex <| if String.isEmpty s then Nothing else Just s ) <| D.at ["target", "value"] D.string
-              ]
-              <| Html.option [ Attr.value "" ] [ Html.text "No graph selected..." ]
-              :: (List.map (\e -> Html.option [  Attr.value e.id ] [ Html.text <| e.title ++ if e.location == Graph.Local then " (Local)" else " (Remote)" ])  <| Dict.values model.graphIndex)
-            , ( let disabled = not <| Utils.maybeHasValue model.selectedGraphIndexEntryId in
-                Html.button
-                [ Attr.class "transition-colors rounded-md font-bold uppercase ml-2 px-4 py-2"
-                , Attr.classList
-                  [ ("bg-gray-200 text-gray-400", disabled)
-                  , ("bg-primary text-secondary hover:bg-secondary hover:text-primary shadow-md", not disabled)
-                  ]
-                , Events.onClick <| if disabled then Noop else LoadExistingGraph
-                , Attr.disabled disabled
-                ]
-                [ Html.text "Load" ]
-              )
-            ]
-          ]
-        ]
+        graphSelectionView model
       Just graph ->
         (menuPane model graph) :: (canvasView model)
+
+graphSelectionView : Model -> List (Html.Html Msg)
+graphSelectionView model =
+  [ Html.div
+    [ Attr.class "h-full w-full flex flex-col justify-center items-center" ]
+    [ Html.button
+      [ Attr.class "transition-colors shadow-md rounded-md bg-primary text-secondary px-4 py-2 hover:bg-secondary hover:text-primary font-bold uppercase mb-8"
+      , Events.onClick <| CreateNewGraph Nothing
+      ]
+      [ Html.text "Create a new graph" ]
+    , Html.p [ Attr.class "text-center my-8" ] [ Html.text "or select one of existing graphs:" ]
+    , Html.div
+      [ Attr.class "flex" ]
+      [ Html.select
+        [ Attr.class "transition-all border-2 border-primary rounded-md min-w-[15rem]"
+        , Events.on "change" <| D.map (\s -> SelectGraphFromIndex <| Saves.graphIndexEntryFromString s ) <| D.at ["target", "value"] D.string
+        ]
+        <| Html.option [ Attr.value "" ] [ Html.text "No graph selected..." ]
+        ::
+        ( List.map
+          ( \e ->
+            Html.option
+            [ Attr.value (Saves.graphIndexEntryToString 0 e) ]
+            [ Html.text <| e.title ++ if e.location == Graph.Local then " (Local)" else " (Remote)" ]
+          ) <| List.append (Dict.values model.localGraphIndex) <| Dict.values model.remoteGraphIndex)
+      , ( let disabled = not <| Utils.maybeHasValue model.selectedGraphIndexEntry in
+          Html.button
+          [ Attr.class "transition-colors rounded-md font-bold uppercase ml-2 px-4 py-2"
+          , Attr.classList
+            [ ("bg-gray-200 text-gray-400", disabled)
+            , ("bg-primary text-secondary hover:bg-secondary hover:text-primary shadow-md", not disabled)
+            ]
+          , Events.onClick <| if disabled then Noop else LoadExistingGraph
+          , Attr.disabled disabled
+          ]
+          [ Html.text "Load" ]
+        )
+      ]
+    ]
+  ]
+
 
 
 menuPane : Model -> Graph.Graph ->Html.Html Msg
 menuPane model graph =
   Html.div
-  [ Attr.class "fixed top-0 bottom-0 w-96 transition-all bg-primary shadow-md z-20"
+  [ Attr.class "fixed top-0 bottom-0 w-96 transition-all bg-primary shadow-md z-20 flex flex-col"
   , Attr.classList
     [ ("left-0", model.menuShown)
     , ("-left-96", not model.menuShown)
     ]
   ]
-  [ Html.button
-    [ Attr.class "bg-primary text-secondary p-4 rounded-br-md absolute right-0 translate-x-full shadow-md top-0 z-10"
-    , Events.onClick <| SetMenuShown <| not model.menuShown
-    ]
-    [ Icons.menu ]
-  , Html.div
-    [ Attr.class "h-full w-full p-4 text-white" ]
+  [ Html.div
+    [ Attr.class "flex items-center bg-primary text-secondary p-4 rounded-br-md shadow-md w-max" ]
     [ Html.h1
-      [ Attr.class "text-xl font-bold mb-4" ]
+      [ Attr.class "text-xl font-bold inline-block w-96 pr-8" ]
       [ Html.text graph.title ]
-    , Html.div
+    , Html.button
+      [ Attr.class "inline-block"
+      , Events.onClick <| SetMenuShown <| not model.menuShown
+      ]
+      [ Icons.menu ]
+    ]
+  , Html.div
+    [ Attr.class "flex-grow w-full p-4 text-white" ]
+    [ Html.div
       [ Attr.class "w-full" ]
       [ Html.label
         [ Attr.class "font-light text-sm flex justify-between" ]
@@ -566,6 +584,14 @@ menuPane model graph =
         ]
         []
       ]
+    ]
+  , Html.div
+    [ Attr.class "flex shadow-inner" ]
+    [ Html.button
+      [ Attr.class "px-6 py-3 shadow-inner text-secondary font-bold transition-colors hover:bg-secondary hover:text-primary"
+      , Events.onClick LeaveGraph
+      ]
+      [ Html.text "Leave graph" ]
     ]
   ]
 

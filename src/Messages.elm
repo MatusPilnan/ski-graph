@@ -22,8 +22,9 @@ type Msg
   | DownloadCurrentGraph
   | CreateNewGraph (Maybe Graph.GraphID)
   | SetCurrentGraph Graph.Graph
+  | LeaveGraph
   | LoadExistingGraph
   | LoadGraphIndex (Maybe (Result String (Dict Graph.GraphID Graph.GraphIndexEntry)))
-  | SelectGraphFromIndex (Maybe Graph.GraphID)
+  | SelectGraphFromIndex (Maybe Graph.GraphIndexEntry)
   | SetMenuShown Bool
   | SetBackgroundOpacity Float
