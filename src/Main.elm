@@ -217,7 +217,12 @@ update msg model =
         Just (Err _) -> (model, Cmd.none)
 
     SetCurrentGraph graph ->
-      ({ model | currentGraph = Just graph, vertexCounter = Graph.getNextVertexId graph, edgeCounter = Graph.getNextEdgeId graph }, saveGraph model.currentGraph)
+      ( { model
+        | currentGraph = Just <| Graph.calculateVertexTypes graph
+        , vertexCounter = Graph.getNextVertexId graph
+        , edgeCounter = Graph.getNextEdgeId graph
+        }
+      , saveGraph model.currentGraph)
 
     SetMenuShown shown ->
       ({ model | menuShown = shown }, Cmd.none )
@@ -227,7 +232,7 @@ update msg model =
       ({ model | backgroundOpacity = max 0 <| min 1 opacity }, Cmd.none)
 
     LeaveGraph ->
-      ({ model | currentGraph = Nothing }, saveGraphAndIndex model )
+      ({ model | currentGraph = Nothing, menuShown = False }, saveGraphAndIndex model )
 
 
 saveGraphAndIndex : Model -> Cmd Msg
@@ -399,8 +404,14 @@ getHoveringEdge : Model -> MouseEvent -> Maybe (Graph.Edge, Graph.Point)
 getHoveringEdge model event =
   List.head <| List.filterMap (\edge -> Maybe.map (\point -> (edge, point)) <| Geom.mouseOverEdge (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph) event.position edge) <| Graph.getEdgesList model.currentGraph
 
+getEdgeOnPosition : Model -> Graph.Point -> Maybe (Graph.Edge, Graph.Point)
 getEdgeOnPosition model position =
   List.head <| List.filterMap (\edge -> Maybe.map (\point -> (edge, point)) <| Geom.pointOverEdge position (Graph.getZoom model.currentGraph) edge) <| Graph.getEdgesList model.currentGraph
+
+getEdgeOnPositionFromGraph : Graph.Graph -> Graph.Point -> Maybe Graph.Edge
+getEdgeOnPositionFromGraph graph position =
+  List.head <| List.filter (\edge -> Utils.maybeHasValue <| Geom.pointOverEdge position graph.zoom edge) <| Graph.getEdgesList <| Just graph
+
 
 connectEdgeToVertex : Model -> Graph.Edge -> Graph.Vertex -> Model
 connectEdgeToVertex model edge vertex =
@@ -439,26 +450,23 @@ connectEdgeToEdge model edge targetEdge point =
         let
           decision =
             ( (newEdge.start.id) == -1
-            , Maybe.andThen (\e -> Maybe.map (\p -> (e, p)) (Geom.pointOverEdge edge.start.position graph.zoom e)) <| Dict.get targetEdge.id updatedGraph.edges
-            , Maybe.andThen (\e -> Maybe.map (\p -> (e, p)) (Geom.pointOverEdge edge.start.position graph.zoom e)) <| Dict.get (model.edgeCounter + 2) updatedGraph.edges
+            , getEdgeOnPositionFromGraph updatedGraph newEdge.start.position
             )
           action splitEdge splitPoint =
-            Geom.splitEdge splitEdge splitPoint (model.edgeCounter + 3) (model.vertexCounter + 2) updatedGraph
-            |> Graph.addEdge (Geom.calculateEdgeBoundingBox { newEdge | start = (let s = newEdge.start in { s | id = if s.id == -1 then model.vertexCounter + 2 else s.id}) })
+            Geom.splitEdge splitEdge splitPoint (model.edgeCounter + 3) (model.vertexCounter + 1) updatedGraph
+            |> Graph.addEdge (Geom.calculateEdgeBoundingBox { newEdge | start = (let s = newEdge.start in { s | id = if s.id == -1 then model.vertexCounter + 1 else s.id}) })
         in
         ( case decision of
-            (True, Just (splitEdge, splitPoint), _) ->
-              action splitEdge splitPoint
-            (True, _, Just (splitEdge, splitPoint)) ->
-              action splitEdge splitPoint
-            (_, _, _) ->
+            (True, Just splitEdge) ->
+              action splitEdge newEdge.start.position
+            (_, _) ->
               updatedGraph
         )
       )
-      <| Geom.splitEdge targetEdge point (model.edgeCounter + 2) (model.vertexCounter + 1)
+      <| Geom.splitEdge targetEdge point (model.edgeCounter + 2) (model.vertexCounter)
       <| Graph.addEdge (Geom.calculateEdgeBoundingBox newEdge) graph
     )
-    ({ edge | end = Just <| Graph.Vertex (model.vertexCounter + 1) Nothing Graph.LiftStation point, edgeType = model.activeEdgeDrawingMode })
+    ({ edge | end = Just <| Graph.Vertex (model.vertexCounter) Nothing Graph.LiftStation point, edgeType = model.activeEdgeDrawingMode })
     model.currentGraph
   }
 
@@ -571,7 +579,7 @@ menuPane model graph =
       [ Html.label
         [ Attr.class "font-light text-sm flex justify-between" ]
         [ Html.span [] [ Html.text "Background opacity"]
-        , Html.span [] [ Html.text <| (String.fromFloat <| 100 * model.backgroundOpacity) ++ "%" ]
+        , Html.span [] [ Html.text <| (String.fromInt <| round <| 100 * model.backgroundOpacity) ++ "%" ]
         ]
       , Html.input
         [ Attr.type_ "range"
