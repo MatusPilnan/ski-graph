@@ -10,6 +10,7 @@ import Color
 import Dict
 import Geometry as Geom
 import Graph
+import GraphUtils as GU
 import Html
 import Html.Attributes as Attr
 import Html.Events as Events
@@ -50,10 +51,10 @@ init flags =
     , height = flags.height
     , vertexCounter = 0
     , edgeCounter = 0
-    , mousePosition = Graph.Point 0 0
+    , mousePosition = Geom.Point 0 0
     , mouseDown = False
     , hasMovedWhileMouseDown = False
-    , mouseDownStartPosition = Graph.Point 0 0
+    , mouseDownStartPosition = Geom.Point 0 0
     , mapFieldVisible = False
     , mapFieldInput = flags.savedBackground
     , mapFieldState = Loading
@@ -150,7 +151,7 @@ update msg model =
       ( { model
         | currentGraph = Maybe.map
           ( Graph.setPosition
-            ( Geom.constrainBackgroundToCanvas { model | currentGraph = Maybe.map (Graph.setZoom zoomAfter) model.currentGraph }
+            ( GU.constrainBackgroundToCanvas { model | currentGraph = Maybe.map (Graph.setZoom zoomAfter) model.currentGraph }
                 <| Geom.subPoints model.mousePosition
                 <| Geom.mulPoint (Geom.canvasPointToBackgroundPoint model.mousePosition (Graph.getPosition model.currentGraph) zoomBefore) zoomAfter
             ) << Graph.setZoom zoomAfter
@@ -270,7 +271,7 @@ adaptToNewDimensions width height (model, cmd) =
   ( { newModel
     | currentGraph = Maybe.map
       ( Graph.setPosition
-        ( Geom.constrainBackgroundToCanvas newModel
+        ( GU.constrainBackgroundToCanvas newModel
           <| Graph.getPosition model.currentGraph
         ) << Graph.setZoom zoomAfter
       ) model.currentGraph
@@ -291,7 +292,7 @@ checkModelDragging event (model, cmd) =
     in
     ( { model
       | hasMovedWhileMouseDown = True
-      , currentGraph = Graph.updateGraphProperty Graph.setPosition (Geom.constrainBackgroundToCanvas model new) model.currentGraph
+      , currentGraph = Graph.updateGraphProperty Graph.setPosition (GU.constrainBackgroundToCanvas model new) model.currentGraph
       }
     , cmd
     ) else (model,cmd)
@@ -400,17 +401,17 @@ getHoveringVertex model event =
   List.head <| List.filter (\v -> Geom.mouseOverPoint (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph) event.position v.position ) <| Graph.getVerticesList model.currentGraph
 
 
-getHoveringEdge : Model -> MouseEvent -> Maybe (Graph.Edge, Graph.Point)
+getHoveringEdge : Model -> MouseEvent -> Maybe (Graph.Edge, Geom.Point)
 getHoveringEdge model event =
-  List.head <| List.filterMap (\edge -> Maybe.map (\point -> (edge, point)) <| Geom.mouseOverEdge (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph) event.position edge) <| Graph.getEdgesList model.currentGraph
+  List.head <| List.filterMap (\edge -> Maybe.map (\point -> (edge, point)) <| GU.mouseOverEdge (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph) event.position edge) <| Graph.getEdgesList model.currentGraph
 
-getEdgeOnPosition : Model -> Graph.Point -> Maybe (Graph.Edge, Graph.Point)
+getEdgeOnPosition : Model -> Geom.Point -> Maybe (Graph.Edge, Geom.Point)
 getEdgeOnPosition model position =
-  List.head <| List.filterMap (\edge -> Maybe.map (\point -> (edge, point)) <| Geom.pointOverEdge position (Graph.getZoom model.currentGraph) edge) <| Graph.getEdgesList model.currentGraph
+  List.head <| List.filterMap (\edge -> Maybe.map (\point -> (edge, point)) <| GU.pointOverEdge position (Graph.getZoom model.currentGraph) edge) <| Graph.getEdgesList model.currentGraph
 
-getEdgeOnPositionFromGraph : Graph.Graph -> Graph.Point -> Maybe Graph.Edge
+getEdgeOnPositionFromGraph : Graph.Graph -> Geom.Point -> Maybe Graph.Edge
 getEdgeOnPositionFromGraph graph position =
-  List.head <| List.filter (\edge -> Utils.maybeHasValue <| Geom.pointOverEdge position graph.zoom edge) <| Graph.getEdgesList <| Just graph
+  List.head <| List.filter (\edge -> Utils.maybeHasValue <| GU.pointOverEdge position graph.zoom edge) <| Graph.getEdgesList <| Just graph
 
 
 connectEdgeToVertex : Model -> Graph.Edge -> Graph.Vertex -> Model
@@ -422,22 +423,22 @@ connectEdgeToVertex model edge vertex =
     ( \newEdge ->
       ( if newEdge.start.id == -1
         then
-          Geom.splitEdge
+          GU.splitEdge
           (Maybe.withDefault newEdge <| Maybe.map Tuple.first <| getEdgeOnPosition model newEdge.start.position)
           newEdge.start.position (model.edgeCounter + 2) (model.vertexCounter)
         else identity
       )
-      >> Graph.addEdge (Geom.calculateEdgeBoundingBox { newEdge | start = (let s = newEdge.start in { s | id = if s.id == -1 then model.vertexCounter else s.id}) })
+      >> Graph.addEdge (GU.calculateEdgeBoundingBox { newEdge | start = (let s = newEdge.start in { s | id = if s.id == -1 then model.vertexCounter else s.id}) })
       >> Graph.calculateVertexTypes
     )
-    ( Geom.calculateEdgeBoundingBox
+    ( GU.calculateEdgeBoundingBox
       { edge | end = Just vertex
       , edgeType = model.activeEdgeDrawingMode
       }
     ) model.currentGraph
   }
 
-connectEdgeToEdge : Model -> Graph.Edge -> Graph.Edge -> Graph.Point -> Model
+connectEdgeToEdge : Model -> Graph.Edge -> Graph.Edge -> Geom.Point -> Model
 connectEdgeToEdge model edge targetEdge point =
   if point == edge.start.position then model else
   { model | drawingEdge = Nothing
@@ -453,8 +454,8 @@ connectEdgeToEdge model edge targetEdge point =
             , getEdgeOnPositionFromGraph updatedGraph newEdge.start.position
             )
           action splitEdge splitPoint =
-            Geom.splitEdge splitEdge splitPoint (model.edgeCounter + 3) (model.vertexCounter + 1) updatedGraph
-            |> Graph.addEdge (Geom.calculateEdgeBoundingBox { newEdge | start = (let s = newEdge.start in { s | id = if s.id == -1 then model.vertexCounter + 1 else s.id}) })
+            GU.splitEdge splitEdge splitPoint (model.edgeCounter + 3) (model.vertexCounter + 1) updatedGraph
+            |> Graph.addEdge (GU.calculateEdgeBoundingBox { newEdge | start = (let s = newEdge.start in { s | id = if s.id == -1 then model.vertexCounter + 1 else s.id}) })
         in
         ( case decision of
             (True, Just splitEdge) ->
@@ -463,8 +464,8 @@ connectEdgeToEdge model edge targetEdge point =
               updatedGraph
         )
       )
-      <| Geom.splitEdge targetEdge point (model.edgeCounter + 2) (model.vertexCounter)
-      <| Graph.addEdge (Geom.calculateEdgeBoundingBox newEdge) graph
+      <| GU.splitEdge targetEdge point (model.edgeCounter + 2) (model.vertexCounter)
+      <| Graph.addEdge (GU.calculateEdgeBoundingBox newEdge) graph
     )
     ({ edge | end = Just <| Graph.Vertex (model.vertexCounter) Nothing Graph.LiftStation point, edgeType = model.activeEdgeDrawingMode })
     model.currentGraph
@@ -653,7 +654,7 @@ pointToCanvasLibPoint point =
 mouseDecoder msg =
   D.map5
     ( \offsetX offsetY movementX movementY button ->
-      msg <| MouseEvent (Graph.Point offsetX offsetY) (Graph.Point movementX movementY)
+      msg <| MouseEvent (Geom.Point offsetX offsetY) (Geom.Point movementX movementY)
       <| case button of
           0 -> Primary
           1 -> Wheel
@@ -753,7 +754,7 @@ edgeView model edge =
          ]
   ] ++ (
     let tempVertex point = Canvas.circle (pointToCanvasLibPoint point) (Geom.skiRunConnectionPointSize / Graph.getZoom model.currentGraph) in
-    case (model.activeEdgeDrawingMode, edge.edgeType, Geom.mouseOverEdge (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph) model.mousePosition edge) of
+    case (model.activeEdgeDrawingMode, edge.edgeType, GU.mouseOverEdge (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph) model.mousePosition edge) of
       (Graph.SkiRun _, Graph.SkiRun _, Just point) ->
         [ tempVertex point ]
       (_, _, _) ->
@@ -902,7 +903,7 @@ saveMapButtons model =
   ]
 
 
-renderPieSlice : Color.Color -> Graph.Point -> Float -> Float -> Float -> Canvas.Renderable
+renderPieSlice : Color.Color -> Geom.Point -> Float -> Float -> Float -> Canvas.Renderable
 renderPieSlice color center radius startAngle endAngle =
   Canvas.shapes [ Canvas.Settings.fill color ]
     [ Canvas.path (pointToCanvasLibPoint center)

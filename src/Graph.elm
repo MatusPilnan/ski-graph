@@ -1,10 +1,10 @@
 module Graph exposing (..)
 
 import Dict exposing (Dict)
+import Geometry exposing (Point)
 type alias VertexID = Int
 type alias EdgeID = Int
 type alias GraphID = String
-type alias Point = { x : Float, y : Float}
 
 type alias SkiRunForkPercentages = Dict String Float
 
@@ -172,8 +172,6 @@ calculateVertexTypes graph =
           (graph.vertices)
           Dict.empty
     }
-
-
 
 
 setBackground : String -> Graph -> Graph

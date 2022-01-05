@@ -3,6 +3,7 @@ module Model exposing (..)
 import Animator
 import Canvas.Texture
 import Dict exposing (Dict)
+import Geometry as Geom
 import Graph
 
 
@@ -27,10 +28,10 @@ type alias Model =
   , height : Float
   , vertexCounter : Int
   , edgeCounter : Int
-  , mousePosition : ViewportPoint
+  , mousePosition : Geom.ViewportPoint
   , mouseDown : Bool
   , hasMovedWhileMouseDown : Bool
-  , mouseDownStartPosition : ViewportPoint
+  , mouseDownStartPosition : Geom.ViewportPoint
   , mapFieldVisible : Bool
   , mapFieldInput : String
   , mapFieldState : BackgroundState
@@ -49,8 +50,8 @@ type MouseButton
 
 
 type alias MouseEvent =
-  { position : ViewportPoint
-  , movement : ViewportPoint
+  { position : Geom.ViewportPoint
+  , movement : Geom.ViewportPoint
   , button : MouseButton
   }
 
@@ -58,7 +59,6 @@ type alias ScrollEvent =
   { deltaX : Float
   }
 
-type alias ViewportPoint = { x : Float, y : Float}
 
 type alias DragEvent =
   { movementX : Float

@@ -3,6 +3,7 @@ module Saves exposing (..)
 import Dict exposing (Dict)
 import Geometry
 import Graph exposing (..)
+import GraphUtils as GU
 import Json.Encode as E
 import Json.Decode as D
 import Model exposing (..)
@@ -129,7 +130,7 @@ edgeToJson edge =
     , ("type", E.string <| edgeTypeToString edge.edgeType)
     ]
 
-pointToJson : Point -> E.Value
+pointToJson : Geometry.Point -> E.Value
 pointToJson point =
   E.list E.float [point.x, point.y]
 
@@ -198,7 +199,7 @@ edgeDecoder =
         , Dict.fromList
           <| List.map2
             ( \start ((id, title, _), (endId, edgeType, points)) ->
-              (id, Geometry.calculateEdgeBoundingBox <| Edge id title start (Dict.get endId verts) edgeType start.position start.position points)
+              (id, GU.calculateEdgeBoundingBox <| Edge id title start (Dict.get endId verts) edgeType start.position start.position points)
             ) (List.filterMap identity starts) edgeData
         )
     else
@@ -217,13 +218,13 @@ edgeDecoder =
       (D.field "points" <| D.list pointDecoder)
   )
 
-pointDecoder : D.Decoder Point
+pointDecoder : D.Decoder Geometry.Point
 pointDecoder =
   D.andThen
   ( \coordinates ->
     case coordinates of
       x :: y :: _ ->
-        D.succeed <| Point x y
+        D.succeed <| Geometry.Point x y
       [_] -> D.fail "Missing coordinate Y."
       [] ->
         D.fail "Wrong coordinates."
