@@ -5,12 +5,14 @@ import Canvas.Texture
 import Dict exposing (Dict)
 import Geometry as Geom
 import Graph
+import Menus.Menus as Menus
 
 
 type BackgroundState = Loaded | Loading | Invalid
 
 type alias Animations =
   { expandedPoint : Animator.Timeline (Maybe Graph.Vertex)
+  , highlightedEdge : Animator.Timeline Float
   }
 
 
@@ -38,8 +40,7 @@ type alias Model =
   , drawingEdge : Maybe Graph.Edge
   , activeEdgeDrawingMode : Graph.EdgeType
   , baseUrl : String
-  , menuShown : Bool
-  , backgroundOpacity : Float
+  , menu : Menus.Model
   }
 
 type MouseButton

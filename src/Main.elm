@@ -18,6 +18,7 @@ import Canvas
 import Icons
 import Json.Decode as D
 import Loading exposing (defaultConfig)
+import Menus.Menus as Menus
 import Messages exposing (Msg(..))
 import Model exposing (..)
 import Random
@@ -45,6 +46,7 @@ init flags =
   ( { currentGraph = Nothing
     , animations =
       { expandedPoint = Animator.init Nothing
+      , highlightedEdge = Animator.init 0
       }
     , texture = Nothing
     , width = flags.width
@@ -64,8 +66,7 @@ init flags =
     , remoteGraphIndex = Dict.empty
     , selectedGraphIndexEntry = Nothing
     , baseUrl = flags.baseUrl
-    , menuShown = False
-    , backgroundOpacity = 1
+    , menu = Menus.init
     } |> Saves.loadGraphFromJsonToModel flags.graphJson
   , Requests.fetchGraphIndex flags.baseUrl
   )
@@ -225,15 +226,14 @@ update msg model =
         }
       , saveGraph model.currentGraph)
 
-    SetMenuShown shown ->
-      ({ model | menuShown = shown }, Cmd.none )
-      |> adaptToNewDimensions model.width model.height
+    UpdateMenu menuMsg ->
+      case menuMsg of
+        Menus.LeaveGraph ->
+          ({ model | currentGraph = Nothing }, Cmd.none)
+        _ ->
+          Tuple.mapBoth (\menu -> { model | menu = menu}) (\cmd -> Cmd.map UpdateMenu cmd) <| Menus.update model.menu menuMsg
 
-    SetBackgroundOpacity opacity ->
-      ({ model | backgroundOpacity = max 0 <| min 1 opacity }, Cmd.none)
 
-    LeaveGraph ->
-      ({ model | currentGraph = Nothing, menuShown = False }, saveGraphAndIndex model )
 
 
 saveGraphAndIndex : Model -> Cmd Msg
@@ -488,9 +488,7 @@ subscriptions model =
 animator : Animator.Animator Animations
 animator =
   Animator.animator
-    |> Animator.watching
-      .expandedPoint
-      (\newPoint model -> { model | expandedPoint = newPoint })
+    |> Animator.watching .expandedPoint (\newPoint model -> { model | expandedPoint = newPoint })
 
 animateHoveredPoint : Animations -> Maybe Graph.Vertex -> Animations
 animateHoveredPoint animations newHover =
@@ -509,7 +507,7 @@ view model =
       Nothing ->
         graphSelectionView model
       Just graph ->
-        (menuPane model graph) :: (canvasView model)
+        (Html.map UpdateMenu <| Menus.menuPane model.menu graph) :: (canvasView model)
 
 graphSelectionView : Model -> List (Html.Html Msg)
 graphSelectionView model =
@@ -550,60 +548,6 @@ graphSelectionView model =
       ]
     ]
   ]
-
-
-
-menuPane : Model -> Graph.Graph ->Html.Html Msg
-menuPane model graph =
-  Html.div
-  [ Attr.class "fixed top-0 bottom-0 w-96 transition-all bg-primary shadow-md z-20 flex flex-col"
-  , Attr.classList
-    [ ("left-0", model.menuShown)
-    , ("-left-96", not model.menuShown)
-    ]
-  ]
-  [ Html.div
-    [ Attr.class "flex items-center bg-primary text-secondary p-4 rounded-br-md shadow-md w-max" ]
-    [ Html.h1
-      [ Attr.class "text-xl font-bold inline-block w-96 pr-8" ]
-      [ Html.text graph.title ]
-    , Html.button
-      [ Attr.class "inline-block"
-      , Events.onClick <| SetMenuShown <| not model.menuShown
-      ]
-      [ Icons.menu ]
-    ]
-  , Html.div
-    [ Attr.class "flex-grow w-full p-4 text-white" ]
-    [ Html.div
-      [ Attr.class "w-full" ]
-      [ Html.label
-        [ Attr.class "font-light text-sm flex justify-between" ]
-        [ Html.span [] [ Html.text "Background opacity"]
-        , Html.span [] [ Html.text <| (String.fromInt <| round <| 100 * model.backgroundOpacity) ++ "%" ]
-        ]
-      , Html.input
-        [ Attr.type_ "range"
-        , Attr.class "w-full block mt-1"
-        , Attr.max "1"
-        , Attr.min "0"
-        , Attr.step "0.01"
-        , Attr.value <| String.fromFloat model.backgroundOpacity
-        , Events.onInput <| SetBackgroundOpacity << Maybe.withDefault 1 << String.toFloat
-        ]
-        []
-      ]
-    ]
-  , Html.div
-    [ Attr.class "flex shadow-inner" ]
-    [ Html.button
-      [ Attr.class "px-6 py-3 shadow-inner text-secondary font-bold transition-colors hover:bg-secondary hover:text-primary"
-      , Events.onClick LeaveGraph
-      ]
-      [ Html.text "Leave graph" ]
-    ]
-  ]
-
 
 
 canvasView : Model -> List (Html.Html Msg)
@@ -690,7 +634,7 @@ vertexView model vertex =
           ( \(skiRunType, percentage) (renderables, start) ->
             ( renderables ++
               [ renderPieSlice
-                ( skiRunColor <| Graph.skiRunTypeFromString skiRunType )
+                ( Graph.skiRunColor <| Graph.skiRunTypeFromString skiRunType )
                 vertex.position
                 ( vertexPointSize model vertex Geom.skiRunConnectionPointSize 1 1.5 )
                 (degrees <| 360 * (min 1 start))
@@ -771,17 +715,11 @@ edgeStyle edgeType zoom =
   case edgeType of
     Graph.SkiRun skiRunType ->
       case skiRunType of
-        Graph.SkiRoute -> [ Canvas.Settings.stroke (skiRunColor skiRunType), Canvas.Settings.Line.lineDash [10 / zoom, 15 / zoom] ]
-        _ -> [ Canvas.Settings.stroke (skiRunColor skiRunType) ]
+        Graph.SkiRoute -> [ Canvas.Settings.stroke (Graph.skiRunColor skiRunType), Canvas.Settings.Line.lineDash [10 / zoom, 15 / zoom] ]
+        _ -> [ Canvas.Settings.stroke (Graph.skiRunColor skiRunType) ]
     Graph.Lift -> [ Canvas.Settings.stroke Color.black ]
     Graph.Unfinished -> [ Canvas.Settings.stroke Color.green ]
 
-skiRunColor skiRunType =
-  case skiRunType of
-    Graph.Easy -> Color.blue
-    Graph.Medium -> Color.red
-    Graph.Difficult -> Color.black
-    Graph.SkiRoute -> Color.red
 
 addBackground : Model -> List Canvas.Renderable -> List Canvas.Renderable
 addBackground model renderables =
@@ -790,7 +728,7 @@ addBackground model renderables =
     Just t ->
       [ Canvas.clear (0, 0) ((Canvas.Texture.dimensions t).width) ((Canvas.Texture.dimensions t).height)
       , Canvas.texture
-        [ Canvas.Settings.Advanced.alpha model.backgroundOpacity ]
+        [ Canvas.Settings.Advanced.alpha model.menu.backgroundOpacity ]
         (0, 0)
         t
       ] ++ renderables
@@ -869,12 +807,7 @@ modeSelectionButton selected edgeType =
     icon =
       case edgeType of
         Graph.SkiRun skiRunType ->
-          Icons.skiRunIcon <|
-          case skiRunType of
-            Graph.Easy -> "#0000ff"
-            Graph.Medium -> "#ff0000"
-            Graph.Difficult -> "#000000"
-            Graph.SkiRoute -> "#890202"
+          Icons.skiRunIcon <| Graph.skiRunColorCode skiRunType
         Graph.Lift -> Icons.liftIcon
         Graph.Unfinished -> Html.text ""
 

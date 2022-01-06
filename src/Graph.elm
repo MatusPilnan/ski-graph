@@ -1,5 +1,6 @@
 module Graph exposing (..)
 
+import Color
 import Dict exposing (Dict)
 import Geometry exposing (Point)
 type alias VertexID = Int
@@ -81,6 +82,22 @@ skiRunTypeToString skiRunType =
     SkiRoute -> "ski-route"
 
 
+edgeTypeToNiceString : EdgeType -> String
+edgeTypeToNiceString edgeType =
+  case edgeType of
+    SkiRun skiRunType ->
+      String.append "Ski run - " <| skiRunTypeToNiceString skiRunType
+    Lift -> "Ski lift"
+    Unfinished -> "Unfinished"
+
+skiRunTypeToNiceString : SkiRunType -> String
+skiRunTypeToNiceString skiRunType =
+  case skiRunType of
+    Easy -> "easy"
+    Medium -> "medium"
+    Difficult -> "difficult"
+    SkiRoute -> "ski-route"
+
 skiRunTypeFromString : String -> SkiRunType
 skiRunTypeFromString skiRunType =
   case skiRunType of
@@ -91,6 +108,17 @@ skiRunTypeFromString skiRunType =
     _ -> SkiRoute
 
 
+
+skiRunColor skiRunType =
+  case skiRunType of
+    Easy -> Color.blue
+    Medium -> Color.red
+    Difficult -> Color.black
+    SkiRoute -> Color.fromRgba { red = 137 / 256, green = 2 / 256, blue = 2/ 256, alpha = 1 }
+
+
+skiRunColorCode skiRunType =
+  Color.toCssString <| skiRunColor skiRunType
 
 init =
   Graph "New graph" "graph-id" "" Dict.empty Dict.empty zeroPoint 1
