@@ -1,6 +1,6 @@
 module Menus.Menus exposing (..)
 
-import Dict
+import Dict exposing (Dict)
 import Geometry as Geom
 import Graph
 import Html
@@ -30,14 +30,17 @@ type alias Model =
   { sideMenuShown : Bool
   , backgroundOpacity : Float
   , mainMenuView : MainMenuView
+  , highlightedEdges : Dict Graph.EdgeID Bool
   , contextMenu : Maybe ContextMenu
   }
 
+init : Model
 init =
   { sideMenuShown = False
   , backgroundOpacity = 1
   , mainMenuView = Default
   , contextMenu = Nothing
+  , highlightedEdges = Dict.empty
   }
 
 type MenuMsg
@@ -45,6 +48,7 @@ type MenuMsg
   | SetBackgroundOpacity Float
   | LeaveGraph
   | SetMainMenuView MainMenuView
+  | SetEdgeHighlighted Graph.EdgeID Bool
 
 update : Model -> MenuMsg -> (Model, Cmd MenuMsg)
 update model msg =
@@ -60,6 +64,14 @@ update model msg =
 
     SetMainMenuView mainMenuView ->
       ({ model | mainMenuView = mainMenuView }, Cmd.none )
+
+    SetEdgeHighlighted edgeID highlighted ->
+      ( { model
+        | highlightedEdges = Dict.insert edgeID highlighted model.highlightedEdges
+        }
+      , Cmd.none
+      )
+
 
 menuPane : Model -> Graph.Graph -> Html.Html MenuMsg
 menuPane model graph =
@@ -103,7 +115,7 @@ menuView model graph =
     Default ->
       defaultView model
     EdgeList ->
-      edgesListView <| Dict.values graph.edges
+      edgesListView model <| Dict.values graph.edges
     VertexList ->
       verticesListView <| Dict.values graph.vertices
     EdgeDetail edge ->
@@ -148,8 +160,8 @@ defaultView model =
   ]
 
 
-edgesListView : List Graph.Edge -> List (Html.Html MenuMsg)
-edgesListView edges =
+edgesListView : Model -> List Graph.Edge -> List (Html.Html MenuMsg)
+edgesListView model edges =
    let (lifts, runs) = List.partition (\edge -> edge.edgeType == Graph.Lift) edges in
   [ Html.button
     [ Attr.class "flex w-full items-center transition-colors hover:bg-blue-500 px-2 py-3 mb-2 rounded-md font-light"
@@ -170,7 +182,7 @@ edgesListView edges =
         [ Html.text "Ski lifts" ]
       , Html.ul
         []
-        <| List.map edgeInListView lifts
+        <| List.map (edgeInListView model) lifts
       ]
     , Html.li
       [ Attr.class "" ]
@@ -179,12 +191,13 @@ edgesListView edges =
        [ Html.text "Ski runs" ]
       , Html.ul
         []
-        <| List.map edgeInListView runs
+        <| List.map (edgeInListView model) runs
       ]
     ]
   ]
 
-edgeInListView edge =
+edgeInListView : Model -> Graph.Edge -> Html.Html MenuMsg
+edgeInListView model edge =
   Html.li
   [ Attr.class "grid grid-cols-12 gap-2" ] <|
   ( case edge.edgeType of
@@ -199,8 +212,15 @@ edgeInListView edge =
       ]
     ]
     [ Html.text <| Maybe.withDefault ("edge-" ++ String.fromInt edge.id) <| edge.title ]
-  , Html.button
-    [ Attr.class "text-blue-200 transition-colors hover:text-white" ]
+  , let highlighted = Maybe.withDefault False <| Dict.get edge.id model.highlightedEdges in
+    Html.button
+    [ Attr.class "transition-colors hover:text-white"
+    , Attr.classList
+      [ ("text-blue-200", not highlighted)
+      , ("text-secondary", highlighted)
+      ]
+    , Events.onClick <| SetEdgeHighlighted edge.id <| not highlighted
+    ]
     [ Icons.highlight ]
   , Html.button
     [ Attr.class "transition-colors hover:text-red-600" ]

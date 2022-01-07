@@ -489,6 +489,7 @@ animator : Animator.Animator Animations
 animator =
   Animator.animator
     |> Animator.watching .expandedPoint (\newPoint model -> { model | expandedPoint = newPoint })
+    |> Animator.watching .highlightedEdge (\newValue model -> { model | highlightedEdge = newValue })
 
 animateHoveredPoint : Animations -> Maybe Graph.Vertex -> Animations
 animateHoveredPoint animations newHover =
@@ -686,25 +687,82 @@ vertexEdgeDrawingCondition model vertex =
 
 edgeView : Model -> Graph.Edge -> Canvas.Renderable
 edgeView model edge =
-  Canvas.shapes
-  (edgeStyle edge.edgeType (Graph.getZoom model.currentGraph)) <|
-  [ Canvas.path (pointToCanvasLibPoint edge.start.position)
-    <| List.map
-      (Canvas.lineTo << pointToCanvasLibPoint)
-      <| edge.points
-      ++ [ case edge.end of
-             Nothing -> Geom.canvasPointToBackgroundPoint model.mousePosition (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph)
-             Just vertex -> vertex.position
-         ]
+  Canvas.group
+  [] <|
+  [ Canvas.shapes
+    (edgeStyle edge.edgeType (Graph.getZoom model.currentGraph)) <|
+    [ edgeToPath model edge
+    ] ++ (
+      let tempVertex point = Canvas.circle (pointToCanvasLibPoint point) (Geom.skiRunConnectionPointSize / Graph.getZoom model.currentGraph) in
+      case (model.activeEdgeDrawingMode, edge.edgeType, GU.mouseOverEdge (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph) model.mousePosition edge) of
+        (Graph.SkiRun _, Graph.SkiRun _, Just point) ->
+          [ tempVertex point ]
+        (_, _, _) ->
+          if edge.start.id == -1 then [ tempVertex edge.start.position ] else []
+    )
   ] ++ (
-    let tempVertex point = Canvas.circle (pointToCanvasLibPoint point) (Geom.skiRunConnectionPointSize / Graph.getZoom model.currentGraph) in
-    case (model.activeEdgeDrawingMode, edge.edgeType, GU.mouseOverEdge (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph) model.mousePosition edge) of
-      (Graph.SkiRun _, Graph.SkiRun _, Just point) ->
-        [ tempVertex point ]
-      (_, _, _) ->
-        if edge.start.id == -1 then [ tempVertex edge.start.position ] else []
+    if Maybe.withDefault False <| Dict.get edge.id model.menu.highlightedEdges
+    then
+      [ Canvas.shapes
+        [ Canvas.Settings.Line.lineWidth <| Geom.lineWidth * 0.5 / (Graph.getZoom model.currentGraph)
+        --, Canvas.Settings.Line.lineCap Canvas.Settings.Line.RoundCap
+        , Canvas.Settings.Line.lineJoin Canvas.Settings.Line.RoundJoin
+        , Canvas.Settings.stroke <| Color.fromRgba { red = 253 / 256, green = 224 / 256, blue = 71 / 256, alpha = 1 }
+        , Canvas.Settings.Line.lineDash <|
+          let
+            zoom = ( Graph.getZoom model.currentGraph )
+            dash =
+              Animator.move
+              model.animations.highlightedEdge
+              (\_ ->
+                Animator.loop Animator.verySlowly <| Animator.wrap -1 1
+              )
+            line x = (x * 10) / zoom
+            gap x = (x * 15) / zoom
+          in
+          if dash > 0 then
+            if dash > 0.999
+            then
+            [ line dash
+            , gap dash
+            ]
+            else
+            [ line 0
+            , gap dash
+            , line 1
+            , gap <| 1 - dash
+            ]
+          else
+            if dash < -0.999
+            then
+            [ line 0
+            , gap 1
+            , line 1
+            , gap 0
+            ]
+            else
+            [ line <| 1 - (abs dash)
+            , gap 1
+            , line <| abs dash
+            , gap 0
+            ]
+        ]
+        [ edgeToPath model edge ]
+      ]
+    else
+      []
   )
 
+edgeToPath : Model -> Graph.Edge -> Canvas.Shape
+edgeToPath model edge =
+  Canvas.path (pointToCanvasLibPoint edge.start.position)
+  <| List.map
+    (Canvas.lineTo << pointToCanvasLibPoint)
+    <| edge.points
+    ++ [ case edge.end of
+           Nothing -> Geom.canvasPointToBackgroundPoint model.mousePosition (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph)
+           Just vertex -> vertex.position
+       ]
 
 edgeStyle : Graph.EdgeType -> Float -> List Canvas.Settings.Setting
 edgeStyle edgeType zoom =
