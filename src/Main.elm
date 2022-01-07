@@ -239,6 +239,18 @@ update msg model =
       , saveGraph newGraph
       )
 
+    UpdateVertexTitle vertex title ->
+      let
+        newGraph =
+          Graph.updateGraphProperty
+          Graph.insertVertex
+          { vertex | title = Just title }
+          model.currentGraph
+      in
+      ( { model | currentGraph = newGraph }
+      , saveGraph newGraph
+      )
+
     UpdateMenu menuMsg ->
       case menuMsg of
         Menus.LeaveGraph ->
@@ -633,7 +645,7 @@ vertexView : Model -> Graph.Vertex -> Canvas.Renderable
 vertexView model vertex =
   Canvas.group
   [] <|
-  ( if Maybe.withDefault False <| Dict.get vertex.id model.menu.highlightedVertices
+  ( if model.menu.editingVertexTitle == Just vertex.id || (Maybe.withDefault False <| Dict.get vertex.id model.menu.highlightedVertices)
     then
     let multiplier = Animator.move model.animations.highlightedVertex (\_ -> Animator.loop (Animator.millis 2000) <| Animator.wrap 0 2) in
     [ Canvas.shapes

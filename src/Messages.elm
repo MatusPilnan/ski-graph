@@ -28,10 +28,12 @@ type Msg
   | SelectGraphFromIndex (Maybe Graph.GraphIndexEntry)
   | UpdateMenu Menus.MenuMsg
   | UpdateEdgeTitle Graph.Edge String
+  | UpdateVertexTitle Graph.Vertex String
 
 
 menuMsgToMsg : Menus.MenuMsg -> Msg
 menuMsgToMsg menuMsg =
   case menuMsg of
     Menus.SetEdgeTitle edge title -> UpdateEdgeTitle edge title
+    Menus.SetVertexTitle vertex title -> UpdateVertexTitle vertex title
     _ -> UpdateMenu menuMsg

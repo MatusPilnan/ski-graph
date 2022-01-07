@@ -35,6 +35,7 @@ type alias Model =
   , highlightedVertices : Dict Graph.VertexID Bool
   , contextMenu : Maybe ContextMenu
   , editingEdgeTitle : Maybe Graph.EdgeID
+  , editingVertexTitle : Maybe Graph.VertexID
   }
 
 init : Model
@@ -46,6 +47,7 @@ init =
   , highlightedEdges = Dict.empty
   , highlightedVertices = Dict.empty
   , editingEdgeTitle = Nothing
+  , editingVertexTitle = Nothing
   }
 
 type MenuMsg
@@ -56,7 +58,9 @@ type MenuMsg
   | SetEdgeHighlighted Graph.EdgeID Bool
   | SetVertexHighlighted Graph.EdgeID Bool
   | SetEdgeTitle Graph.Edge String
+  | SetVertexTitle Graph.Vertex String
   | SetEditingEdgeTitleID (Maybe Graph.EdgeID)
+  | SetEditingVertexTitleID (Maybe Graph.VertexID)
 
 update : Model -> MenuMsg -> (Model, Cmd MenuMsg)
 update model msg =
@@ -90,8 +94,16 @@ update model msg =
     SetEdgeTitle _ _ ->
       (model, Cmd.none)
 
+    SetVertexTitle _ _ ->
+      (model, Cmd.none)
+
     SetEditingEdgeTitleID edgeID ->
       ( { model | editingEdgeTitle = edgeID }
+      , Cmd.none
+      )
+
+    SetEditingVertexTitleID vertexID ->
+      ( { model | editingVertexTitle = vertexID }
       , Cmd.none
       )
 
@@ -206,7 +218,7 @@ edgesListView model edges =
         [ Html.text "Ski lifts" ]
       , Html.ul
         []
-        <| List.map (edgeInListView model) <| List.sortWith Graph.edgesTitleComparator lifts
+        <| List.map (edgeInListView model) <| List.sortWith Graph.titleComparator lifts
       ]
     , Html.li
       [ Attr.class "" ]
@@ -215,7 +227,7 @@ edgesListView model edges =
        [ Html.text "Ski runs" ]
       , Html.ul
         []
-        <| List.map (edgeInListView model) <| List.sortWith Graph.edgesTitleComparator runs
+        <| List.map (edgeInListView model) <| List.sortWith Graph.titleComparator runs
       ]
     ]
   ]
@@ -295,7 +307,7 @@ verticesListView model vertices =
         [ Html.text "Lift stations" ]
       , Html.ul
         []
-        <| List.map (vertexInListView model) stations
+        <| List.map (vertexInListView model) <| List.sortWith Graph.titleComparator stations
       ]
     , Html.li
       [ Attr.class "" ]
@@ -304,7 +316,7 @@ verticesListView model vertices =
        [ Html.text "Ski run X-ings" ]
       , Html.ul
         []
-        <| List.map (vertexInListView model) crossroads
+        <| List.map (vertexInListView model) <| List.sortWith Graph.titleComparator crossroads
       ]
     ]
   ]
@@ -314,10 +326,23 @@ vertexInListView : Model -> Graph.Vertex -> Html.Html MenuMsg
 vertexInListView model vertex =
   Html.li
   [ Attr.class "grid grid-cols-12 gap-2" ]
-  [ Html.h3
-    [ Attr.class "col-span-9"
+  [ ( if model.editingVertexTitle == Just vertex.id
+    then
+    Html.input
+    [ Attr.class "col-span-9 pl-1 text-black rounded-md bg-white w-full"
+    , Attr.value <| Maybe.withDefault "" vertex.title
+    , Events.onInput <| SetVertexTitle vertex
+    , Events.onBlur  <| SetEditingVertexTitleID Nothing
+    , Events.on "keyup" (Json.Decode.andThen (\keyCode -> if keyCode == 13 then Json.Decode.succeed <| SetEditingVertexTitleID Nothing else Json.Decode.fail "Not Enter.") Events.keyCode)
+    ]
+    []
+    else
+    Html.h3
+    [ Attr.class "col-span-9 transition-all border border-primary rounded-md pl-1 hover:border-blue-500"
+    , Events.onClick <| SetEditingVertexTitleID <| Just vertex.id
     ]
     [ Html.text <| Maybe.withDefault ("vertex-" ++ String.fromInt vertex.id) <| vertex.title ]
+    )
   , let highlighted = Maybe.withDefault False <| Dict.get vertex.id model.highlightedVertices in
     Html.button
     [ Attr.class "transition-colors hover:text-white"

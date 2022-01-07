@@ -218,6 +218,11 @@ addVertex : VertexID -> Point -> Graph -> Graph
 addVertex id position graph =
   { graph | vertices = Dict.insert id (Vertex id Nothing LiftStation position) graph.vertices }
 
+insertVertex : Vertex -> Graph -> Graph
+insertVertex vertex graph =
+  { graph | vertices = Dict.insert vertex.id vertex graph.vertices }
+
+
 addEdge : Edge -> Graph -> Graph
 addEdge edge graph =
   { graph | edges = Dict.insert edge.id edge graph.edges }
@@ -270,14 +275,14 @@ zeroPoint = Point 0 0
 
 
 
-edgesTitleComparator : Edge -> Edge -> Order
-edgesTitleComparator a b =
+titleComparator : { edgeOrVertex | title : Maybe String, id : comparable } -> { edgeOrVertex | title : Maybe String, id : comparable } -> Order
+titleComparator a b =
   case (a.title, b.title) of
     (Nothing, Nothing) ->
       compare a.id b.id
     (Just _, Nothing) ->
-      GT
-    (Nothing, Just _) ->
       LT
+    (Nothing, Just _) ->
+      GT
     (Just titleA, Just titleB) ->
       compare titleA titleB
