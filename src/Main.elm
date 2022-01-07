@@ -226,6 +226,18 @@ update msg model =
         }
       , saveGraph model.currentGraph)
 
+    UpdateEdgeTitle edge title ->
+      let
+        newGraph =
+          Graph.updateGraphProperty
+          Graph.addEdge
+          { edge | title = Just title }
+          model.currentGraph
+      in
+      ( { model | currentGraph = newGraph }
+      , saveGraph newGraph
+      )
+
     UpdateMenu menuMsg ->
       case menuMsg of
         Menus.LeaveGraph ->
@@ -508,7 +520,7 @@ view model =
       Nothing ->
         graphSelectionView model
       Just graph ->
-        (Html.map UpdateMenu <| Menus.menuPane model.menu graph) :: (canvasView model)
+        (Html.map Messages.menuMsgToMsg <| Menus.menuPane model.menu graph) :: (canvasView model)
 
 graphSelectionView : Model -> List (Html.Html Msg)
 graphSelectionView model =
@@ -701,11 +713,10 @@ edgeView model edge =
           if edge.start.id == -1 then [ tempVertex edge.start.position ] else []
     )
   ] ++ (
-    if Maybe.withDefault False <| Dict.get edge.id model.menu.highlightedEdges
+    if model.menu.editingEdgeTitle == Just edge.id || (Maybe.withDefault False <| Dict.get edge.id model.menu.highlightedEdges)
     then
       [ Canvas.shapes
         [ Canvas.Settings.Line.lineWidth <| Geom.lineWidth * 0.5 / (Graph.getZoom model.currentGraph)
-        --, Canvas.Settings.Line.lineCap Canvas.Settings.Line.RoundCap
         , Canvas.Settings.Line.lineJoin Canvas.Settings.Line.RoundJoin
         , Canvas.Settings.stroke <| Color.fromRgba { red = 253 / 256, green = 224 / 256, blue = 71 / 256, alpha = 1 }
         , Canvas.Settings.Line.lineDash <|

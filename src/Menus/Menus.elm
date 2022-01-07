@@ -7,6 +7,7 @@ import Html
 import Html.Attributes as Attr
 import Html.Events as Events
 import Icons
+import Json.Decode
 
 type ContextMenuVariant
   = EdgeContextMenu Graph.Edge
@@ -32,6 +33,7 @@ type alias Model =
   , mainMenuView : MainMenuView
   , highlightedEdges : Dict Graph.EdgeID Bool
   , contextMenu : Maybe ContextMenu
+  , editingEdgeTitle : Maybe Graph.EdgeID
   }
 
 init : Model
@@ -41,6 +43,7 @@ init =
   , mainMenuView = Default
   , contextMenu = Nothing
   , highlightedEdges = Dict.empty
+  , editingEdgeTitle = Nothing
   }
 
 type MenuMsg
@@ -49,6 +52,8 @@ type MenuMsg
   | LeaveGraph
   | SetMainMenuView MainMenuView
   | SetEdgeHighlighted Graph.EdgeID Bool
+  | SetEdgeTitle Graph.Edge String
+  | SetEditingEdgeTitleID (Maybe Graph.EdgeID)
 
 update : Model -> MenuMsg -> (Model, Cmd MenuMsg)
 update model msg =
@@ -71,6 +76,15 @@ update model msg =
         }
       , Cmd.none
       )
+
+    SetEdgeTitle _ _ ->
+      (model, Cmd.none)
+
+    SetEditingEdgeTitleID edgeID ->
+      ( { model | editingEdgeTitle = edgeID }
+      , Cmd.none
+      )
+
 
 
 menuPane : Model -> Graph.Graph -> Html.Html MenuMsg
@@ -182,7 +196,7 @@ edgesListView model edges =
         [ Html.text "Ski lifts" ]
       , Html.ul
         []
-        <| List.map (edgeInListView model) lifts
+        <| List.map (edgeInListView model) <| List.sortWith Graph.edgesTitleComparator lifts
       ]
     , Html.li
       [ Attr.class "" ]
@@ -191,7 +205,7 @@ edgesListView model edges =
        [ Html.text "Ski runs" ]
       , Html.ul
         []
-        <| List.map (edgeInListView model) runs
+        <| List.map (edgeInListView model) <| List.sortWith Graph.edgesTitleComparator runs
       ]
     ]
   ]
@@ -204,14 +218,30 @@ edgeInListView model edge =
       Graph.SkiRun skiRunType -> [ Html.div [ Attr.class "bg-white rounded-full self-center h-5 w-5 p-1" ] [ Icons.skiRunIcon <| Graph.skiRunColorCode skiRunType ] ]
       _ -> []
   ) ++
-  [ Html.h3
-    [ Attr.class "col-span-8"
-    , let withoutIcon = edge.edgeType == Graph.Lift || edge.edgeType == Graph.Unfinished in
-      Attr.classList
+  [ ( let withoutIcon = edge.edgeType == Graph.Lift || edge.edgeType == Graph.Unfinished in
+    if model.editingEdgeTitle == Just edge.id
+    then
+    Html.input
+    [ Attr.class "col-span-8 pl-1 text-black rounded-md bg-white w-full"
+    , Attr.value <| Maybe.withDefault "" edge.title
+    , Attr.classList
       [ ("col-start-2", withoutIcon)
       ]
+    , Events.onInput <| SetEdgeTitle edge
+    , Events.onBlur  <| SetEditingEdgeTitleID Nothing
+    , Events.on "keyup" (Json.Decode.andThen (\keyCode -> if keyCode == 13 then Json.Decode.succeed <| SetEditingEdgeTitleID Nothing else Json.Decode.fail "Not Enter.") Events.keyCode)
+    ]
+    []
+    else
+    Html.h3
+    [ Attr.class "col-span-8 transition-all border border-primary rounded-md pl-1 hover:border-blue-500"
+    , Attr.classList
+      [ ("col-start-2", withoutIcon)
+      ]
+    , Events.onClick <| SetEditingEdgeTitleID <| Just edge.id
     ]
     [ Html.text <| Maybe.withDefault ("edge-" ++ String.fromInt edge.id) <| edge.title ]
+    )
   , let highlighted = Maybe.withDefault False <| Dict.get edge.id model.highlightedEdges in
     Html.button
     [ Attr.class "transition-colors hover:text-white"

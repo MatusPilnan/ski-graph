@@ -267,3 +267,17 @@ getNextEdgeId graph =
 
 zeroPoint : Point
 zeroPoint = Point 0 0
+
+
+
+edgesTitleComparator : Edge -> Edge -> Order
+edgesTitleComparator a b =
+  case (a.title, b.title) of
+    (Nothing, Nothing) ->
+      compare a.id b.id
+    (Just _, Nothing) ->
+      GT
+    (Nothing, Just _) ->
+      LT
+    (Just titleA, Just titleB) ->
+      compare titleA titleB

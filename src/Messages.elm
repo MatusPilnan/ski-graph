@@ -27,3 +27,11 @@ type Msg
   | LoadGraphIndex (Maybe (Result String (Dict Graph.GraphID Graph.GraphIndexEntry)))
   | SelectGraphFromIndex (Maybe Graph.GraphIndexEntry)
   | UpdateMenu Menus.MenuMsg
+  | UpdateEdgeTitle Graph.Edge String
+
+
+menuMsgToMsg : Menus.MenuMsg -> Msg
+menuMsgToMsg menuMsg =
+  case menuMsg of
+    Menus.SetEdgeTitle edge title -> UpdateEdgeTitle edge title
+    _ -> UpdateMenu menuMsg

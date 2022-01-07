@@ -1,10 +1,10 @@
 {
   "title": "Turracher Hoehe",
-  "background": "https://vcdn.bergfex.at/images/resized/5f/b66b2c0f20ebed5f_e600fdabdbc8f004@2x.jpg",
-  "zoom": 0.5199324324324325,
+  "background": "/backgrounds/turracher-hoehe.jpg",
+  "zoom": 0.6649324324324326,
   "position": [
-    207.0771624808067,
-    -450.6727141500262
+    48.83757226035533,
+    -650.4348333840564
   ],
   "vertices": [
     {
@@ -283,7 +283,7 @@
   "edges": [
     {
       "id": 1,
-      "title": "Edge 1",
+      "title": "Sonnenbahn",
       "points": [
         [
           1186,
@@ -304,7 +304,7 @@
     },
     {
       "id": 3,
-      "title": "Edge 3",
+      "title": "Seitensprunglift",
       "points": [],
       "start_id": 2,
       "end_id": 3,
@@ -320,7 +320,7 @@
     },
     {
       "id": 6,
-      "title": "Edge 6",
+      "title": "Weitentallift",
       "points": [
         [
           456,
@@ -358,7 +358,7 @@
     },
     {
       "id": 10,
-      "title": "Edge 10",
+      "title": "Weitental",
       "points": [
         [
           907.7777777777778,
@@ -718,7 +718,7 @@
     },
     {
       "id": 31,
-      "title": "Edge 31",
+      "title": "Turrachbahn",
       "points": [
         [
           234.16563658838072,
@@ -747,7 +747,7 @@
     },
     {
       "id": 32,
-      "title": "Edge 32",
+      "title": "Zirbenwaldbahn",
       "points": [
         [
           1408.6526576019776,
@@ -1104,7 +1104,7 @@
     },
     {
       "id": 52,
-      "title": "Edge 52",
+      "title": "Wildkopflift",
       "points": [],
       "start_id": 31,
       "end_id": 32,
