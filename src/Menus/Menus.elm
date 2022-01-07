@@ -32,6 +32,7 @@ type alias Model =
   , backgroundOpacity : Float
   , mainMenuView : MainMenuView
   , highlightedEdges : Dict Graph.EdgeID Bool
+  , highlightedVertices : Dict Graph.VertexID Bool
   , contextMenu : Maybe ContextMenu
   , editingEdgeTitle : Maybe Graph.EdgeID
   }
@@ -43,6 +44,7 @@ init =
   , mainMenuView = Default
   , contextMenu = Nothing
   , highlightedEdges = Dict.empty
+  , highlightedVertices = Dict.empty
   , editingEdgeTitle = Nothing
   }
 
@@ -52,6 +54,7 @@ type MenuMsg
   | LeaveGraph
   | SetMainMenuView MainMenuView
   | SetEdgeHighlighted Graph.EdgeID Bool
+  | SetVertexHighlighted Graph.EdgeID Bool
   | SetEdgeTitle Graph.Edge String
   | SetEditingEdgeTitleID (Maybe Graph.EdgeID)
 
@@ -73,6 +76,13 @@ update model msg =
     SetEdgeHighlighted edgeID highlighted ->
       ( { model
         | highlightedEdges = Dict.insert edgeID highlighted model.highlightedEdges
+        }
+      , Cmd.none
+      )
+
+    SetVertexHighlighted vertexId highlighted ->
+      ( { model
+        | highlightedVertices = Dict.insert vertexId highlighted model.highlightedVertices
         }
       , Cmd.none
       )
@@ -131,7 +141,7 @@ menuView model graph =
     EdgeList ->
       edgesListView model <| Dict.values graph.edges
     VertexList ->
-      verticesListView <| Dict.values graph.vertices
+      verticesListView model <| Dict.values graph.vertices
     EdgeDetail edge ->
       []
     VertexDetail vertex ->
@@ -263,8 +273,8 @@ edgeInListView model edge =
 
 
 
-verticesListView : List Graph.Vertex -> List (Html.Html MenuMsg)
-verticesListView vertices =
+verticesListView : Model -> List Graph.Vertex -> List (Html.Html MenuMsg)
+verticesListView model vertices =
    let (stations, crossroads) = List.partition (\vertex -> vertex.vertexType == Graph.LiftStation) vertices in
   [ Html.button
     [ Attr.class "flex w-full items-center transition-colors hover:bg-blue-500 px-2 py-3 mb-2 rounded-md font-light"
@@ -285,7 +295,7 @@ verticesListView vertices =
         [ Html.text "Lift stations" ]
       , Html.ul
         []
-        <| List.map vertexInListView stations
+        <| List.map (vertexInListView model) stations
       ]
     , Html.li
       [ Attr.class "" ]
@@ -294,20 +304,29 @@ verticesListView vertices =
        [ Html.text "Ski run X-ings" ]
       , Html.ul
         []
-        <| List.map vertexInListView crossroads
+        <| List.map (vertexInListView model) crossroads
       ]
     ]
   ]
 
-vertexInListView vertex =
+
+vertexInListView : Model -> Graph.Vertex -> Html.Html MenuMsg
+vertexInListView model vertex =
   Html.li
   [ Attr.class "grid grid-cols-12 gap-2" ]
   [ Html.h3
     [ Attr.class "col-span-9"
     ]
     [ Html.text <| Maybe.withDefault ("vertex-" ++ String.fromInt vertex.id) <| vertex.title ]
-  , Html.button
-    [ Attr.class "text-blue-200 transition-colors hover:text-white" ]
+  , let highlighted = Maybe.withDefault False <| Dict.get vertex.id model.highlightedVertices in
+    Html.button
+    [ Attr.class "transition-colors hover:text-white"
+    , Attr.classList
+      [ ("text-blue-200", not highlighted)
+      , ("text-secondary", highlighted)
+      ]
+    , Events.onClick <| SetVertexHighlighted vertex.id <| not highlighted
+    ]
     [ Icons.highlight ]
   , Html.button
     [ Attr.class "transition-colors hover:text-red-600" ]

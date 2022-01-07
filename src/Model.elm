@@ -13,6 +13,7 @@ type BackgroundState = Loaded | Loading | Invalid
 type alias Animations =
   { expandedPoint : Animator.Timeline (Maybe Graph.Vertex)
   , highlightedEdge : Animator.Timeline Float
+  , highlightedVertex : Animator.Timeline Float
   }
 
 

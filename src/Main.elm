@@ -47,6 +47,7 @@ init flags =
     , animations =
       { expandedPoint = Animator.init Nothing
       , highlightedEdge = Animator.init 0
+      , highlightedVertex = Animator.init 0
       }
     , texture = Nothing
     , width = flags.width
@@ -502,6 +503,7 @@ animator =
   Animator.animator
     |> Animator.watching .expandedPoint (\newPoint model -> { model | expandedPoint = newPoint })
     |> Animator.watching .highlightedEdge (\newValue model -> { model | highlightedEdge = newValue })
+    |> Animator.watching .highlightedVertex (\newValue model -> { model | highlightedVertex = newValue })
 
 animateHoveredPoint : Animations -> Maybe Graph.Vertex -> Animations
 animateHoveredPoint animations newHover =
@@ -630,14 +632,26 @@ scrollDecoder msg =
 vertexView : Model -> Graph.Vertex -> Canvas.Renderable
 vertexView model vertex =
   Canvas.group
-  []
+  [] <|
+  ( if Maybe.withDefault False <| Dict.get vertex.id model.menu.highlightedVertices
+    then
+    let multiplier = Animator.move model.animations.highlightedVertex (\_ -> Animator.loop (Animator.millis 2000) <| Animator.wrap 0 2) in
+    [ Canvas.shapes
+      [ Canvas.Settings.fill <| Color.fromRgba { secondaryColor | alpha = min 1 <| 2 - multiplier } ]
+      [ Canvas.circle
+        ( vertex.position.x, vertex.position.y)
+        ( vertexPointSize model vertex (1 + multiplier) (1.5 + multiplier) )
+      ]
+    ]
+    else []
+  ) ++
   [ ( case vertex.vertexType of
       Graph.LiftStation ->
         Canvas.shapes
         []
         [ Canvas.circle
           ( vertex.position.x, vertex.position.y)
-          ( vertexPointSize model vertex Geom.liftStationPointSize 1 1.5 )
+          ( vertexPointSize model vertex 1 1.5 )
         ]
       Graph.SkiRunFork percentages ->
         Canvas.group
@@ -649,7 +663,7 @@ vertexView model vertex =
               [ renderPieSlice
                 ( Graph.skiRunColor <| Graph.skiRunTypeFromString skiRunType )
                 vertex.position
-                ( vertexPointSize model vertex Geom.skiRunConnectionPointSize 1 1.5 )
+                ( vertexPointSize model vertex 1 1.5 )
                 (degrees <| 360 * (min 1 start))
                 (degrees <| 360 * (min 1 <| start + percentage))
               ]
@@ -662,12 +676,20 @@ vertexView model vertex =
     [ Canvas.Settings.fill <| if vertexEdgeDrawingCondition model vertex then Color.green else Color.white ]
     [ Canvas.circle
       ( vertex.position.x, vertex.position.y)
-      ( vertexPointSize model vertex (if (vertex.vertexType) == Graph.LiftStation then Geom.liftStationPointSize else Geom.skiRunConnectionPointSize) 0 1 )
+      ( vertexPointSize model vertex 0 1 )
     ]
   ]
 
-vertexPointSize : Model -> Graph.Vertex -> Float -> Float -> Float -> Float
-vertexPointSize model vertex baseRadius baseMultiplier hoverMultiplier =
+vertexPointSize : Model -> Graph.Vertex -> Float -> Float -> Float
+vertexPointSize model vertex baseMultiplier hoverMultiplier =
+  let
+      baseRadius =
+          case vertex.vertexType of
+            Graph.LiftStation -> Geom.liftStationPointSize
+            Graph.SkiRunFork _ -> Geom.skiRunConnectionPointSize
+
+  in
+
   ( max 0
     ( if vertexExpansionCondition model vertex
       then Animator.move model.animations.expandedPoint <| vertexAnimation baseRadius baseMultiplier hoverMultiplier
@@ -718,7 +740,7 @@ edgeView model edge =
       [ Canvas.shapes
         [ Canvas.Settings.Line.lineWidth <| Geom.lineWidth * 0.5 / (Graph.getZoom model.currentGraph)
         , Canvas.Settings.Line.lineJoin Canvas.Settings.Line.RoundJoin
-        , Canvas.Settings.stroke <| Color.fromRgba { red = 253 / 256, green = 224 / 256, blue = 71 / 256, alpha = 1 }
+        , Canvas.Settings.stroke <| Color.fromRgba secondaryColor
         , Canvas.Settings.Line.lineDash <|
           let
             zoom = ( Graph.getZoom model.currentGraph )
@@ -922,3 +944,4 @@ renderPieSlice color center radius startAngle endAngle =
       }
     ]
 
+secondaryColor = { red = 253 / 256, green = 224 / 256, blue = 71 / 256, alpha = 1 }
