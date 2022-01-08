@@ -353,7 +353,16 @@ vertexInListView : Model -> Graph.Vertex -> Html.Html MenuMsg
 vertexInListView model vertex =
   Html.li
   [ Attr.class "grid grid-cols-12 gap-2" ] <|
-  ( case model.editingVertexTitle of
+  ( let
+      title =
+        [ Html.h3
+          [ Attr.class "col-span-9 transition-all border border-primary rounded-md pl-1 hover:border-blue-500"
+          , Events.onClick <| SetEditingVertexTitle <| Just (vertex.id, Maybe.withDefault ("vertex-" ++ String.fromInt vertex.id) <| vertex.title)
+          ]
+          [ Html.text <| Maybe.withDefault ("vertex-" ++ String.fromInt vertex.id) <| vertex.title ]
+        ]
+    in
+    case model.editingVertexTitle of
      Just (id, newTitle) ->
        if id == vertex.id then
         [ Html.input
@@ -364,14 +373,9 @@ vertexInListView model vertex =
           , Events.on "keyup" (Json.Decode.andThen (\keyCode -> if keyCode == 13 then Json.Decode.succeed <| SetVertexTitle vertex newTitle else Json.Decode.fail "Not Enter.") Events.keyCode)
           ]
           []
-        ] else []
+        ] else title
      _ ->
-      [ Html.h3
-        [ Attr.class "col-span-9 transition-all border border-primary rounded-md pl-1 hover:border-blue-500"
-        , Events.onClick <| SetEditingVertexTitle <| Just (vertex.id, Maybe.withDefault ("vertex-" ++ String.fromInt vertex.id) <| vertex.title)
-        ]
-        [ Html.text <| Maybe.withDefault ("vertex-" ++ String.fromInt vertex.id) <| vertex.title ]
-      ]
+       title
     ) ++
   [ let highlighted = Maybe.withDefault False <| Dict.get vertex.id model.highlightedVertices in
     Html.button
