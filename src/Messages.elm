@@ -33,7 +33,4 @@ type Msg
 
 menuMsgToMsg : Menus.MenuMsg -> Msg
 menuMsgToMsg menuMsg =
-  case menuMsg of
-    Menus.SetEdgeTitle edge title -> UpdateEdgeTitle edge title
-    Menus.SetVertexTitle vertex title -> UpdateVertexTitle vertex title
-    _ -> UpdateMenu menuMsg
+  UpdateMenu menuMsg

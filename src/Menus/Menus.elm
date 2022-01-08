@@ -36,8 +36,8 @@ type alias Model =
   , highlightedEdges : Dict Graph.EdgeID Bool
   , highlightedVertices : Dict Graph.VertexID Bool
   , contextMenu : Maybe ContextMenu
-  , editingEdgeTitle : Maybe Graph.EdgeID
-  , editingVertexTitle : Maybe Graph.VertexID
+  , editingEdgeTitle : Maybe (Graph.EdgeID, String)
+  , editingVertexTitle : Maybe (Graph.VertexID, String)
   }
 
 init : Model
@@ -61,8 +61,8 @@ type MenuMsg
   | SetVertexHighlighted Graph.EdgeID Bool
   | SetEdgeTitle Graph.Edge String
   | SetVertexTitle Graph.Vertex String
-  | SetEditingEdgeTitleID (Maybe Graph.EdgeID)
-  | SetEditingVertexTitleID (Maybe Graph.VertexID)
+  | SetEditingEdgeTitle (Maybe (Graph.EdgeID, String))
+  | SetEditingVertexTitle (Maybe (Graph.VertexID, String))
   | DeleteVertex Graph.Vertex
   | DeleteEdge Graph.Edge
 
@@ -96,18 +96,18 @@ update model msg =
       )
 
     SetEdgeTitle _ _ ->
-      (model, Cmd.none)
+      ({ model | editingEdgeTitle = Nothing}, Cmd.none)
 
     SetVertexTitle _ _ ->
-      (model, Cmd.none)
+      ({ model | editingVertexTitle = Nothing}, Cmd.none)
 
-    SetEditingEdgeTitleID edgeID ->
-      ( { model | editingEdgeTitle = edgeID }
+    SetEditingEdgeTitle newValue ->
+      ( { model | editingEdgeTitle = newValue }
       , Cmd.none
       )
 
-    SetEditingVertexTitleID vertexID ->
-      ( { model | editingVertexTitle = vertexID }
+    SetEditingVertexTitle newValue ->
+      ( { model | editingVertexTitle = newValue }
       , Cmd.none
       )
 
@@ -259,31 +259,37 @@ edgeInListView model edge =
       Graph.SkiRun skiRunType -> [ Html.div [ Attr.class "bg-white rounded-full self-center h-5 w-5 p-1" ] [ Icons.skiRunIcon <| Graph.skiRunColorCode skiRunType ] ]
       _ -> []
   ) ++
-  [ ( let withoutIcon = edge.edgeType == Graph.Lift || edge.edgeType == Graph.Unfinished in
-    if model.editingEdgeTitle == Just edge.id
-    then
-    Html.input
-    [ Attr.class "col-span-8 pl-1 text-black rounded-md bg-white w-full"
-    , Attr.value <| Maybe.withDefault "" edge.title
-    , Attr.classList
-      [ ("col-start-2", withoutIcon)
-      ]
-    , Events.onInput <| SetEdgeTitle edge
-    , Events.onBlur  <| SetEditingEdgeTitleID Nothing
-    , Events.on "keyup" (Json.Decode.andThen (\keyCode -> if keyCode == 13 then Json.Decode.succeed <| SetEditingEdgeTitleID Nothing else Json.Decode.fail "Not Enter.") Events.keyCode)
-    ]
-    []
-    else
-    Html.h3
-    [ Attr.class "col-span-8 transition-all border border-primary rounded-md pl-1 hover:border-blue-500"
-    , Attr.classList
-      [ ("col-start-2", withoutIcon)
-      ]
-    , Events.onClick <| SetEditingEdgeTitleID <| Just edge.id
-    ]
-    [ Html.text <| Maybe.withDefault ("edge-" ++ String.fromInt edge.id) <| edge.title ]
-    )
-  , let highlighted = Maybe.withDefault False <| Dict.get edge.id model.highlightedEdges in
+  ( let
+      withoutIcon = edge.edgeType == Graph.Lift || edge.edgeType == Graph.Unfinished
+      title =
+        [ Html.h3
+          [ Attr.class "col-span-8 transition-all border border-primary rounded-md pl-1 hover:border-blue-500"
+          , Attr.classList
+            [ ("col-start-2", withoutIcon)
+            ]
+          , Events.onClick <| SetEditingEdgeTitle <| Just (edge.id, Maybe.withDefault ("edge-" ++ String.fromInt edge.id) <| edge.title)
+          ]
+          [ Html.text <| Maybe.withDefault ("edge-" ++ String.fromInt edge.id) <| edge.title ]
+        ]
+    in
+    case model.editingEdgeTitle of
+      Just (id, newTitle) ->
+        if id == edge.id then
+        [ Html.input
+          [ Attr.class "col-span-8 pl-1 text-black rounded-md bg-white w-full"
+          , Attr.value <| newTitle
+          , Attr.classList
+            [ ("col-start-2", withoutIcon)
+            ]
+          , Events.onInput <| (\t -> SetEditingEdgeTitle <| Just (edge.id, t))
+          , Events.onBlur  <| SetEdgeTitle edge newTitle
+          , Events.on "keyup" (Json.Decode.andThen (\keyCode -> if keyCode == 13 then Json.Decode.succeed <| SetEdgeTitle edge newTitle else Json.Decode.fail "Not Enter.") Events.keyCode)
+          ]
+          []
+        ] else title
+      _ -> title
+  ) ++
+  [ let highlighted = Maybe.withDefault False <| Dict.get edge.id model.highlightedEdges in
     Html.button
     [ Attr.class "transition-colors hover:text-white"
     , Attr.classList
@@ -346,25 +352,28 @@ verticesListView model vertices =
 vertexInListView : Model -> Graph.Vertex -> Html.Html MenuMsg
 vertexInListView model vertex =
   Html.li
-  [ Attr.class "grid grid-cols-12 gap-2" ]
-  [ ( if model.editingVertexTitle == Just vertex.id
-    then
-    Html.input
-    [ Attr.class "col-span-9 pl-1 text-black rounded-md bg-white w-full"
-    , Attr.value <| Maybe.withDefault "" vertex.title
-    , Events.onInput <| SetVertexTitle vertex
-    , Events.onBlur  <| SetEditingVertexTitleID Nothing
-    , Events.on "keyup" (Json.Decode.andThen (\keyCode -> if keyCode == 13 then Json.Decode.succeed <| SetEditingVertexTitleID Nothing else Json.Decode.fail "Not Enter.") Events.keyCode)
-    ]
-    []
-    else
-    Html.h3
-    [ Attr.class "col-span-9 transition-all border border-primary rounded-md pl-1 hover:border-blue-500"
-    , Events.onClick <| SetEditingVertexTitleID <| Just vertex.id
-    ]
-    [ Html.text <| Maybe.withDefault ("vertex-" ++ String.fromInt vertex.id) <| vertex.title ]
-    )
-  , let highlighted = Maybe.withDefault False <| Dict.get vertex.id model.highlightedVertices in
+  [ Attr.class "grid grid-cols-12 gap-2" ] <|
+  ( case model.editingVertexTitle of
+     Just (id, newTitle) ->
+       if id == vertex.id then
+        [ Html.input
+          [ Attr.class "col-span-9 pl-1 text-black rounded-md bg-white w-full"
+          , Attr.value newTitle
+          , Events.onInput <| (\t -> SetEditingVertexTitle <| Just (vertex.id, t))
+          , Events.onBlur  <| SetVertexTitle vertex newTitle
+          , Events.on "keyup" (Json.Decode.andThen (\keyCode -> if keyCode == 13 then Json.Decode.succeed <| SetVertexTitle vertex newTitle else Json.Decode.fail "Not Enter.") Events.keyCode)
+          ]
+          []
+        ] else []
+     _ ->
+      [ Html.h3
+        [ Attr.class "col-span-9 transition-all border border-primary rounded-md pl-1 hover:border-blue-500"
+        , Events.onClick <| SetEditingVertexTitle <| Just (vertex.id, Maybe.withDefault ("vertex-" ++ String.fromInt vertex.id) <| vertex.title)
+        ]
+        [ Html.text <| Maybe.withDefault ("vertex-" ++ String.fromInt vertex.id) <| vertex.title ]
+      ]
+    ) ++
+  [ let highlighted = Maybe.withDefault False <| Dict.get vertex.id model.highlightedVertices in
     Html.button
     [ Attr.class "transition-colors hover:text-white"
     , Attr.classList
@@ -456,3 +465,15 @@ confirmDeleteView onCancel onConfirm vertices edges =
       [ Html.text "Confirm" ]
     ]
   ]
+
+isVertexTitleEdited : Model -> Graph.Vertex -> Bool
+isVertexTitleEdited model vertex =
+  case model.editingVertexTitle of
+    Just (id, _) -> id == vertex.id
+    _ -> False
+
+isEdgeTitleEdited : Model -> Graph.Edge -> Bool
+isEdgeTitleEdited model edge =
+  case model.editingEdgeTitle of
+    Just (id, _) -> id == edge.id
+    _ -> False

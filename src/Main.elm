@@ -260,18 +260,36 @@ update msg model =
           let
             newModel = { model | currentGraph = Graph.updateGraphProperty Graph.removeEdge edge model.currentGraph }
           in
-          Tuple.mapBoth (\menu -> { newModel | menu = menu}) (\cmd -> Cmd.map UpdateMenu cmd) <| Menus.update model.menu menuMsg
+          updateMenu newModel Cmd.none menuMsg
         Menus.DeleteVertex vertex ->
           let
             newModel = { model | currentGraph = Graph.updateGraphProperty Graph.removeVertex vertex model.currentGraph }
           in
-          Tuple.mapBoth (\menu -> { newModel | menu = menu}) (\cmd -> Cmd.map UpdateMenu cmd) <| Menus.update model.menu menuMsg
-
+          updateMenu newModel Cmd.none menuMsg
+        Menus.SetEdgeTitle edge title ->
+          let
+            newGraph =
+              Graph.updateGraphProperty
+              Graph.addEdge
+              { edge | title = Just title }
+              model.currentGraph
+          in
+          updateMenu { model | currentGraph = newGraph } (saveGraph newGraph) menuMsg
+        Menus.SetVertexTitle vertex title ->
+          let
+            newGraph =
+              Graph.updateGraphProperty
+              Graph.insertVertex
+              { vertex | title = Just title }
+              model.currentGraph
+          in
+          updateMenu { model | currentGraph = newGraph } (saveGraph newGraph) menuMsg
         _ ->
-          Tuple.mapBoth (\menu -> { model | menu = menu}) (\cmd -> Cmd.map UpdateMenu cmd) <| Menus.update model.menu menuMsg
+          updateMenu model Cmd.none menuMsg
 
 
-
+updateMenu model command menuMsg =
+  Tuple.mapBoth (\menu -> { model | menu = menu}) (\cmd -> Cmd.batch [ Cmd.map UpdateMenu cmd, command ]) <| Menus.update model.menu menuMsg
 
 saveGraphAndIndex : Model -> Cmd Msg
 saveGraphAndIndex model =
@@ -658,7 +676,7 @@ vertexView : Model -> Graph.Vertex -> Canvas.Renderable
 vertexView model vertex =
   Canvas.group
   [] <|
-  ( if model.menu.editingVertexTitle == Just vertex.id || (Maybe.withDefault False <| Dict.get vertex.id model.menu.highlightedVertices)
+  ( if Menus.isVertexTitleEdited model.menu vertex|| (Maybe.withDefault False <| Dict.get vertex.id model.menu.highlightedVertices)
     then
     let multiplier = Animator.move model.animations.highlightedVertex (\_ -> Animator.loop (Animator.millis 2000) <| Animator.wrap 0 2) in
     [ Canvas.shapes
@@ -786,7 +804,7 @@ edgeView model edge =
           if edge.start.id == -1 then [ tempVertex edge.start.position ] else []
     )
   ] ++ (
-    if model.menu.editingEdgeTitle == Just edge.id || (Maybe.withDefault False <| Dict.get edge.id model.menu.highlightedEdges)
+    if Menus.isEdgeTitleEdited model.menu edge || (Maybe.withDefault False <| Dict.get edge.id model.menu.highlightedEdges)
     then
       [ Canvas.shapes
         [ Canvas.Settings.Line.lineWidth <| Geom.lineWidth * 0.5 / (Graph.getZoom model.currentGraph)
