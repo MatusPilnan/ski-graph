@@ -352,6 +352,12 @@ checkModelDragging event (model, cmd) =
     , cmd
     ) else (model,cmd)
 
+
+--checkContextMenu : MouseEvent -> (Model, Cmd Msg) -> (Model, Cmd Msg)
+--checkContextMenu event (model, cmd) =
+--  if
+
+
 checkVertexCreation : MouseEvent -> (Model, Cmd Msg) -> (Model, Cmd Msg)
 checkVertexCreation event (model, cmd) =
   let
@@ -453,8 +459,12 @@ checkToStartDrawing event (model, cmd) =
 
 getHoveringVertex : Model -> MouseEvent -> Maybe Graph.Vertex
 getHoveringVertex model event =
-  List.head <| List.filter (\v -> Geom.mouseOverPoint (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph) event.position v.position ) <| Graph.getVerticesList model.currentGraph
+  getVertexOnPosition model event.position
 
+
+getVertexOnPosition : Model -> Geom.ViewportPoint -> Maybe Graph.Vertex
+getVertexOnPosition model position =
+  List.head <| List.filter (\v -> Geom.mouseOverPoint (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph) position v.position ) <| Graph.getVerticesList model.currentGraph
 
 getHoveringEdge : Model -> MouseEvent -> Maybe (Graph.Edge, Geom.Point)
 getHoveringEdge model event =
@@ -648,7 +658,50 @@ canvasView model =
   , mapField model
   , modeSelectionButtons model.activeEdgeDrawingMode
   , saveMapButtons model
+  ] ++
+  ( case ( getEdgeOnPosition model <| Geom.canvasPointToBackgroundPoint model.mousePosition (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph)
+         , getVertexOnPosition model model.mousePosition
+         ) of
+      (Just (edge, point), Nothing) ->
+        [ edgeLabel model edge point ]
+      (_, Just vertex) ->
+        [ vertexLabel model vertex ]
+      (Nothing, Nothing) ->
+        []
+
+  )
+
+edgeLabel : Model -> Graph.Edge -> Geom.Point -> Html.Html Msg
+edgeLabel model edge point =
+  let
+    position = Geom.backgroundPointToCanvasPoint point (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph)
+  in
+  Html.div
+  [ Attr.class "fixed -translate-x-1/2 -translate-y-full pointer-events-none"
+  , Attr.style "top" <| String.fromFloat position.y ++ "px"
+  , Attr.style "left" <| String.fromFloat position.x ++ "px"
   ]
+  [ Html.p
+    [ Attr.class "rounded-md px-2 text-secondary bg-primary bg-opacity-50 font-bold text-sm" ]
+    [ Html.text <|  Maybe.withDefault ("edge-" ++ String.fromInt edge.id) <| edge.title ]
+  ]
+
+
+vertexLabel : Model -> Graph.Vertex -> Html.Html Msg
+vertexLabel model vertex =
+  let
+    position = Geom.backgroundPointToCanvasPoint vertex.position (Graph.getPosition model.currentGraph) (Graph.getZoom model.currentGraph)
+  in
+  Html.div
+  [ Attr.class "fixed -translate-x-1/2 -translate-y-full pointer-events-none"
+  , Attr.style "top" <| String.fromFloat (position.y + 15 ) ++ "px"
+  , Attr.style "left" <| String.fromFloat position.x ++ "px"
+  ]
+  [ Html.p
+    [ Attr.class "rounded-md px-2 text-secondary bg-primary bg-opacity-50 font-bold text-sm" ]
+    [ Html.text <|  Maybe.withDefault ("vertex-" ++ String.fromInt vertex.id) <| vertex.title ]
+  ]
+
 
 pointToCanvasLibPoint point =
   (point.x, point.y)
