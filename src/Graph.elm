@@ -227,6 +227,19 @@ addEdge : Edge -> Graph -> Graph
 addEdge edge graph =
   { graph | edges = Dict.insert edge.id edge graph.edges }
 
+removeEdge : Edge -> Graph -> Graph
+removeEdge edge graph =
+  { graph | edges = Dict.remove edge.id graph.edges }
+
+removeVertex : Vertex -> Graph -> Graph
+removeVertex vertex graph =
+  { graph
+  | vertices = Dict.remove vertex.id graph.vertices
+  , edges =
+    Dict.filter
+    (\_ edge -> edge.start /= vertex && edge.end /= Just vertex)
+    graph.edges
+  }
 
 getBackground : Maybe Graph -> String
 getBackground graph =
@@ -273,7 +286,14 @@ getNextEdgeId graph =
 zeroPoint : Point
 zeroPoint = Point 0 0
 
-
+findConnectedEdges : Vertex -> Graph -> List Edge
+findConnectedEdges vertex graph =
+  List.filter
+  ( \edge ->
+    edge.start.id == vertex.id
+    ||
+    (Maybe.withDefault False <| Maybe.map (\v -> v.id == vertex.id) edge.end)
+  ) <| Dict.values graph.edges
 
 titleComparator : { edgeOrVertex | title : Maybe String, id : comparable } -> { edgeOrVertex | title : Maybe String, id : comparable } -> Order
 titleComparator a b =

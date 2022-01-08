@@ -14,6 +14,7 @@ type alias Animations =
   { expandedPoint : Animator.Timeline (Maybe Graph.Vertex)
   , highlightedEdge : Animator.Timeline Float
   , highlightedVertex : Animator.Timeline Float
+  , deletingHighlight : Animator.Timeline Float
   }
 
 

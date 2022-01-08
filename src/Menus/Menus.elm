@@ -19,6 +19,8 @@ type MainMenuView
   | VertexList
   | EdgeDetail Graph.Edge
   | VertexDetail Graph.Vertex
+  | ConfirmDeleteVertex Graph.Vertex
+  | ConfirmDeleteEdge Graph.Edge
 
 
 type alias ContextMenu =
@@ -61,6 +63,8 @@ type MenuMsg
   | SetVertexTitle Graph.Vertex String
   | SetEditingEdgeTitleID (Maybe Graph.EdgeID)
   | SetEditingVertexTitleID (Maybe Graph.VertexID)
+  | DeleteVertex Graph.Vertex
+  | DeleteEdge Graph.Edge
 
 update : Model -> MenuMsg -> (Model, Cmd MenuMsg)
 update model msg =
@@ -106,6 +110,17 @@ update model msg =
       ( { model | editingVertexTitle = vertexID }
       , Cmd.none
       )
+
+    DeleteVertex _ ->
+      ( { model | mainMenuView = VertexList }
+      , Cmd.none
+      )
+
+    DeleteEdge _ ->
+      ( { model | mainMenuView = EdgeList }
+      , Cmd.none
+      )
+
 
 
 
@@ -158,6 +173,10 @@ menuView model graph =
       []
     VertexDetail vertex ->
       []
+    ConfirmDeleteVertex vertex ->
+      confirmDeleteVertexView vertex graph
+    ConfirmDeleteEdge edge ->
+      confirmDeleteEdgeView edge
 
 
 defaultView model =
@@ -275,7 +294,9 @@ edgeInListView model edge =
     ]
     [ Icons.highlight ]
   , Html.button
-    [ Attr.class "transition-colors hover:text-red-600" ]
+    [ Attr.class "transition-colors hover:text-red-600"
+    , Events.onClick <| SetMainMenuView <| ConfirmDeleteEdge edge
+    ]
     [ Icons.remove ]
   , Html.button
     [ Attr.class "transition-colors hover:text-secondary" ]
@@ -354,10 +375,84 @@ vertexInListView model vertex =
     ]
     [ Icons.highlight ]
   , Html.button
-    [ Attr.class "transition-colors hover:text-red-600" ]
+    [ Attr.class "transition-colors hover:text-red-600"
+    , Events.onClick <| SetMainMenuView <| ConfirmDeleteVertex vertex
+    ]
     [ Icons.remove ]
   , Html.button
     [ Attr.class "transition-colors hover:text-secondary" ]
     [ Icons.detail ]
   ]
 
+confirmDeleteEdgeView : Graph.Edge -> List (Html.Html MenuMsg)
+confirmDeleteEdgeView edge =
+  confirmDeleteView (SetMainMenuView EdgeList) (DeleteEdge edge) [] [ edge ]
+
+confirmDeleteVertexView : Graph.Vertex -> Graph.Graph -> List (Html.Html MenuMsg)
+confirmDeleteVertexView vertex graph =
+  confirmDeleteView (SetMainMenuView VertexList) (DeleteVertex vertex) [ vertex ] (Graph.findConnectedEdges vertex graph)
+
+confirmDeleteView : MenuMsg -> MenuMsg -> List Graph.Vertex -> List Graph.Edge -> List (Html.Html MenuMsg)
+confirmDeleteView onCancel onConfirm vertices edges =
+  [ Html.div
+    [ Attr.class "grid grid-cols-2 gap-4" ] <|
+    [ Html.button
+      [ Attr.class "col-span-2 flex w-full items-center transition-colors hover:bg-blue-500 px-2 py-3 mb-2 rounded-md font-light"
+      , Events.onClick onConfirm
+      ]
+      [ Icons.chevronLeft
+      , Html.h2
+        [ Attr.class "font-bold text-lg text-secondary"
+        ]
+        [ Html.text "Are you sure?" ]
+      ]
+    ] ++ (
+      let
+        nv = List.length vertices
+        ne = List.length edges
+      in
+      case (vertices, edges) of
+        ([], []) -> []
+        (_, []) ->
+          [ Html.p
+            [ Attr.class "col-span-2 font-light text-white" ]
+            [ Html.text <| "You are about to delete " ++ String.fromInt nv ++ if nv > 1 then " vertices:" else " vertex:" ]
+          , Html.ul
+            [ Attr.class "col-span-2 font-bold pl-2" ]
+            <| List.map (\v -> Html.li [] [ Html.text <| Maybe.withDefault ("vertex-" ++ String.fromInt v.id) <| v.title ]) vertices
+          ]
+        ([], _) ->
+          [ Html.p
+            [ Attr.class "col-span-2 font-light text-white" ]
+            [ Html.text <| "You are about to delete " ++ String.fromInt ne ++ if ne > 1 then " edges:" else " edge:" ]
+          , Html.ul
+            [ Attr.class "col-span-2 font-bold pl-2" ]
+            <| List.map (\e -> Html.li [] [ Html.text <| Maybe.withDefault ("edge-" ++ String.fromInt e.id) <| e.title ]) edges
+          ]
+        (_, _) ->
+          [ Html.p
+            [ Attr.class "col-span-2 font-light text-white" ]
+            [ Html.text <| "You are about to delete " ++ String.fromInt nv ++ if nv > 1 then " vertices:" else " vertex:" ]
+          , Html.ul
+            [ Attr.class "col-span-2 font-bold pl-2" ]
+            <| List.map (\v -> Html.li [] [ Html.text <| Maybe.withDefault ("vertex-" ++ String.fromInt v.id) <| v.title ]) vertices
+          , Html.p
+            [ Attr.class "col-span-2 font-light text-white" ]
+            [ Html.text <| "This will also delete the following " ++ String.fromInt ne ++ " connected" ++ if ne > 1 then " edges:" else " edge:" ]
+          , Html.ul
+            [ Attr.class "col-span-2 font-bold pl-2" ]
+            <| List.map (\e -> Html.li [] [ Html.text <| Maybe.withDefault ("edge-" ++ String.fromInt e.id) <| e.title ]) edges
+          ]
+    ) ++
+    [ Html.button
+      [ Attr.class "rounded-md border-secondary border transition-colors text-secondary hover:bg-secondary hover:text-primary"
+      , Events.onClick onCancel
+      ]
+      [ Html.text "Cancel" ]
+    , Html.button
+      [ Attr.class "rounded-md border transition-colors bg-secondary text-primary hover:bg-primary hover:text-secondary border hover:border-secondary"
+      , Events.onClick onConfirm
+      ]
+      [ Html.text "Confirm" ]
+    ]
+  ]

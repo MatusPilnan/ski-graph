@@ -48,6 +48,7 @@ init flags =
       { expandedPoint = Animator.init Nothing
       , highlightedEdge = Animator.init 0
       , highlightedVertex = Animator.init 0
+      , deletingHighlight = Animator.init 0
       }
     , texture = Nothing
     , width = flags.width
@@ -255,6 +256,17 @@ update msg model =
       case menuMsg of
         Menus.LeaveGraph ->
           ({ model | currentGraph = Nothing }, Cmd.none)
+        Menus.DeleteEdge edge ->
+          let
+            newModel = { model | currentGraph = Graph.updateGraphProperty Graph.removeEdge edge model.currentGraph }
+          in
+          Tuple.mapBoth (\menu -> { newModel | menu = menu}) (\cmd -> Cmd.map UpdateMenu cmd) <| Menus.update model.menu menuMsg
+        Menus.DeleteVertex vertex ->
+          let
+            newModel = { model | currentGraph = Graph.updateGraphProperty Graph.removeVertex vertex model.currentGraph }
+          in
+          Tuple.mapBoth (\menu -> { newModel | menu = menu}) (\cmd -> Cmd.map UpdateMenu cmd) <| Menus.update model.menu menuMsg
+
         _ ->
           Tuple.mapBoth (\menu -> { model | menu = menu}) (\cmd -> Cmd.map UpdateMenu cmd) <| Menus.update model.menu menuMsg
 
@@ -516,6 +528,7 @@ animator =
     |> Animator.watching .expandedPoint (\newPoint model -> { model | expandedPoint = newPoint })
     |> Animator.watching .highlightedEdge (\newValue model -> { model | highlightedEdge = newValue })
     |> Animator.watching .highlightedVertex (\newValue model -> { model | highlightedVertex = newValue })
+    |> Animator.watching .deletingHighlight (\newValue model -> { model | deletingHighlight = newValue })
 
 animateHoveredPoint : Animations -> Maybe Graph.Vertex -> Animations
 animateHoveredPoint animations newHover =
@@ -657,6 +670,18 @@ vertexView model vertex =
     ]
     else []
   ) ++
+  ( if model.menu.mainMenuView == Menus.ConfirmDeleteVertex vertex
+    then
+      let multiplier = Animator.move model.animations.deletingHighlight (\_ -> Animator.loop (Animator.millis 1000) <| Animator.wrap 0 2) in
+      [ Canvas.shapes
+        [ Canvas.Settings.fill <| Color.fromRgba { red = 1, green = 0, blue = 0, alpha = min 1 <| 2 - multiplier } ]
+        [ Canvas.circle
+          ( vertex.position.x, vertex.position.y)
+          ( vertexPointSize model vertex (1 + multiplier) (1.5 + multiplier) )
+        ]
+      ]
+    else []
+  ) ++
   [ ( case vertex.vertexType of
       Graph.LiftStation ->
         Canvas.shapes
@@ -735,6 +760,20 @@ edgeView : Model -> Graph.Edge -> Canvas.Renderable
 edgeView model edge =
   Canvas.group
   [] <|
+  ( if
+      model.menu.mainMenuView == Menus.ConfirmDeleteVertex edge.start
+      || model.menu.mainMenuView == Menus.ConfirmDeleteVertex (Maybe.withDefault edge.start edge.end)
+      || model.menu.mainMenuView == Menus.ConfirmDeleteEdge edge
+    then
+      let multiplier = Animator.move model.animations.deletingHighlight (\_ -> Animator.loop (Animator.millis 1000) <| Animator.wrap 0 2) in
+      [ Canvas.shapes
+        [ Canvas.Settings.stroke <| Color.fromRgba { red = 1, green = 0, blue = 0, alpha = min 1 <| 2 - multiplier }
+        , Canvas.Settings.Line.lineWidth <| (Geom.lineWidth * (1 + multiplier)) / (Graph.getZoom model.currentGraph)
+        ]
+        [ edgeToPath model edge ]
+      ]
+    else []
+  ) ++
   [ Canvas.shapes
     (edgeStyle edge.edgeType (Graph.getZoom model.currentGraph)) <|
     [ edgeToPath model edge
